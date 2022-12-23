@@ -1,0 +1,10 @@
+/target
+/logs
+.git
+.settings
+.classpath
+.project
+.txt
+.log
+.DS_Store
+.idea
