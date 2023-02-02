@@ -1,0 +1,14 @@
+package com.mikhail.tarasevich.university.dao;
+
+import com.mikhail.tarasevich.university.entity.Group;
+
+import java.util.List;
+
+public interface GroupDao extends CrudPageableDao<Group>{
+
+    void changeFaculty(int groupId, int newFacultyId);
+    void changeHeadUser(int groupId, int newUserId);
+    void changeEducationForm(int groupId, int newEducationFormId);
+    List<Group> findGroupsRelateToTeacher (int teacherId);
+
+}
