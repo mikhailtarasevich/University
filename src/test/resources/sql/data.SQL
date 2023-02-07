@@ -47,7 +47,7 @@ VALUES ('Professor'),
        ('test TT 1'),
        ('test TT 2');
 
-        INSERT INTO users (user_type, first_name, last_name, gender, email, password, group_id, teacher_title_id, department_id)
+INSERT INTO users (user_type, first_name, last_name, gender, email, password, group_id, teacher_title_id, department_id)
 VALUES ('student', 'Tom', 'Robinson', 0, 'tomrobinson@gmail.com', '1234', NULL, NULL, NULL),
        ('student', 'Rory', 'McDonald', 0, 'mcdonald@yandex.ru', '1111', NULL, NULL, NULL),
        ('student', 'Kate', 'Austin', 1, 'kitty@yahoo.com', 'kate12#', NULL, NULL, NULL),

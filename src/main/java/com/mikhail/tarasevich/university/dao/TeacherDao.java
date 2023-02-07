@@ -10,9 +10,13 @@ public interface TeacherDao extends UserDao<Teacher> {
     void deleteTeacherFromCourse(int teacherId, int courseId);
     void changeDepartment(int teacherId, Integer newDepartmentId);
     void changeTeacherTitle(int teacherId, Integer newTeacherTitleId);
-    public void deleteTeacherFromGroup(int userId, int groupId);
+    void deleteTeacherFromGroup(int userId, int groupId);
     List<Teacher> findTeachersRelateToGroup(int groupId);
     List<Teacher> findTeachersRelateToCourse(int courseId);
     List<Teacher> findTeachersRelateToDepartment(int departmentId);
+    void unbindTeachersFromCourse(int courseId);
+    void unbindTeachersFromDepartment(int departmentId);
+    void unbindTeachersFromGroup(int groupId);
+    void unbindTeachersFromTeacherTitle(int teacherTitleId);
 
 }

@@ -11,17 +11,17 @@ public abstract class AbstractUserDaoImpl<E extends User> extends AbstractPageab
     protected final String addUserToGroupQuery;
 
     protected AbstractUserDaoImpl(JdbcOperations jdbcTemplate, RowMapper<E> mapper,
-                               String saveQuery, String findByIdQuery, String findAllQuery, String findAllPageableQuery,
-                               String updateQuery, String deleteByIdQuery,
-                               String countTableRowsQuery, String addUserToGroupQuery) {
-        super(jdbcTemplate, mapper, saveQuery, findByIdQuery, findAllQuery, findAllPageableQuery, updateQuery,
-                deleteByIdQuery, countTableRowsQuery);
+                                  String saveQuery, String findByIdQuery, String findAllQuery, String findByNameQuery,
+                                  String findAllPageableQuery, String updateQuery, String deleteByIdQuery,
+                                  String countTableRowsQuery, String addUserToGroupQuery) {
+        super(jdbcTemplate, mapper, saveQuery, findByIdQuery, findAllQuery, findByNameQuery, findAllPageableQuery,
+                updateQuery, deleteByIdQuery, countTableRowsQuery);
         this.addUserToGroupQuery = addUserToGroupQuery;
     }
 
     @Override
     public void addUserToGroup(int userId, Integer groupId) {
-        jdbcTemplate.update(addUserToGroupQuery, new Object[]{groupId, userId});
+        jdbcTemplate.update(addUserToGroupQuery, groupId, userId);
     }
 
 }

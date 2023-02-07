@@ -13,16 +13,13 @@ import java.sql.SQLException;
 @Repository
 public class EducationFormDaoImpl extends AbstractPageableCrudDaoImpl<EducationForm> implements EducationFormDao {
 
-    private static final String SAVE_QUERY =
-            "INSERT INTO education_forms (name) VALUES(?)";
+    private static final String SAVE_QUERY = "INSERT INTO education_forms (name) VALUES(?)";
     private static final String FIND_ALL_QUERY = "SELECT * FROM education_forms ORDER BY id";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM education_forms WHERE id = ?";
-    private static final String FIND_ALL_PAGEABLE_QUERY =
-            "SELECT * FROM education_forms ORDER BY id LIMIT ? OFFSET ?";
-    private static final String UPDATE_QUERY =
-            "UPDATE education_forms SET name = ? WHERE id = ?";
-    private static final String DELETE_BY_ID_QUERY =
-            "DELETE FROM education_forms WHERE id = ?";
+    private static final String FIND_BY_NAME_QUERY = "SELECT * FROM education_forms WHERE name = ? ORDER BY id";
+    private static final String FIND_ALL_PAGEABLE_QUERY = "SELECT * FROM education_forms ORDER BY id LIMIT ? OFFSET ?";
+    private static final String UPDATE_QUERY = "UPDATE education_forms SET name = ? WHERE id = ?";
+    private static final String DELETE_BY_ID_QUERY = "DELETE FROM education_forms WHERE id = ?";
     private static final String COUNT_TABLE_ROWS_QUERY = "SELECT COUNT(*) FROM education_forms";
     private static final RowMapper<EducationForm> ROW_MAPPER = (resultSet, rowNumber) ->
             EducationForm.builder()
@@ -33,7 +30,7 @@ public class EducationFormDaoImpl extends AbstractPageableCrudDaoImpl<EducationF
     @Autowired
     public EducationFormDaoImpl(JdbcOperations jdbcTemplate) {
         super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY, FIND_ALL_PAGEABLE_QUERY,
-                UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY);
+                FIND_BY_NAME_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY);
     }
 
     @Override

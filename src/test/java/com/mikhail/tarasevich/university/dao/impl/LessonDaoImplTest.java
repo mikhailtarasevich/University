@@ -140,6 +140,14 @@ class LessonDaoImplTest {
     }
 
     @Test
+    void findByName_inputEntityName_expectedEntitiesListReturnedFromDB() {
+        Optional<Lesson> foundEntity = lessonDao.findByName("lesson 1");
+
+        assertTrue(foundEntity.isPresent());
+        assertEquals(lesson1, foundEntity.get());
+    }
+
+    @Test
     void findAll_inputNothing_expectedAllEntitiesFromDB() {
         List<Lesson> foundEntities = lessonDao.findAll();
 
@@ -147,8 +155,8 @@ class LessonDaoImplTest {
     }
 
     @Test
-    void findAllPageable_inputNothing_expectedEntitiesFromThePage() {
-        List<Lesson> foundEntities = lessonDao.findAll(0, 2);
+    void findAllPageable_inputPageNumber_expectedEntitiesFromThePage() {
+        List<Lesson> foundEntities = lessonDao.findAll(1, 2);
 
         assertEquals(lessons, foundEntities);
     }
@@ -271,6 +279,14 @@ class LessonDaoImplTest {
     }
 
     @Test
+    void findLessonsRelateToGroup_inputGroupId_expectedAllLessonsRelateToGroup() {
+        List<Lesson> foundEntities = lessonDao.findLessonsRelateToGroup(1);
+
+        assertEquals(1, foundEntities.size());
+        assertEquals(lesson1, foundEntities.get(0));
+    }
+
+    @Test
     void changeGroup_inputLessonIdGroupId_expectedLessonHasNewGroupId() {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "lessons",
                 "id = 1 AND group_id = 2"));
@@ -326,6 +342,50 @@ class LessonDaoImplTest {
 
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "lessons",
                 "id = 1 AND start_time = '2033-11-11 14:00:00'"));
+    }
+
+    @Test
+    void unbindLessonsFromCourse_inputCourseId_expectedCourseWereUnbound() {
+        assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "lessons",
+                "course_id = 1"));
+
+        lessonDao.unbindLessonsFromCourse(1);
+
+        assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "lessons",
+                "course_id = 1"));
+    }
+
+    @Test
+    void unbindLessonsFromTeacher_inputTeacherId_expectedTeacherWereUnbound() {
+        assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "lessons",
+                "user_id = 6"));
+
+        lessonDao.unbindLessonsFromTeacher(6);
+
+        assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "lessons",
+                "user_id = 6"));
+    }
+
+    @Test
+    void unbindLessonsFromGroup_inputGroupId_expectedGroupWereUnbound() {
+        assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "lessons",
+                "group_id = 1"));
+
+        lessonDao.unbindLessonsFromGroup(1);
+
+        assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "lessons",
+                "group_id = 1"));
+    }
+
+    @Test
+    void unbindLessonsFromLessonType_inputLessonTypeId_expectedLessonTypeWereUnbound() {
+        assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "lessons",
+                "lesson_type_id = 1"));
+
+        lessonDao.unbindLessonsFromLessonType(1);
+
+        assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "lessons",
+                "lesson_type_id = 1"));
     }
 
 }

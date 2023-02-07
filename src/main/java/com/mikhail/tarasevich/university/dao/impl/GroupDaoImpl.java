@@ -27,23 +27,28 @@ public class GroupDaoImpl extends AbstractPageableCrudDaoImpl<Group> implements 
                     "LEFT JOIN users ON groups.head_user_id = users.id " +
                     "LEFT JOIN education_forms ON education_form_id = education_forms.id ";
     private static final String FIND_ALL_QUERY = FIND_COMMON_PART_QUERY + "ORDER BY groups.id";
-    private static final String FIND_BY_ID_QUERY = FIND_COMMON_PART_QUERY + "WHERE groups.id = ? ORDER BY groups.id";
+    private static final String FIND_BY_ID_QUERY = FIND_COMMON_PART_QUERY + "WHERE groups.id = ?";
+    private static final String FIND_BY_NAME_QUERY =
+            FIND_COMMON_PART_QUERY + "WHERE groups.name = ? ORDER BY groups.id";
     private static final String FIND_ALL_PAGEABLE_QUERY = FIND_COMMON_PART_QUERY +
             "ORDER BY groups.id LIMIT ? OFFSET ?";
     private static final String UPDATE_QUERY =
             "UPDATE groups SET name = ?, faculty_id = ?, head_user_id = ?, education_form_id = ? WHERE id = ?";
-    private static final String DELETE_BY_ID_QUERY =
-            "DELETE FROM groups WHERE id = ?";
+    private static final String DELETE_BY_ID_QUERY = "DELETE FROM groups WHERE id = ?";
     private static final String COUNT_TABLE_ROWS_QUERY = "SELECT COUNT(*) FROM groups";
-    private static final String UPDATE_FACULTY_QUERY =
-            "UPDATE groups SET faculty_id = ? WHERE id = ?";
-    private static final String UPDATE_HEAD_USER_QUERY =
-            "UPDATE groups SET head_user_id = ? WHERE id = ?";
-    private static final String UPDATE_EDUCATION_FORM_QUERY =
-            "UPDATE groups SET education_form_id = ? WHERE id = ?";
+    private static final String UPDATE_FACULTY_QUERY = "UPDATE groups SET faculty_id = ? WHERE id = ?";
+    private static final String UPDATE_HEAD_USER_QUERY = "UPDATE groups SET head_user_id = ? WHERE id = ?";
+    private static final String UPDATE_EDUCATION_FORM_QUERY = "UPDATE groups SET education_form_id = ? WHERE id = ?";
     private static final String FIND_GROUPS_RELATE_TO_TEACHER_QUERY = FIND_COMMON_PART_QUERY +
-            "LEFT JOIN user_groups ON groups.id = user_groups.group_id " +
-            "WHERE user_id = ? ORDER BY groups.id";
+            "LEFT JOIN user_groups ON groups.id = user_groups.group_id WHERE user_id = ? ORDER BY groups.id";
+    private static final String UNBIND_GROUPS_FROM_STUDENT_QUERY =
+            "UPDATE groups SET head_user_id = NULL WHERE head_user_id = ?";
+    private static final String UNBIND_GROUPS_FROM_TEACHER_QUERY =
+            "DELETE FROM user_groups WHERE user_id = ?";
+    private static final String UNBIND_GROUPS_FROM_EDUCATION_FORM_QUERY =
+            "UPDATE groups SET education_form_id = NULL WHERE education_form_id = ?";
+    private static final String UNBIND_GROUPS_FROM_FACULTY_QUERY =
+            "UPDATE groups SET faculty_id = NULL WHERE faculty_id = ?";
     private static final RowMapper<Group> ROW_MAPPER = (resultSet, rowNum) ->
             Group.builder()
                     .withId(resultSet.getInt("group_id"))
@@ -75,8 +80,8 @@ public class GroupDaoImpl extends AbstractPageableCrudDaoImpl<Group> implements 
 
     @Autowired
     public GroupDaoImpl(JdbcOperations jdbcTemplate) {
-        super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY,
-                FIND_ALL_PAGEABLE_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY);
+        super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY, FIND_ALL_PAGEABLE_QUERY,
+                FIND_BY_NAME_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY);
     }
 
     @Override
@@ -97,6 +102,26 @@ public class GroupDaoImpl extends AbstractPageableCrudDaoImpl<Group> implements 
     @Override
     public List<Group> findGroupsRelateToTeacher(int teacherId) {
         return jdbcTemplate.query(FIND_GROUPS_RELATE_TO_TEACHER_QUERY, ROW_MAPPER, teacherId);
+    }
+
+    @Override
+    public void unbindGroupsFromStudent(int studentId) {
+        jdbcTemplate.update(UNBIND_GROUPS_FROM_STUDENT_QUERY, studentId);
+    }
+
+    @Override
+    public void unbindGroupsFromTeacher(int teacherId) {
+        jdbcTemplate.update(UNBIND_GROUPS_FROM_TEACHER_QUERY, teacherId);
+    }
+
+    @Override
+    public void unbindGroupsFromEducationForm(int educationFormId) {
+        jdbcTemplate.update(UNBIND_GROUPS_FROM_EDUCATION_FORM_QUERY, educationFormId);
+    }
+
+    @Override
+    public void unbindGroupsFromFaculty(int facultyId) {
+        jdbcTemplate.update(UNBIND_GROUPS_FROM_FACULTY_QUERY, facultyId);
     }
 
     @Override

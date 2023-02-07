@@ -13,10 +13,10 @@ import java.sql.SQLException;
 @Repository
 public class DepartmentDaoImpl extends AbstractPageableCrudDaoImpl<Department> implements DepartmentDao {
 
-    private static final String SAVE_QUERY =
-            "INSERT INTO departments (name, description) VALUES(?, ?)";
+    private static final String SAVE_QUERY = "INSERT INTO departments (name, description) VALUES(?, ?)";
     private static final String FIND_ALL_QUERY = "SELECT * FROM departments ORDER BY id";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM departments WHERE id = ? ORDER BY id";
+    private static final String FIND_BY_NAME_QUERY = "SELECT * FROM departments WHERE name = ? ORDER BY id";
     private static final String FIND_ALL_PAGEABLE_QUERY = "SELECT * FROM departments ORDER BY id LIMIT ? OFFSET ?";
     private static final String UPDATE_QUERY = "UPDATE departments SET name = ?, description = ? WHERE id = ?";
     private static final String DELETE_BY_ID_QUERY = "DELETE FROM departments WHERE id = ?";
@@ -25,6 +25,8 @@ public class DepartmentDaoImpl extends AbstractPageableCrudDaoImpl<Department> i
             "INSERT INTO department_courses (department_id, course_id) VALUES (?, ?)";
     private static final String DELETE_COURSE_FROM_DEPARTMENT_QUERY =
             "DELETE FROM department_courses WHERE department_id = ? AND course_id = ?";
+    private static final String UNBIND_DEPARTMENTS_FROM_COURSE_QUERY =
+            "DELETE FROM department_courses WHERE course_id = ?";
     private static final RowMapper<Department> ROW_MAPPER = (resultSet, rowNum) ->
             Department.builder()
                     .withId(resultSet.getInt("id"))
@@ -34,8 +36,8 @@ public class DepartmentDaoImpl extends AbstractPageableCrudDaoImpl<Department> i
 
     @Autowired
     public DepartmentDaoImpl(JdbcOperations jdbcTemplate) {
-        super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY,
-                FIND_ALL_PAGEABLE_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY);
+        super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY, FIND_ALL_PAGEABLE_QUERY,
+                FIND_BY_NAME_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY);
     }
 
     @Override
@@ -46,6 +48,11 @@ public class DepartmentDaoImpl extends AbstractPageableCrudDaoImpl<Department> i
     @Override
     public void deleteCourseFromDepartment(int departmentId, Integer courseId) {
         jdbcTemplate.update(DELETE_COURSE_FROM_DEPARTMENT_QUERY, departmentId, courseId);
+    }
+
+    @Override
+    public void unbindDepartmentsFromCourse(int courseId){
+        jdbcTemplate.update(UNBIND_DEPARTMENTS_FROM_COURSE_QUERY, courseId);
     }
 
     @Override

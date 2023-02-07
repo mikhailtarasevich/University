@@ -18,23 +18,26 @@ import java.util.*;
 public abstract class AbstractCrudDaoImpl<E> implements CrudDao<E> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractCrudDaoImpl.class);
+
     protected final JdbcOperations jdbcTemplate;
     protected RowMapper<E> mapper;
     protected static final KeyHolder keyHolder = new GeneratedKeyHolder();
     private final String saveQuery;
     private final String findByIdQuery;
     private final String findAllQuery;
+    private final String findByNameQuery;
     private final String updateQuery;
     private final String deleteByIdQuery;
 
     protected AbstractCrudDaoImpl(JdbcOperations jdbcTemplate, RowMapper<E> mapper,
-                                  String saveQuery, String findByIdQuery, String findAllQuery,
+                                  String saveQuery, String findByIdQuery, String findAllQuery, String findByNameQuery,
                                   String updateQuery, String deleteByIdQuery) {
         this.jdbcTemplate = jdbcTemplate;
         this.mapper = mapper;
         this.saveQuery = saveQuery;
         this.findByIdQuery = findByIdQuery;
         this.findAllQuery = findAllQuery;
+        this.findByNameQuery = findByNameQuery;
         this.updateQuery = updateQuery;
         this.deleteByIdQuery = deleteByIdQuery;
     }
@@ -71,7 +74,7 @@ public abstract class AbstractCrudDaoImpl<E> implements CrudDao<E> {
     }
 
     @Override
-    public Optional<E> findById(Integer id) {
+    public Optional<E> findById(int id) {
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(findByIdQuery, mapper, id));
         } catch (DataAccessException e) {
@@ -83,6 +86,16 @@ public abstract class AbstractCrudDaoImpl<E> implements CrudDao<E> {
     @Override
     public List<E> findAll() {
         return jdbcTemplate.query(findAllQuery, mapper);
+    }
+
+    @Override
+    public Optional<E> findByName(String name){
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(findByNameQuery, mapper, name));
+        } catch (DataAccessException e) {
+            LOG.info("Entity with name = {} not found in DB. Query: {} ", name, findByNameQuery);
+            return Optional.empty();
+        }
     }
 
     @Override

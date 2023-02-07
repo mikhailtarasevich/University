@@ -17,15 +17,16 @@ public class TeacherDaoImpl extends AbstractUserDaoImpl<Teacher> implements Teac
     private static final String SAVE_QUERY =
             "INSERT INTO users (user_type, first_name, last_name, gender, email, password, " +
                     "teacher_title_id, department_id) VALUES('teacher', ?, ?, ?, ?, ?, ?, ?)";
-    private static final String FIND_ALL_QUERY =
+    private static final String FIND_COMMON_PART_QUERY =
             "SELECT users.id AS user_id, first_name, last_name, gender, email, password, " +
-                    "teacher_title_id, department_id FROM users WHERE user_type = 'teacher' ORDER BY users.id";
-    private static final String FIND_BY_ID_QUERY =
-            "SELECT users.id AS user_id, first_name, last_name, gender, email, password, teacher_title_id, " +
-                    "department_id FROM users WHERE user_type = 'teacher' AND id = ? ORDER BY users.id";
+                    "teacher_title_id, department_id FROM users ";
+    private static final String FIND_ALL_QUERY =
+            FIND_COMMON_PART_QUERY + "WHERE user_type = 'teacher' ORDER BY users.id";
+    private static final String FIND_BY_ID_QUERY = FIND_COMMON_PART_QUERY + "WHERE user_type = 'teacher' AND id = ?";
+    private static final String FIND_BY_EMAIL_QUERY =
+            FIND_COMMON_PART_QUERY + "WHERE user_type = 'teacher' AND email = ? ORDER BY users.id";
     private static final String FIND_ALL_PAGEABLE_QUERY =
-            "SELECT users.id AS user_id, first_name, last_name, gender, email, password, teacher_title_id, " +
-                    "department_id FROM users WHERE user_type = 'teacher' ORDER BY users.id LIMIT ? OFFSET ?";
+            FIND_COMMON_PART_QUERY + "WHERE user_type = 'teacher' ORDER BY users.id LIMIT ? OFFSET ?";
     private static final String UPDATE_QUERY =
             "UPDATE users SET first_name = ?, last_name = ?, gender = ?, email = ?, password = ?, " +
                     "teacher_title_id = ?, department_id = ? WHERE user_type = 'teacher' AND users.id = ?";
@@ -62,6 +63,14 @@ public class TeacherDaoImpl extends AbstractUserDaoImpl<Teacher> implements Teac
             "SELECT users.id AS user_id, first_name, last_name, gender, email, password, " +
                     "teacher_title_id, department_id " +
                     "FROM users WHERE user_type = 'teacher' AND department_id = ? ORDER BY id";
+    private static final String UNBIND_TEACHERS_FROM_COURSE_QUERY =
+            "DELETE FROM user_courses WHERE course_id = ?";
+    private static final String UNBIND_TEACHERS_FROM_DEPARTMENT_QUERY =
+            "UPDATE users SET department_id = NULL WHERE user_type = 'teacher' AND department_id = ?";
+    private static final String UNBIND_TEACHERS_FROM_GROUP_QUERY =
+            "DELETE FROM user_groups WHERE group_id = ?";
+    private static final String UNBIND_TEACHERS_FROM_TEACHER_TITLE_QUERY =
+            "UPDATE users SET teacher_title_id = NULL WHERE user_type = 'teacher' AND teacher_title_id = ?";
     private static final RowMapper<Teacher> ROW_MAPPER = (resultSet, rowNum) ->
             Teacher.builder()
                     .withId(resultSet.getInt("user_id"))
@@ -78,8 +87,8 @@ public class TeacherDaoImpl extends AbstractUserDaoImpl<Teacher> implements Teac
 
     @Autowired
     public TeacherDaoImpl(JdbcOperations jdbcTemplate) {
-        super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY,
-                FIND_ALL_PAGEABLE_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY,
+        super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY, FIND_ALL_PAGEABLE_QUERY,
+                FIND_BY_EMAIL_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY,
                 ADD_TEACHER_TO_GROUP_QUERY);
     }
 
@@ -121,6 +130,27 @@ public class TeacherDaoImpl extends AbstractUserDaoImpl<Teacher> implements Teac
     @Override
     public List<Teacher> findTeachersRelateToDepartment(int departmentId) {
         return jdbcTemplate.query(FIND_TEACHERS_RELATE_TO_DEPARTMENT_QUERY, ROW_MAPPER, departmentId);
+    }
+
+    @Override
+    public void unbindTeachersFromCourse(int courseId) {
+        jdbcTemplate.update(UNBIND_TEACHERS_FROM_COURSE_QUERY, courseId);
+    }
+
+    @Override
+    public void unbindTeachersFromDepartment(int departmentId) {
+        jdbcTemplate.update(UNBIND_TEACHERS_FROM_DEPARTMENT_QUERY, departmentId);
+    }
+
+    @Override
+    public void unbindTeachersFromGroup(int groupId) {
+        jdbcTemplate.update(UNBIND_TEACHERS_FROM_GROUP_QUERY, groupId);
+    }
+
+
+    @Override
+    public void unbindTeachersFromTeacherTitle(int teacherTitleId) {
+        jdbcTemplate.update(UNBIND_TEACHERS_FROM_TEACHER_TITLE_QUERY, teacherTitleId);
     }
 
     @Override

@@ -220,6 +220,14 @@ class StudentDaoImplTest {
     }
 
     @Test
+    void findByName_inputEntityName_expectedEntitiesListReturnedFromDB() {
+        Optional<Student> foundEntity = studentDao.findByName("tomrobinson@gmail.com");
+
+        assertTrue(foundEntity.isPresent());
+        assertEquals(student1, foundEntity.get());
+    }
+
+    @Test
     void findAll_inputNothing_expectedAllEntitiesFromDB() {
         List<Student> foundEntities = studentDao.findAll();
 
@@ -227,8 +235,8 @@ class StudentDaoImplTest {
     }
 
     @Test
-    void findAllPageable_inputNothing_expectedEntitiesFromThePage() {
-        List<Student> foundEntities = studentDao.findAll(1, 2);
+    void findAllPageable_inputPageNumber_expectedEntitiesFromThePage() {
+        List<Student> foundEntities = studentDao.findAll(2, 2);
 
         List<Student> expectedEntities = new ArrayList<>();
         expectedEntities.add(student3);
@@ -392,6 +400,17 @@ class StudentDaoImplTest {
 
         assertEquals(expectedStudents, foundStudents);
         assertEquals(foundStudents.size(), JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
+                "group_id = 1"));
+    }
+
+    @Test
+    void unbindStudentsFromGroup_inputGroupId_expectedGroupsWereUnbound() {
+        assertEquals(3, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
+                "group_id = 1"));
+
+        studentDao.unbindStudentsFromGroup(1);
+
+        assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "group_id = 1"));
     }
 

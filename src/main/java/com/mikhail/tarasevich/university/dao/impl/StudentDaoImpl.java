@@ -26,6 +26,8 @@ public class StudentDaoImpl extends AbstractUserDaoImpl<Student> implements Stud
             FIND_COMMON_PART_QUERY + "WHERE user_type = 'student' ORDER BY users.id";
     private static final String FIND_BY_ID_QUERY =
             FIND_COMMON_PART_QUERY + "WHERE user_type = 'student' AND users.id = ?";
+    private static final String FIND_BY_EMAIL_QUERY =
+            FIND_COMMON_PART_QUERY + "WHERE user_type = 'student' AND email = ? ORDER BY users.id";
     private static final String FIND_ALL_PAGEABLE_QUERY =
             FIND_COMMON_PART_QUERY + "WHERE user_type = 'student' ORDER BY users.id LIMIT ? OFFSET ?";
     private static final String UPDATE_QUERY = "UPDATE users SET first_name = ?, last_name = ?, gender = ?, " +
@@ -33,14 +35,16 @@ public class StudentDaoImpl extends AbstractUserDaoImpl<Student> implements Stud
     private static final String DELETE_BY_ID_QUERY = "DELETE FROM users WHERE id = ?";
     private static final String COUNT_TABLE_ROWS_QUERY = "SELECT COUNT(*) FROM users WHERE user_type = 'student'";
     private static final String ADD_STUDENT_TO_GROUP_QUERY = "UPDATE users SET group_id = ? WHERE id = ?";
-    private static final String DELETE_STUDENT_FROM_GROUP = "UPDATE users SET group_id = null WHERE id = ?";
-    private static final String FIND_STUDENTS_RELATE_TO_GROUP =
+    private static final String DELETE_STUDENT_FROM_GROUP_QUERY = "UPDATE users SET group_id = null WHERE id = ?";
+    private static final String FIND_STUDENTS_RELATE_TO_GROUP_QUERY =
             "SELECT users.id AS user_id, first_name, last_name, gender, email, password, " +
                     "group_id, groups.name AS group_name, faculty_id, head_user_id, education_form_id " +
                     "FROM users " +
                     "JOIN groups ON group_id = groups.id " +
                     "WHERE user_type = 'student' AND group_id = ? " +
                     "ORDER BY user_id";
+    private static final String UNBIND_STUDENTS_FROM_GROUP_QUERY =
+            "UPDATE users SET group_id = NULL WHERE group_id = ?";
     private static final RowMapper<Student> ROW_MAPPER = (resultSet, rowNum) ->
             Student.builder()
                     .withId(resultSet.getInt("user_id"))
@@ -58,25 +62,31 @@ public class StudentDaoImpl extends AbstractUserDaoImpl<Student> implements Stud
                             )
                             .withEducationForm(
                                     EducationForm.builder().withId(resultSet.getInt("education_form_id"))
-                                    .build()
+                                            .build()
                             )
                             .build())
                     .build();
 
     @Autowired
     public StudentDaoImpl(JdbcOperations jdbcTemplate) {
-        super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY,
-                FIND_ALL_PAGEABLE_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY,
+        super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY, FIND_ALL_PAGEABLE_QUERY,
+                FIND_BY_EMAIL_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY,
                 ADD_STUDENT_TO_GROUP_QUERY);
     }
 
+    @Override
     public void deleteStudentFromGroup(int studentId) {
-        jdbcTemplate.update(DELETE_STUDENT_FROM_GROUP, studentId);
+        jdbcTemplate.update(DELETE_STUDENT_FROM_GROUP_QUERY, studentId);
     }
 
     @Override
     public List<Student> findStudentsRelateToGroup(int groupId) {
-        return jdbcTemplate.query(FIND_STUDENTS_RELATE_TO_GROUP, ROW_MAPPER, groupId);
+        return jdbcTemplate.query(FIND_STUDENTS_RELATE_TO_GROUP_QUERY, ROW_MAPPER, groupId);
+    }
+
+    @Override
+    public void unbindStudentsFromGroup(int groupId) {
+        jdbcTemplate.update(UNBIND_STUDENTS_FROM_GROUP_QUERY, groupId);
     }
 
     @Override

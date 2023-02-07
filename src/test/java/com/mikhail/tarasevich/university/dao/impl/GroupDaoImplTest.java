@@ -239,6 +239,14 @@ class GroupDaoImplTest {
     }
 
     @Test
+    void findByName_inputEntityName_expectedEntitiesListReturnedFromDB() {
+        Optional<Group> foundEntity = groupDao.findByName("g1");
+
+        assertTrue(foundEntity.isPresent());
+        assertEquals(group1, foundEntity.get());
+    }
+
+    @Test
     void findAll_inputNothing_expectedAllEntitiesFromDB() {
         List<Group> foundEntities = groupDao.findAll();
 
@@ -246,8 +254,8 @@ class GroupDaoImplTest {
     }
 
     @Test
-    void findAllPageable_inputNothing_expectedEntitiesFromThePage() {
-        List<Group> foundEntities = groupDao.findAll(1, 2);
+    void findAllPageable_inputPageNumber_expectedEntitiesFromThePage() {
+        List<Group> foundEntities = groupDao.findAll(2, 2);
 
         List<Group> expectedEntities = new ArrayList<>();
         expectedEntities.add(group3);
@@ -415,6 +423,50 @@ class GroupDaoImplTest {
         assertEquals(group1, foundEntities.get(0));
         assertEquals(group2, foundEntities.get(1));
         assertEquals(2, foundEntities.size());
+    }
+
+    @Test
+    void unbindGroupsFromStudent_inputStudentId_expectedGroupsWereUnbound(){
+        assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "groups",
+                "head_user_id = 1"));
+
+        groupDao.unbindGroupsFromStudent(1);
+
+        assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "groups",
+                "head_user_id = 1"));
+    }
+
+    @Test
+    void unbindGroupsFromTeacher_inputTeacherId_expectedGroupsWereUnbound(){
+        assertEquals(2, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "user_groups",
+                "user_id = 6"));
+
+        groupDao.unbindGroupsFromTeacher(6);
+
+        assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "user_groups",
+                "user_id = 6"));
+    }
+
+    @Test
+    void unbindGroupsFromEducationForm_inputEducationFormId_expectedGroupsWereUnbound(){
+        assertEquals(2, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "groups",
+                "education_form_id = 1"));
+
+        groupDao.unbindGroupsFromEducationForm(1);
+
+        assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "groups",
+                "education_form_id = 1"));
+    }
+
+    @Test
+    void unbindGroupsFromFaculty_inputFacultyId_expectedGroupsWereUnbound(){
+        assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "groups",
+                "faculty_id = 1"));
+
+        groupDao.unbindGroupsFromFaculty(1);
+
+        assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "groups",
+                "faculty_id = 1"));
     }
 
 }

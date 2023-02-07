@@ -139,6 +139,14 @@ class TeacherDaoImplTest {
     }
 
     @Test
+    void findByName_inputEntityName_expectedEntitiesListReturnedFromDB() {
+        Optional<Teacher> foundEntity = teacherDao.findByName("drugova@gmail.com");
+
+        assertTrue(foundEntity.isPresent());
+        assertEquals(teacher2, foundEntity.get());
+    }
+
+    @Test
     void findAll_inputNothing_expectedAllEntitiesFromDB() {
         List<Teacher> foundEntities = teacherDao.findAll();
 
@@ -146,8 +154,8 @@ class TeacherDaoImplTest {
     }
 
     @Test
-    void findAllPageable_inputNothing_expectedEntitiesFromThePage() {
-        List<Teacher> foundEntities = teacherDao.findAll(1, 2);
+    void findAllPageable_inputPageNumber_expectedEntitiesFromThePage() {
+        List<Teacher> foundEntities = teacherDao.findAll(2, 2);
 
         List<Teacher> expectedEntities = new ArrayList<>();
         expectedEntities.add(teacher3);
@@ -337,7 +345,6 @@ class TeacherDaoImplTest {
 
     @Test
     void findTeachersRelateToGroup_inputGroupId_expectedTeachersRelateToGroup() {
-
         List<Teacher> foundStudents = teacherDao.findTeachersRelateToGroup(1);
 
         List<Teacher> expectedTeachers = new ArrayList<>();
@@ -350,7 +357,6 @@ class TeacherDaoImplTest {
 
     @Test
     void findTeachersRelateToCourse_inputCourseId_expectedTeachersRelateToCourse() {
-
         List<Teacher> foundStudents = teacherDao.findTeachersRelateToCourse(1);
 
         List<Teacher> expectedTeachers = new ArrayList<>();
@@ -363,7 +369,6 @@ class TeacherDaoImplTest {
 
     @Test
     void findTeachersRelateToDepartment_inputDepartmentId_expectedTeachersRelateToDepartment() {
-
         List<Teacher> foundStudents = teacherDao.findTeachersRelateToDepartment(1);
 
         List<Teacher> expectedTeachers = new ArrayList<>();
@@ -373,6 +378,50 @@ class TeacherDaoImplTest {
         assertEquals(expectedTeachers, foundStudents);
         assertEquals(JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "department_id = 1"), foundStudents.size());
+    }
+
+    @Test
+    void unbindTeachersFromCourse_inputCourseId_expectedThereAreNoCourse() {
+        assertEquals(1L, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate, "user_courses", "course_id = 3"));
+
+        teacherDao.unbindTeachersFromCourse(3);
+
+        assertEquals(0L, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate, "user_courses", "course_id = 3"));
+    }
+
+    @Test
+    void unbindTeachersFromDepartment_inputDepartmentId_expectedThereAreNoDepartment() {
+        assertEquals(2L, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate, "users", "department_id = 1"));
+
+        teacherDao.unbindTeachersFromDepartment(1);
+
+        assertEquals(0L, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate, "users", "department_id = 1"));
+    }
+
+    @Test
+    void unbindTeachersFromGroup_inputGroupId_expectedTeacherWereUnbound() {
+        assertEquals(1L, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate, "user_groups", "group_id = 1"));
+
+        teacherDao.unbindTeachersFromGroup(1);
+
+        assertEquals(0L, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate, "user_groups", "group_id = 1"));
+    }
+
+    @Test
+    void unbindTeachersFromTeacherTitle_inputTeacherTitleId_expectedTeacherTitleWereUnbound() {
+        assertEquals(2L, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate, "users", "teacher_title_id = 1"));
+
+        teacherDao.unbindTeachersFromTeacherTitle(1);
+
+        assertEquals(0L, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate, "users", "teacher_title_id = 1"));
     }
 
 }

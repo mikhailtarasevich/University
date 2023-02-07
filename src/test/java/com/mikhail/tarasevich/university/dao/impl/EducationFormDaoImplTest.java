@@ -95,6 +95,14 @@ class EducationFormDaoImplTest {
     }
 
     @Test
+    void findByName_inputEntityName_expectedEntitiesListReturnedFromDB() {
+        Optional<EducationForm> foundEntity = educationFormDao.findByName("Full-time education");
+
+        assertTrue(foundEntity.isPresent());
+        assertEquals(educationForm1, foundEntity.get());
+    }
+
+    @Test
     void findAll_inputNothing_expectedAllEntitiesFromDB() {
         List<EducationForm> foundEntities = educationFormDao.findAll();
 
@@ -102,8 +110,8 @@ class EducationFormDaoImplTest {
     }
 
     @Test
-    void findAllPageable_inputNothing_expectedEntitiesFromThePage() {
-        List<EducationForm> foundEntities = educationFormDao.findAll(1, 2);
+    void findAllPageable_inputPageNumber_expectedEntitiesFromThePage() {
+        List<EducationForm> foundEntities = educationFormDao.findAll(2, 2);
 
         List<EducationForm> expectedEntities = new ArrayList<>();
         expectedEntities.add(educationForm3);
