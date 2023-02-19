@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public class LessonDaoImpl extends AbstractPageableCrudDaoImpl<Lesson> implements LessonDao {
@@ -29,19 +30,30 @@ public class LessonDaoImpl extends AbstractPageableCrudDaoImpl<Lesson> implement
             "LEFT JOIN courses ON course_id = courses.id " +
             "LEFT JOIN lesson_types ON lesson_type_id = lesson_types.id ";
     private static final String FIND_ALL_QUERY = FIND_COMMON_PART_QUERY + "ORDER BY lessons.id";
-    private static final String FIND_BY_ID_QUERY =
-            FIND_COMMON_PART_QUERY + "WHERE lessons.id = ? ORDER BY lessons.id";
+    private static final String FIND_BY_ID_QUERY = FIND_COMMON_PART_QUERY + "WHERE lessons.id = ?";
+    private static final String FIND_BY_NAME_QUERY =
+            FIND_COMMON_PART_QUERY + "WHERE lessons.name = ? ORDER BY lessons.id";
     private static final String FIND_ALL_PAGEABLE_QUERY =
             FIND_COMMON_PART_QUERY + "ORDER BY lessons.id LIMIT ? OFFSET ?";
     private static final String UPDATE_QUERY = "UPDATE lessons SET name = ?, group_id = ?, user_id = ?, " +
             "course_id = ?, lesson_type_id = ?, start_time = ? WHERE id = ?";
     private static final String DELETE_BY_ID_QUERY = "DELETE FROM lessons WHERE id = ?";
     private static final String COUNT_TABLE_ROWS_QUERY = "SELECT COUNT(*) FROM lessons";
+    private static final String FIND_LESSONS_RELATE_TO_GROUP_QUERY =
+            FIND_COMMON_PART_QUERY + "WHERE lessons.group_id = ? ORDER BY start_time";
     private static final String UPDATE_GROUP_QUERY = "UPDATE lessons SET group_id = ? WHERE id = ?";
     private static final String UPDATE_TEACHER_QUERY = "UPDATE lessons SET user_id = ? WHERE id = ?";
     private static final String UPDATE_COURSE_QUERY = "UPDATE lessons SET course_id = ? WHERE id = ?";
     private static final String UPDATE_LESSON_TYPE_QUERY = "UPDATE lessons SET lesson_type_id = ? WHERE id = ?";
     private static final String UPDATE_START_TIME_QUERY = "UPDATE lessons SET start_time = ? WHERE id = ?";
+    private static final String UNBIND_LESSONS_FROM_COURSE_QUERY =
+            "UPDATE lessons SET course_id = NULL WHERE course_id = ?";
+    private static final String UNBIND_LESSONS_FROM_TEACHER_QUERY =
+            "UPDATE lessons SET user_id = NULL WHERE user_id = ?";
+    private static final String UNBIND_LESSONS_FROM_GROUP_QUERY =
+            "UPDATE lessons SET group_id = NULL WHERE group_id = ?";
+    private static final String UNBIND_LESSONS_FROM_LESSON_TYPE_QUERY =
+            "UPDATE lessons SET lesson_type_id = NULL WHERE lesson_type_id = ?";
     private static final RowMapper<Lesson> ROW_MAPPER = (resultSet, rowNum) ->
             Lesson.builder()
                     .withId(resultSet.getInt("lesson_id"))
@@ -79,8 +91,13 @@ public class LessonDaoImpl extends AbstractPageableCrudDaoImpl<Lesson> implement
 
     @Autowired
     public LessonDaoImpl(JdbcOperations jdbcTemplate) {
-        super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY,
-                FIND_ALL_PAGEABLE_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY);
+        super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY, FIND_ALL_PAGEABLE_QUERY,
+                FIND_BY_NAME_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY);
+    }
+
+    @Override
+    public List<Lesson> findLessonsRelateToGroup(int groupId) {
+        return jdbcTemplate.query(FIND_LESSONS_RELATE_TO_GROUP_QUERY, mapper, groupId);
     }
 
     @Override
@@ -106,6 +123,26 @@ public class LessonDaoImpl extends AbstractPageableCrudDaoImpl<Lesson> implement
     @Override
     public void changeStartTime(int lessonId, LocalDateTime newStartTime) {
         jdbcTemplate.update(UPDATE_START_TIME_QUERY, newStartTime, lessonId);
+    }
+
+    @Override
+    public void unbindLessonsFromCourse(int courseId) {
+        jdbcTemplate.update(UNBIND_LESSONS_FROM_COURSE_QUERY, courseId);
+    }
+
+    @Override
+    public void unbindLessonsFromTeacher(int courseId) {
+        jdbcTemplate.update(UNBIND_LESSONS_FROM_TEACHER_QUERY, courseId);
+    }
+
+    @Override
+    public void unbindLessonsFromGroup(int groupId) {
+        jdbcTemplate.update(UNBIND_LESSONS_FROM_GROUP_QUERY, groupId);
+    }
+
+    @Override
+    public void unbindLessonsFromLessonType(int lessonTypeId) {
+        jdbcTemplate.update(UNBIND_LESSONS_FROM_LESSON_TYPE_QUERY, lessonTypeId);
     }
 
     @Override

@@ -121,6 +121,14 @@ class FacultyDaoImplTest {
     }
 
     @Test
+    void findByName_inputEntityName_expectedEntitiesListReturnedFromDB() {
+        Optional<Faculty> foundEntity = facultyDao.findByName("Statistics");
+
+        assertTrue(foundEntity.isPresent());
+        assertEquals(faculty3, foundEntity.get());
+    }
+
+    @Test
     void findAll_inputNothing_expectedAllEntitiesFromDB() {
         List<Faculty> foundEntities = facultyDao.findAll();
 
@@ -128,8 +136,8 @@ class FacultyDaoImplTest {
     }
 
     @Test
-    void findAllPageable_inputNothing_expectedEntitiesFromThePage() {
-        List<Faculty> foundEntities = facultyDao.findAll(1, 2);
+    void findAllPageable_inputPageNumber_expectedEntitiesFromThePage() {
+        List<Faculty> foundEntities = facultyDao.findAll(2, 2);
 
         List<Faculty> expectedEntities = new ArrayList<>();
         expectedEntities.add(faculty3);

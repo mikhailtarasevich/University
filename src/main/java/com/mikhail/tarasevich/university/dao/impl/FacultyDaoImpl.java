@@ -13,16 +13,13 @@ import java.sql.SQLException;
 @Repository
 public class FacultyDaoImpl extends AbstractPageableCrudDaoImpl<Faculty> implements FacultyDao {
 
-    private static final String SAVE_QUERY =
-            "INSERT INTO faculties (name, description) VALUES(?, ?)";
+    private static final String SAVE_QUERY = "INSERT INTO faculties (name, description) VALUES(?, ?)";
     private static final String FIND_ALL_QUERY = "SELECT * FROM faculties ORDER BY id";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM faculties WHERE id = ?";
-    private static final String FIND_ALL_PAGEABLE_QUERY =
-            "SELECT * FROM faculties ORDER BY id LIMIT ? OFFSET ?";
-    private static final String UPDATE_QUERY =
-            "UPDATE faculties SET name = ?, description = ? WHERE id = ?";
-    private static final String DELETE_BY_ID_QUERY =
-            "DELETE FROM faculties WHERE id = ?";
+    private static final String FIND_BY_NAME_QUERY = "SELECT * FROM faculties WHERE name = ? ORDER BY id";
+    private static final String FIND_ALL_PAGEABLE_QUERY = "SELECT * FROM faculties ORDER BY id LIMIT ? OFFSET ?";
+    private static final String UPDATE_QUERY = "UPDATE faculties SET name = ?, description = ? WHERE id = ?";
+    private static final String DELETE_BY_ID_QUERY = "DELETE FROM faculties WHERE id = ?";
     private static final String COUNT_TABLE_ROWS_QUERY = "SELECT COUNT(*) FROM faculties";
     private static final RowMapper<Faculty> ROW_MAPPER = (resultSet, rowNum) ->
             Faculty.builder()
@@ -33,8 +30,8 @@ public class FacultyDaoImpl extends AbstractPageableCrudDaoImpl<Faculty> impleme
 
     @Autowired
     public FacultyDaoImpl(JdbcOperations jdbcTemplate) {
-        super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY,
-                FIND_ALL_PAGEABLE_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY);
+        super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY, FIND_ALL_PAGEABLE_QUERY,
+                FIND_BY_NAME_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY);
     }
 
     @Override

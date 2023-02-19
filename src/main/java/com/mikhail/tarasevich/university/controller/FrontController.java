@@ -1,53 +1,57 @@
 package com.mikhail.tarasevich.university.controller;
 
-import com.mikhail.tarasevich.university.dao.*;
-import com.mikhail.tarasevich.university.dao.impl.*;
+import com.mikhail.tarasevich.university.dto.*;
 import com.mikhail.tarasevich.university.entity.*;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
 import com.mikhail.tarasevich.university.provider.ViewProvider;
+import com.mikhail.tarasevich.university.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class FrontController {
-
-    FacultyDaoImpl facultyDao;
-    LessonTypeDao lessonTypeDao;
-    EducationFormDao educationFormDao;
-    CourseDao courseDao;
-    GroupDao groupDao;
-    LessonDao lessonDao;
-    StudentDao studentDao;
-    TeacherDao teacherDao;
-    DepartmentDao departmentDao;
-    TeacherTitleDao teacherTitleDao;
-    ViewProvider viewProvider;
+    private final CourseService courseService;
+    private final TeacherService teacherService;
+    private final StudentService studentService;
+    private final GroupService groupService;
+    private final DepartmentService departmentService;
+    private final LessonService lessonService;
+    private final TeacherTitleService teacherTitleService;
+    private final LessonTypeService lessonTypeService;
+    private final FacultyService facultyService;
+    private final EducationFormService educationFormService;
+    private final ViewProvider viewProvider;
 
     @Autowired
-    public FrontController(FacultyDaoImpl facultyDao, LessonTypeDao lessonTypeDao, EducationFormDao educationFormDao,
-                           CourseDao courseDao, GroupDao groupDao, LessonDao lessonDao, StudentDao studentDao,
-                           TeacherDao teacherDao, DepartmentDao departmentDao, TeacherTitleDao teacherTitleDao,
+    public FrontController(CourseService courseService, TeacherService teacherService,
+                           StudentService studentService, GroupService groupService,
+                           DepartmentService departmentService, LessonService lessonService,
+                           TeacherTitleService teacherTitleService, LessonTypeService lessonTypeService,
+                           FacultyService facultyService, EducationFormService educationFormService,
                            ViewProvider viewProvider) {
-        this.facultyDao = facultyDao;
-        this.lessonTypeDao = lessonTypeDao;
-        this.educationFormDao = educationFormDao;
-        this.courseDao = courseDao;
-        this.groupDao = groupDao;
-        this.lessonDao = lessonDao;
-        this.studentDao = studentDao;
-        this.teacherDao = teacherDao;
-        this.departmentDao = departmentDao;
-        this.teacherTitleDao = teacherTitleDao;
+        this.courseService = courseService;
+        this.teacherService = teacherService;
+        this.studentService = studentService;
+        this.groupService = groupService;
+        this.departmentService = departmentService;
+        this.lessonService = lessonService;
+        this.teacherTitleService = teacherTitleService;
+        this.lessonTypeService = lessonTypeService;
+        this.facultyService = facultyService;
+        this.educationFormService = educationFormService;
         this.viewProvider = viewProvider;
     }
 
-    public void startMenu(int itemsPerPage) {
+    public void startMenu() {
 
         int chooser;
-        int pages;
 
         viewProvider.printMessage("\nPress 0 to exit;\n" +
                 "Press 1 to do actions with teacher's entities;\n" +
@@ -79,78 +83,69 @@ public class FrontController {
                         "Press 6 to delete a teacher from a group;\n" +
                         "Press 7 to add a teacher to a course;\n" +
                         "Press 8 to delete a teacher from a course;\n" +
-                        "Press 9 to change teacher's title;\n" +
-                        "Press 10 to change teacher's department;\n" +
-                        "Press 11 to find all groups relate to teacher;\n" +
-                        "Press 12 to find all courses relate to teacher;\n");
+                        "Press 9 to find all teacher relate to groups;\n" +
+                        "Press 10 to find all teacher relate to courses;\n" +
+                        "Press 11 to find all teacher relate to department;\n");
 
                 chooser = viewProvider.readInt();
-
                 switch (chooser) {
-
                     case 0:
-                        startMenu(itemsPerPage);
+                        startMenu();
                         break;
 
                     case 1:
-                        pages = (int) Math.ceil((double) teacherDao.count() / (double) itemsPerPage);
-                        findTeachers(pages, itemsPerPage);
-                        returnToMenu(itemsPerPage);
+                        findTeachers();
+                        returnToMenu();
                         break;
 
                     case 2:
                         findTeacherById();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 3:
                         saveTeacher();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 4:
                         deleteTeacher();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 5:
                         addTeacherToGroup();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 6:
                         deleteTeacherFromGroup();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 7:
                         addTeacherToCourse();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 8:
                         deleteTeacherFromCourse();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 9:
-                        changeTeacherTitle();
-                        returnToMenu(itemsPerPage);
+                        findTeachersRelateToGroup();
+                        returnToMenu();
                         break;
 
                     case 10:
-                        changeDepartment();
-                        returnToMenu(itemsPerPage);
+                        findTeachersRelateToCourse();
+                        returnToMenu();
                         break;
 
                     case 11:
-                        findAllGroupsRelateToTeacher();
-                        returnToMenu(itemsPerPage);
-                        break;
-
-                    case 12:
-                        findAllCoursesRelateToTeacher();
-                        returnToMenu(itemsPerPage);
+                        findAllCoursesRelateToDepartment();
+                        returnToMenu();
                         break;
 
                     default:
@@ -164,50 +159,51 @@ public class FrontController {
                         "Press 2 to find a student by id;\n" +
                         "Press 3 to add new student;\n" +
                         "Press 4 to delete a student;\n" +
-                        "Press 5 to change student's group;\n" +
-                        "Press 6 to delete student's from a group;\n");
+                        "Press 5 to delete student's from a group;\n" +
+                        "Press 6 to find students relate to group;\n");
 
                 chooser = viewProvider.readInt();
                 switch (chooser) {
 
                     case 0:
-                        startMenu(itemsPerPage);
+                        startMenu();
                         break;
 
                     case 1:
-                        pages = (int) Math.ceil((double) studentDao.count() / (double) itemsPerPage);
-                        findStudents(pages, itemsPerPage);
-                        returnToMenu(itemsPerPage);
+                        findStudents();
+                        returnToMenu();
                         break;
 
                     case 2:
                         findStudentById();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 3:
                         saveStudent();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 4:
                         deleteStudent();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 5:
-                        addStudentToGroup();
-                        returnToMenu(itemsPerPage);
+                        unsubscribeStudentFromGroup();
+                        returnToMenu();
                         break;
 
                     case 6:
-                        deleteStudentFromGroup();
-                        returnToMenu(itemsPerPage);
+                        findStudentRelateToGroup();
+                        returnToMenu();
                         break;
 
                     default:
                         break;
+
                 }
+
                 break;
 
             case 3:
@@ -215,35 +211,65 @@ public class FrontController {
                         "Press 1 to find all courses;\n" +
                         "Press 2 to find a course by id;\n" +
                         "Press 3 to add new course;\n" +
-                        "Press 4 to delete a course;\n");
+                        "Press 4 to add new courses;\n" +
+                        "Press 5 to update course;\n" +
+                        "Press 6 to delete a course;\n" +
+                        "Press 7 to delete a courses;\n" +
+                        "Press 8 to find all courses relate to department;\n" +
+                        "Press 9 to find all courses relate to teacher;\n");
 
                 chooser = viewProvider.readInt();
                 switch (chooser) {
 
                     case 0:
-                        startMenu(itemsPerPage);
+                        startMenu();
                         break;
 
                     case 1:
-                        pages = (int) Math.ceil((double) courseDao.count() / (double) itemsPerPage);
-                        findCourses(pages, itemsPerPage);
-                        returnToMenu(itemsPerPage);
+                        findCourses();
+                        returnToMenu();
                         break;
 
                     case 2:
                         findCourseById();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 3:
                         saveCourse();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 4:
-                        deleteCourse();
-                        returnToMenu(itemsPerPage);
+                        saveCourses();
+                        returnToMenu();
                         break;
+
+                    case 5:
+                        updateCourse();
+                        returnToMenu();
+                        break;
+
+                    case 6:
+                        deleteCourse();
+                        returnToMenu();
+                        break;
+
+                    case 7:
+                        deleteCourses();
+                        returnToMenu();
+                        break;
+
+                    case 8:
+                        findAllCoursesRelateToDepartment();
+                        returnToMenu();
+                        break;
+
+                    case 9:
+                        findAllCoursesRelateToTeacher();
+                        returnToMenu();
+                        break;
+
 
                     default:
                         break;
@@ -256,56 +282,45 @@ public class FrontController {
                         "Press 2 to find a group by id;\n" +
                         "Press 3 to add new group;\n" +
                         "Press 4 to delete a group;\n" +
-                        "Press 5 to change faculty in a group;\n" +
-                        "Press 6 to change education form in a group;\n" +
-                        "Press 7 to change head student in a group;\n");
+                        "Press 5 to find groups relate to teacher;\n");
 
                 chooser = viewProvider.readInt();
+
                 switch (chooser) {
 
                     case 0:
-                        startMenu(itemsPerPage);
+                        startMenu();
                         break;
 
                     case 1:
-                        pages = (int) Math.ceil((double) groupDao.count() / (double) itemsPerPage);
-                        findGroups(pages, itemsPerPage);
-                        returnToMenu(itemsPerPage);
+                        findGroups();
+                        returnToMenu();
                         break;
 
                     case 2:
                         findGroupById();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 3:
                         saveGroup();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 4:
                         deleteGroup();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 5:
-                        changeFacultyInGroup();
-                        returnToMenu(itemsPerPage);
-                        break;
-
-                    case 6:
-                        changeEducationFormInGroup();
-                        returnToMenu(itemsPerPage);
-                        break;
-
-                    case 7:
-                        changeHeadStudentInGroup();
-                        returnToMenu(itemsPerPage);
+                        findGroupsRelateToTeacher();
+                        returnToMenu();
                         break;
 
                     default:
                         break;
                 }
+
                 break;
 
             case 5:
@@ -313,63 +328,40 @@ public class FrontController {
                         "Press 1 to find all departments;\n" +
                         "Press 2 to find a department by id;\n" +
                         "Press 3 to add new department;\n" +
-                        "Press 4 to delete a department;\n" +
-                        "Press 5 to add course to a department;\n" +
-                        "Press 6 to delete course from department;\n" +
-                        "Press 7 to find all teachers relate to department;\n" +
-                        "Press 8 to find all courses relate to department;\n");
+                        "Press 4 to delete a department;\n");
 
                 chooser = viewProvider.readInt();
+
                 switch (chooser) {
 
                     case 0:
-                        startMenu(itemsPerPage);
+                        startMenu();
                         break;
 
                     case 1:
-                        pages = (int) Math.ceil((double) departmentDao.count() / (double) itemsPerPage);
-                        findDepartments(pages, itemsPerPage);
-                        returnToMenu(itemsPerPage);
+                        findDepartments();
+                        returnToMenu();
                         break;
 
                     case 2:
                         findDepartmentById();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 3:
                         saveDepartment();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 4:
                         deleteDepartment();
-                        returnToMenu(itemsPerPage);
-                        break;
-
-                    case 5:
-                        addCourseToDepartment();
-                        returnToMenu(itemsPerPage);
-                        break;
-
-                    case 6:
-                        deleteCourseFromDepartment();
-                        returnToMenu(itemsPerPage);
-                        break;
-
-                    case 7:
-                        findAllTeachersRelateToDepartment();
-                        returnToMenu(itemsPerPage);
-                        break;
-
-                    case 8:
-                        findAllCoursesRelateToDepartment();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     default:
                         break;
                 }
+
                 break;
 
             case 6:
@@ -378,68 +370,45 @@ public class FrontController {
                         "Press 2 to find a lesson by id;\n" +
                         "Press 3 to add new lesson;\n" +
                         "Press 4 to delete a lesson;\n" +
-                        "Press 5 to update group in a lesson;\n" +
-                        "Press 6 to update teacher in a lesson;\n" +
-                        "Press 7 to update course in a lesson;\n" +
-                        "Press 8 to update lesson type in a lesson;\n" +
-                        "Press 9 to update start time in a lesson;\n");
+                        "Press 5 to lessons relate to group;\n");
 
                 chooser = viewProvider.readInt();
+
                 switch (chooser) {
 
                     case 0:
-                        startMenu(itemsPerPage);
+                        startMenu();
                         break;
 
                     case 1:
-                        pages = (int) Math.ceil((double) lessonDao.count() / (double) itemsPerPage);
-                        findLessons(pages, itemsPerPage);
-                        returnToMenu(itemsPerPage);
+                        findLessons();
+                        returnToMenu();
                         break;
 
                     case 2:
                         findLessonById();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 3:
                         saveLesson();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 4:
                         deleteLesson();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 5:
-                        changeGroupInLesson();
-                        returnToMenu(itemsPerPage);
-                        break;
-
-                    case 6:
-                        changeTeacherInLesson();
-                        returnToMenu(itemsPerPage);
-                        break;
-
-                    case 7:
-                        changeCourseInLesson();
-                        returnToMenu(itemsPerPage);
-                        break;
-
-                    case 8:
-                        changeLessonTypeInLesson();
-                        returnToMenu(itemsPerPage);
-                        break;
-
-                    case 9:
-                        changeStartTimeInLesson();
-                        returnToMenu(itemsPerPage);
+                        findLessonsRelateToGroup();
+                        returnToMenu();
                         break;
 
                     default:
                         break;
                 }
+
                 break;
 
             case 7:
@@ -450,36 +419,37 @@ public class FrontController {
                         "Press 4 to delete a teacher title;\n");
 
                 chooser = viewProvider.readInt();
+
                 switch (chooser) {
 
                     case 0:
-                        startMenu(itemsPerPage);
+                        startMenu();
                         break;
 
                     case 1:
-                        pages = (int) Math.ceil((double) teacherTitleDao.count() / (double) itemsPerPage);
-                        findTeacherTitles(pages, itemsPerPage);
-                        returnToMenu(itemsPerPage);
+                        findTeacherTitles();
+                        returnToMenu();
                         break;
 
                     case 2:
                         findTeacherTitleById();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 3:
                         saveTeacherTitle();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 4:
                         deleteTeacherTitle();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     default:
                         break;
                 }
+
                 break;
 
             case 8:
@@ -487,45 +457,40 @@ public class FrontController {
                         "Press 1 to find all lesson types;\n" +
                         "Press 2 to find a lesson type by id;\n" +
                         "Press 3 to add new lesson type;\n" +
-                        "Press 4 to delete a lesson type;\n" +
-                        "Press 5 to change a duration of lesson type;\n");
+                        "Press 4 to delete a lesson type;\n");
 
                 chooser = viewProvider.readInt();
+
                 switch (chooser) {
 
                     case 0:
-                        startMenu(itemsPerPage);
+                        startMenu();
                         break;
 
                     case 1:
-                        pages = (int) Math.ceil((double) lessonTypeDao.count() / (double) itemsPerPage);
-                        findLessonTypes(pages, itemsPerPage);
-                        returnToMenu(itemsPerPage);
+                        findLessonTypes();
+                        returnToMenu();
                         break;
 
                     case 2:
                         findLessonTypeById();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 3:
                         saveLessonType();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 4:
                         deleteLessonType();
-                        returnToMenu(itemsPerPage);
-                        break;
-
-                    case 5:
-                        changeDurationInLessonType();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     default:
                         break;
                 }
+
                 break;
 
             case 9:
@@ -536,36 +501,37 @@ public class FrontController {
                         "Press 4 to delete a faculty;\n");
 
                 chooser = viewProvider.readInt();
+
                 switch (chooser) {
 
                     case 0:
-                        startMenu(itemsPerPage);
+                        startMenu();
                         break;
 
                     case 1:
-                        pages = (int) Math.ceil((double) facultyDao.count() / (double) itemsPerPage);
-                        findFaculties(pages, itemsPerPage);
-                        returnToMenu(itemsPerPage);
+                        findFaculties();
+                        returnToMenu();
                         break;
 
                     case 2:
                         findFacultyById();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 3:
                         saveFaculty();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 4:
                         deleteFaculty();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     default:
                         break;
                 }
+
                 break;
 
             case 10:
@@ -576,100 +542,90 @@ public class FrontController {
                         "Press 4 to delete a education form;\n");
 
                 chooser = viewProvider.readInt();
+
                 switch (chooser) {
 
                     case 0:
-                        startMenu(itemsPerPage);
+                        startMenu();
                         break;
 
                     case 1:
-                        pages = (int) Math.ceil((double) educationFormDao.count() / (double) itemsPerPage);
-                        findEducationForms(pages, itemsPerPage);
-                        returnToMenu(itemsPerPage);
+                        findEducationForms();
+                        returnToMenu();
                         break;
 
                     case 2:
                         findEducationFormById();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 3:
                         saveEducationForm();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     case 4:
                         deleteEducationForm();
-                        returnToMenu(itemsPerPage);
+                        returnToMenu();
                         break;
 
                     default:
                         break;
                 }
+
                 break;
 
             default:
-                startMenu(itemsPerPage);
+                startMenu();
         }
     }
 
     //Teachers
 
-    private void findTeachers(int pages, int itemsPerPage) {
-        viewProvider.printMessage("\nPlease, type a page number from 1 to " + pages + ":");
-        int pageNumber = viewProvider.readInt();
-        if (pageNumber <= 0 || pageNumber > pages) {
-            viewProvider.printMessage("You typed an incorrect page number, please, try again\n");
-            return;
-        }
-        List<Teacher> teachers = teacherDao.findAll(pageNumber - 1, itemsPerPage);
-        viewProvider.printMessage(teachers.toString());
+    private void findTeachers() {
+        viewProvider.printMessage("\nPlease, type a page number: ");
+        String pageNumber = viewProvider.read();
+        viewProvider.printMessage(teacherService.findAll(pageNumber).toString());
     }
 
     private void findTeacherById() {
         viewProvider.printMessage("\nPlease, type teacher's id:");
         int id = viewProvider.readInt();
-        viewProvider.printMessage(teacherDao.findById(id).toString());
+        viewProvider.printMessage(teacherService.findById(id).toString());
     }
 
     private void saveTeacher() {
-        Teacher teacher = makeNewTeacher();
-        Teacher savedTeacher = teacherDao.save(teacher);
+        TeacherRequest teacher = makeNewTeacher();
+        TeacherResponse savedTeacher = teacherService.register(teacher);
         viewProvider.printMessage("The teacher with these parameters has been added to database: \n" +
                 savedTeacher);
     }
 
-    private Teacher makeNewTeacher() {
-        viewProvider.printMessage("\nPlease, type first name:");
-        String firstName = viewProvider.read();
-        viewProvider.printMessage("\nPlease, type last name:");
-        String lastName = viewProvider.read();
-        viewProvider.printMessage("\nPlease, type gender in digit representation(MALE = 0 /FEMALE = 1):\n");
-        Gender gender = Gender.getById(viewProvider.readInt());
-        viewProvider.printMessage("\nPlease, type email:");
-        String email = viewProvider.read();
-        viewProvider.printMessage("\nPlease, type password:");
-        String password = viewProvider.read();
-        viewProvider.printMessage("\nPlease, type teacherTitleId:");
-        int teacherTitleId = viewProvider.readInt();
-        viewProvider.printMessage("\nPlease, type departmentId:");
-        int departmentId = viewProvider.readInt();
+    private TeacherRequest makeNewTeacher() {
 
-        return Teacher.builder()
-                .withFirstName(firstName)
-                .withLastName(lastName)
-                .withGender(gender)
-                .withEmail(email)
-                .withPassword(password)
-                .withTeacherTitle(TeacherTitle.builder().withId(teacherTitleId).build())
-                .withDepartment(Department.builder().withId(departmentId).build())
-                .build();
+        TeacherRequest r = new TeacherRequest();
+        viewProvider.printMessage("\nPlease, type first name:");
+        r.setFirstName(viewProvider.read());
+        viewProvider.printMessage("\nPlease, type last name:");
+        r.setLastName(viewProvider.read());
+        viewProvider.printMessage("\nPlease, type gender in digit representation(MALE = 0 /FEMALE = 1):\n");
+        r.setGender(Gender.getById(viewProvider.readInt()));
+        viewProvider.printMessage("\nPlease, type email:");
+        r.setEmail(viewProvider.read());
+        viewProvider.printMessage("\nPlease, type password:");
+        r.setPassword(viewProvider.read());
+        viewProvider.printMessage("\nPlease, type teacherTitleId:");
+        r.setTeacherTitle(TeacherTitle.builder().withId(viewProvider.readInt()).build());
+        viewProvider.printMessage("\nPlease, type departmentId:");
+        r.setDepartment(Department.builder().withId(viewProvider.readInt()).build());
+
+        return r;
     }
 
     private void deleteTeacher() {
         viewProvider.printMessage("Which teacher do you want to delete? Please, type the teacher id: \n");
         int teacherId = viewProvider.readInt();
-        teacherDao.deleteById(teacherId);
+        teacherService.deleteById(teacherId);
         viewProvider.printMessage("The teacher with id = " + teacherId + " has been deleted from database\n");
     }
 
@@ -678,7 +634,7 @@ public class FrontController {
         int teacherId = viewProvider.readInt();
         viewProvider.printMessage("Please, type the group id: \n");
         int groupId = viewProvider.readInt();
-        teacherDao.addUserToGroup(teacherId, groupId);
+        teacherService.subscribeUserToGroup(teacherId, groupId);
     }
 
     private void deleteTeacherFromGroup() {
@@ -686,7 +642,7 @@ public class FrontController {
         int teacherId = viewProvider.readInt();
         viewProvider.printMessage("Please, type the group id: \n");
         int groupId = viewProvider.readInt();
-        teacherDao.deleteTeacherFromGroup(teacherId, groupId);
+        teacherService.unsubscribeTeacherFromGroup(teacherId, groupId);
     }
 
     private void addTeacherToCourse() {
@@ -694,7 +650,7 @@ public class FrontController {
         int teacherId = viewProvider.readInt();
         viewProvider.printMessage("Please, type the course id: \n");
         int courseId = viewProvider.readInt();
-        teacherDao.addTeacherToCourse(teacherId, courseId);
+        teacherService.subscribeTeacherToCourse(teacherId, courseId);
     }
 
     private void deleteTeacherFromCourse() {
@@ -702,595 +658,506 @@ public class FrontController {
         int teacherId = viewProvider.readInt();
         viewProvider.printMessage("Please, type the course id: \n");
         int courseId = viewProvider.readInt();
-        teacherDao.deleteTeacherFromCourse(teacherId, courseId);
+        teacherService.unsubscribeTeacherFromCourse(teacherId, courseId);
     }
 
-    private void changeTeacherTitle() {
-        viewProvider.printMessage("Which teacher do you want to change the teacher title? Please, type the teacher id: \n");
-        int teacherId = viewProvider.readInt();
-        viewProvider.printMessage("Please, type the teacher title id: \n");
-        int teacherTitle = viewProvider.readInt();
-        teacherDao.changeTeacherTitle(teacherId, teacherTitle);
+    private void findTeachersRelateToGroup() {
+        viewProvider.printMessage("Please, type the group id which teachers you want to find: \n");
+        viewProvider.printMessage(teacherService.findTeachersRelateToGroup(viewProvider.readInt()).toString());
     }
 
-    private void changeDepartment() {
-        viewProvider.printMessage("Which teacher do you want to change the department? Please, type the teacher id: \n");
-        int teacherId = viewProvider.readInt();
-        viewProvider.printMessage("Please, type the department id: \n");
-        int departmentId = viewProvider.readInt();
-        teacherDao.deleteTeacherFromCourse(teacherId, departmentId);
+    private void findTeachersRelateToCourse() {
+        viewProvider.printMessage("Please, type the course id which teachers you want to find: \n");
+        viewProvider.printMessage(teacherService.findTeachersRelateToCourse(viewProvider.readInt()).toString());
     }
 
-    private void findAllGroupsRelateToTeacher() {
-        viewProvider.printMessage("Please, type the teacher id which groups you want to find: \n");
-        int teacherId = viewProvider.readInt();
-        viewProvider.printMessage(groupDao.findGroupsRelateToTeacher(teacherId).toString());
+    private void findTeachersRelateToDepartment() {
+        viewProvider.printMessage("Please, type the department id which teachers you want to find: \n");
+        viewProvider.printMessage(teacherService.findTeachersRelateToDepartment(viewProvider.readInt()).toString());
     }
 
-    private void findAllCoursesRelateToTeacher() {
-        viewProvider.printMessage("Please, type the teacher id which courses you want to find: \n");
-        int teacherId = viewProvider.readInt();
-        viewProvider.printMessage(courseDao.findCoursesRelateToTeacher(teacherId).toString());
-    }
+    //    Students
 
-//    Students
-
-    private void findStudents(int pages, int itemsPerPage) {
-        viewProvider.printMessage("\nPlease, type a page number from 1 to " + pages + ":");
-        int pageNumber = viewProvider.readInt();
-        if (pageNumber <= 0 || pageNumber > pages) {
-            viewProvider.printMessage("You typed an incorrect page number, please, try again\n");
-            return;
-        }
-        List<Student> students = studentDao.findAll(pageNumber - 1, itemsPerPage);
-        viewProvider.printMessage(students.toString());
+    private void findStudents() {
+        viewProvider.printMessage("\nPlease, type a page number: ");
+        viewProvider.printMessage(studentService.findAll(viewProvider.read()).toString());
     }
 
     private void findStudentById() {
         viewProvider.printMessage("\nPlease, type student's id:");
-        int id = viewProvider.readInt();
-        viewProvider.printMessage(studentDao.findById(id).toString());
+        viewProvider.printMessage(studentService.findById(viewProvider.readInt()).toString());
     }
 
     private void saveStudent() {
-        Student student = makeNewStudent();
-        Student savedStudent = studentDao.save(student);
+        StudentRequest student = makeNewStudent();
+        StudentResponse savedStudent = studentService.register(student);
         viewProvider.printMessage("The student with these parameters has been added to database: \n" +
                 savedStudent);
     }
 
-    private Student makeNewStudent() {
+    private StudentRequest makeNewStudent() {
+        StudentRequest s = new StudentRequest();
         viewProvider.printMessage("\nPlease, type first name:");
-        String firstName = viewProvider.read();
+        s.setFirstName(viewProvider.read());
         viewProvider.printMessage("\nPlease, type last name:");
-        String lastName = viewProvider.read();
+        s.setLastName(viewProvider.read());
         viewProvider.printMessage("\nPlease, type gender in digit representation(MALE = 0 /FEMALE = 1):\n");
-        Gender gender = Gender.getById(viewProvider.readInt());
+        s.setGender(Gender.getById(viewProvider.readInt()));
         viewProvider.printMessage("\nPlease, type email:");
-        String email = viewProvider.read();
+        s.setEmail(viewProvider.read());
         viewProvider.printMessage("\nPlease, type password:");
-        String password = viewProvider.read();
+        s.setPassword(viewProvider.read());
         viewProvider.printMessage("\nPlease, type groupId:");
-        int groupId = viewProvider.readInt();
+        s.setGroup(Group.builder().withId(viewProvider.readInt()).build());
 
-        return Student.builder()
-                .withFirstName(firstName)
-                .withLastName(lastName)
-                .withGender(gender)
-                .withEmail(email)
-                .withPassword(password)
-                .withGroup(Group.builder().withId(groupId).build())
-                .build();
+        return s;
     }
 
     private void deleteStudent() {
         viewProvider.printMessage("Which student do you want to delete? Please, type the student id: \n");
         int studentId = viewProvider.readInt();
-        studentDao.deleteById(studentId);
+        studentService.deleteById(studentId);
         viewProvider.printMessage("The student with id = " + studentId + " has been deleted from database\n");
     }
 
-    private void addStudentToGroup() {
-        viewProvider.printMessage("Which student do you want to add to the group? Please, type the student id: \n");
+    private void unsubscribeStudentFromGroup() {
+        viewProvider.printMessage("Which student do you want to unsubscribe from the group? Please, type the student id: \n");
         int studentId = viewProvider.readInt();
-        viewProvider.printMessage("Please, type the group id: \n");
-        int groupId = viewProvider.readInt();
-        studentDao.addUserToGroup(studentId, groupId);
+        studentService.unsubscribeStudentFromGroup(studentId);
     }
 
-    private void deleteStudentFromGroup() {
-        viewProvider.printMessage("Which student do you want to delete from the group? Please, type the student id: \n");
-        int studentId = viewProvider.readInt();
-        studentDao.deleteStudentFromGroup(studentId);
+    private void findStudentRelateToGroup() {
+        viewProvider.printMessage("Students from which group do you want to find? Please, type the group id: \n");
+        int groupId = viewProvider.readInt();
+        studentService.findStudentsRelateToGroup(groupId);
     }
 
     //    Courses
 
-    private void findCourses(int pages, int itemsPerPage) {
-        viewProvider.printMessage("\nPlease, type a page number from 1 to " + pages + ":");
-        int pageNumber = viewProvider.readInt();
-        if (pageNumber <= 0 || pageNumber > pages) {
-            viewProvider.printMessage("You typed an incorrect page number, please, try again\n");
-            return;
-        }
-        List<Course> courses = courseDao.findAll(pageNumber - 1, itemsPerPage);
+    private void findCourses() {
+        viewProvider.printMessage("\nPlease, type a page number: ");
+        String pageNumber = viewProvider.read();
+        List<CourseResponse> courses = courseService.findAll(pageNumber);
         viewProvider.printMessage(courses.toString());
     }
 
     private void findCourseById() {
         viewProvider.printMessage("\nPlease, type course's id:");
         int id = viewProvider.readInt();
-        viewProvider.printMessage(courseDao.findById(id).toString());
+        try {
+            viewProvider.printMessage(courseService.findById(id).toString());
+        } catch (NumberFormatException e) {
+            viewProvider.printMessage("There seems to be an error in what you have typed");
+        }
     }
 
     private void saveCourse() {
-        Course course = makeNewCourse();
-        Course savedCourse = courseDao.save(course);
-        viewProvider.printMessage("The course with these parameters has been added to database: \n" +
-                savedCourse);
+        CourseRequest course = makeCourseForSave();
+
+        try {
+            CourseResponse savedCourse = courseService.register(course);
+            viewProvider.printMessage("The course with these parameters has been added to database: " + savedCourse);
+        } catch (IncorrectRequestData e) {
+            viewProvider.printMessage(e.getMessage());
+        }
     }
 
-    private Course makeNewCourse() {
+    private CourseRequest makeCourseForSave() {
+        CourseRequest courseRequest = new CourseRequest();
         viewProvider.printMessage("\nPlease, type course name:");
-        String name = viewProvider.read();
+        courseRequest.setName(viewProvider.read());
         viewProvider.printMessage("\nPlease, type course's description:");
-        String description = viewProvider.read();
+        courseRequest.setDescription(viewProvider.read());
 
-        return Course.builder()
-                .withName(name)
-                .withDescription(description)
-                .build();
+        return courseRequest;
+    }
+
+    private void saveCourses() {
+        List<CourseRequest> coursesForSave = new ArrayList<>();
+
+        try {
+            courseService.registerAll(makeCoursesForSave(coursesForSave));
+            viewProvider.printMessage("The courses have been added to database.");
+        } catch (IncorrectRequestData e) {
+            viewProvider.printMessage(e.getMessage());
+        }
+    }
+
+    private List<CourseRequest> makeCoursesForSave(List<CourseRequest> coursesForSave) {
+
+        CourseRequest courseRequest = new CourseRequest();
+        viewProvider.printMessage("\nPlease, type course name:");
+        courseRequest.setName(viewProvider.read());
+        viewProvider.printMessage("\nPlease, type course's description:");
+        courseRequest.setDescription(viewProvider.read());
+
+        coursesForSave.add(courseRequest);
+
+        viewProvider.printMessage("\nCourse was added to save list.");
+        viewProvider.printMessage("\nDo you want to add one more course to save list? Type Y/N (yes/no): ");
+        String addMore = viewProvider.read();
+        if (addMore.equalsIgnoreCase("y")) makeCoursesForSave(coursesForSave);
+
+        return coursesForSave;
+    }
+
+    private void updateCourse() {
+        CourseRequest course = makeCourseForUpdate();
+
+        try {
+            courseService.edit(course);
+            viewProvider.printMessage("The course with entered id has been updated.");
+        } catch (IncorrectRequestData e) {
+            viewProvider.printMessage(e.getMessage());
+        }
+    }
+
+    private CourseRequest makeCourseForUpdate() {
+        CourseRequest courseRequest = new CourseRequest();
+        viewProvider.printMessage("\nPlease, type the id of the course you want to update: ");
+        courseRequest.setId(viewProvider.readInt());
+        viewProvider.printMessage("\nPlease, type course name:");
+        courseRequest.setName(viewProvider.read());
+        viewProvider.printMessage("\nPlease, type course's description:");
+        courseRequest.setDescription(viewProvider.read());
+
+        return courseRequest;
     }
 
     private void deleteCourse() {
         viewProvider.printMessage("Which course do you want to delete? Please, type the course id: \n");
         int courseId = viewProvider.readInt();
-        courseDao.deleteById(courseId);
-        viewProvider.printMessage("The course with id = " + courseId + " has been deleted from database\n");
-    }
 
-    //    Groups
-
-    private void findGroups(int pages, int itemsPerPage) {
-        viewProvider.printMessage("\nPlease, type a page number from 1 to " + pages + ":");
-        int pageNumber = viewProvider.readInt();
-        if (pageNumber <= 0 || pageNumber > pages) {
-            viewProvider.printMessage("You typed an incorrect page number, please, try again\n");
-            return;
+        try {
+            courseService.deleteById(courseId);
+            viewProvider.printMessage("The course with id = " + courseId + " has been deleted from the database.\n");
+        } catch (IncorrectRequestData e) {
+            viewProvider.printMessage(e.getMessage());
         }
-        List<Group> groups = groupDao.findAll(pageNumber - 1, itemsPerPage);
-        viewProvider.printMessage(groups.toString());
     }
 
-    private void findGroupById() {
-        viewProvider.printMessage("\nPlease, type group's id:");
-        int id = viewProvider.readInt();
-        viewProvider.printMessage(groupDao.findById(id).toString());
+    private void deleteCourses() {
+        Set<Integer> ids = new HashSet<>();
+        ids = addIdsForDelete(ids);
+        courseService.deleteByIds(ids);
+        viewProvider.printMessage("The courses with ids = " + ids + " have been deleted from the database.\n");
     }
 
-    private void saveGroup() {
-        Group group = makeNewGroup();
-        Group savedGroup = groupDao.save(group);
-        viewProvider.printMessage("The course with these parameters has been added to database: \n" +
-                savedGroup);
-    }
-
-    private Group makeNewGroup() {
-        viewProvider.printMessage("\nPlease, type group name:");
-        String name = viewProvider.read();
-        viewProvider.printMessage("\nPlease, type faculty id:");
-        int facultyId = viewProvider.readInt();
-        viewProvider.printMessage("\nPlease, type head student id:");
-        int headStudentId = viewProvider.readInt();
-        viewProvider.printMessage("\nPlease, type education form id:");
-        int educationFormId = viewProvider.readInt();
-
-        return Group.builder()
-                .withName(name)
-                .withFaculty(Faculty.builder().withId(facultyId).build())
-                .withHeadStudent(Student.builder().withId(headStudentId).build())
-                .withEducationForm(EducationForm.builder().withId(educationFormId).build())
-                .build();
-    }
-
-    private void deleteGroup() {
-        viewProvider.printMessage("Which group do you want to delete? Please, type the group id: \n");
-        int groupId = viewProvider.readInt();
-        groupDao.deleteById(groupId);
-        viewProvider.printMessage("The group with id = " + groupId + " has been deleted from database\n");
-    }
-
-    private void changeFacultyInGroup() {
-        viewProvider.printMessage("\nPlease, type group id where you want to change faculty id:");
-        int groupId = viewProvider.readInt();
-        viewProvider.printMessage("\nPlease, type faculty id:");
-        int facultyId = viewProvider.readInt();
-        groupDao.changeFaculty(groupId, facultyId);
-        viewProvider.printMessage("Changes was successful");
-    }
-
-    private void changeHeadStudentInGroup() {
-        viewProvider.printMessage("\nPlease, type group id where you want to change head student id:");
-        int groupId = viewProvider.readInt();
-        viewProvider.printMessage("\nPlease, type new head student id:");
-        int studentId = viewProvider.readInt();
-        groupDao.changeHeadUser(groupId, studentId);
-        viewProvider.printMessage("Changes was successful");
-    }
-
-    private void changeEducationFormInGroup() {
-        viewProvider.printMessage("\nPlease, type group id where you want to change education form id:");
-        int groupId = viewProvider.readInt();
-        viewProvider.printMessage("\nPlease, type new education form id:");
-        int educationFormId = viewProvider.readInt();
-        groupDao.changeEducationForm(groupId, educationFormId);
-        viewProvider.printMessage("Changes was successful");
-    }
-
-    //Departments
-
-    private void findDepartments(int pages, int itemsPerPage) {
-        viewProvider.printMessage("\nPlease, type a page number from 1 to " + pages + ":");
-        int pageNumber = viewProvider.readInt();
-        if (pageNumber <= 0 || pageNumber > pages) {
-            viewProvider.printMessage("You typed an incorrect page number, please, try again\n");
-            return;
-        }
-        List<Department> departments = departmentDao.findAll(pageNumber - 1, itemsPerPage);
-        viewProvider.printMessage(departments.toString());
-    }
-
-    private void findDepartmentById() {
-        viewProvider.printMessage("\nPlease, type department's id:");
-        int id = viewProvider.readInt();
-        viewProvider.printMessage(departmentDao.findById(id).toString());
-    }
-
-    private void saveDepartment() {
-        Department department = makeNewDepartment();
-        Department savedDepartment = departmentDao.save(department);
-        viewProvider.printMessage("The teacher with these parameters has been added to database: \n" +
-                savedDepartment);
-    }
-
-    private Department makeNewDepartment() {
-        viewProvider.printMessage("\nPlease, type department name:");
-        String name = viewProvider.read();
-        viewProvider.printMessage("\nPlease, type description:");
-        String description = viewProvider.read();
-
-        return Department.builder()
-                .withName(name)
-                .withDescription(description)
-                .build();
-    }
-
-    private void deleteDepartment() {
-        viewProvider.printMessage("Which department do you want to delete? Please, type the department id: \n");
-        int departmentId = viewProvider.readInt();
-        departmentDao.deleteById(departmentId);
-        viewProvider.printMessage("The teacher with id = " + departmentId + " has been deleted from database\n");
-    }
-
-    private void addCourseToDepartment() {
-        viewProvider.printMessage("Which course do you want to add to the department? Please, type the course id: \n");
+    private Set<Integer> addIdsForDelete(Set<Integer> ids) {
+        viewProvider.printMessage("Which course do you want to delete? Please, type the course id: \n");
         int courseId = viewProvider.readInt();
-        viewProvider.printMessage("Please, type the department id: \n");
-        int departmentId = viewProvider.readInt();
-        departmentDao.addCourseToDepartment(departmentId, courseId);
-    }
+        viewProvider.printMessage("\nCourse was added to delete set.");
 
-    private void deleteCourseFromDepartment() {
-        viewProvider.printMessage("Which course do you want to delete from the department? Please, type the course id: \n");
-        int courseId = viewProvider.readInt();
-        viewProvider.printMessage("Please, type the department id: \n");
-        int departmentId = viewProvider.readInt();
-        departmentDao.deleteCourseFromDepartment(departmentId, courseId);
-    }
+        viewProvider.printMessage("\nDo you want to add one more course to delete set? Type Y/N (yes/no): ");
+        String addMore = viewProvider.read();
+        ids.add(courseId);
 
-    private void findAllTeachersRelateToDepartment() {
-        viewProvider.printMessage("Please, type the department id: \n");
-        int departmentId = viewProvider.readInt();
-        viewProvider.printMessage(teacherDao.findTeachersRelateToDepartment(departmentId).toString());
+        if (addMore.equalsIgnoreCase("y")) addIdsForDelete(ids);
+
+        return ids;
     }
 
     private void findAllCoursesRelateToDepartment() {
         viewProvider.printMessage("Please, type the department id: \n");
         int departmentId = viewProvider.readInt();
-        viewProvider.printMessage(courseDao.findCoursesRelateToDepartment(departmentId).toString());
+        viewProvider.printMessage(courseService.findCoursesRelateToDepartment(departmentId).toString());
+    }
+
+    private void findAllCoursesRelateToTeacher() {
+        viewProvider.printMessage("Please, type the teacher id: \n");
+        int teacherId = viewProvider.readInt();
+        viewProvider.printMessage(courseService.findCoursesRelateToTeacher(teacherId).toString());
+    }
+
+    //    Groups
+
+    private void findGroups() {
+        viewProvider.printMessage("\nPlease, type a page number: ");
+        String pageNumber = viewProvider.read();
+        viewProvider.printMessage(groupService.findAll(pageNumber).toString());
+    }
+
+    private void findGroupById() {
+        viewProvider.printMessage("\nPlease, type group's id:");
+        viewProvider.printMessage(groupService.findById(viewProvider.readInt()).toString());
+    }
+
+    private void saveGroup() {
+        GroupRequest group = makeNewGroup();
+        GroupResponse savedGroup = groupService.register(group);
+        viewProvider.printMessage("The course with these parameters has been added to database: \n" +
+                savedGroup);
+    }
+
+    private GroupRequest makeNewGroup() {
+        GroupRequest g = new GroupRequest();
+        viewProvider.printMessage("\nPlease, type group name:");
+        g.setName(viewProvider.read());
+        viewProvider.printMessage("\nPlease, type faculty id:");
+        g.setFaculty(Faculty.builder().withId(viewProvider.readInt()).build());
+        viewProvider.printMessage("\nPlease, type head student id:");
+        g.setHeadStudent(Student.builder().withId(viewProvider.readInt()).build());
+        viewProvider.printMessage("\nPlease, type education form id:");
+        g.setEducationForm(EducationForm.builder().withId(viewProvider.readInt()).build());
+
+        return g;
+    }
+
+    private void deleteGroup() {
+        viewProvider.printMessage("Which group do you want to delete? Please, type the group id: \n");
+        int groupId = viewProvider.readInt();
+        groupService.deleteById(groupId);
+        viewProvider.printMessage("The group with id = " + groupId + " has been deleted from database\n");
+    }
+
+    private void findGroupsRelateToTeacher() {
+        viewProvider.printMessage("\nPlease, type teacher id: ");
+        groupService.findGroupsRelateToTeacher(viewProvider.readInt());
+    }
+
+    //Departments
+
+    private void findDepartments() {
+        viewProvider.printMessage("\nPlease, type a page number: ");
+        String pageNumber = viewProvider.read();
+        viewProvider.printMessage(departmentService.findAll(pageNumber).toString());
+    }
+
+    private void findDepartmentById() {
+        viewProvider.printMessage("\nPlease, type department's id:");
+        int id = viewProvider.readInt();
+        viewProvider.printMessage(departmentService.findById(id).toString());
+    }
+
+    private void saveDepartment() {
+        DepartmentRequest department = makeNewDepartment();
+        DepartmentResponse savedDepartment = departmentService.register(department);
+        viewProvider.printMessage("The teacher with these parameters has been added to database: \n" +
+                savedDepartment);
+    }
+
+    private DepartmentRequest makeNewDepartment() {
+        DepartmentRequest d = new DepartmentRequest();
+        viewProvider.printMessage("\nPlease, type department name:");
+        d.setName(viewProvider.read());
+        viewProvider.printMessage("\nPlease, type description:");
+        d.setDescription(viewProvider.read());
+
+        return d;
+    }
+
+    private void deleteDepartment() {
+        viewProvider.printMessage("Which department do you want to delete? Please, type the department id: \n");
+        int departmentId = viewProvider.readInt();
+        departmentService.deleteById(departmentId);
+        viewProvider.printMessage("The teacher with id = " + departmentId + " has been deleted from database\n");
     }
 
     //    Lessons
 
-    private void findLessons(int pages, int itemsPerPage) {
-        viewProvider.printMessage("\nPlease, type a page number from 1 to " + pages + ":");
-        int pageNumber = viewProvider.readInt();
-        if (pageNumber <= 0 || pageNumber > pages) {
-            viewProvider.printMessage("You typed an incorrect page number, please, try again\n");
-            return;
-        }
-        List<Lesson> lessons = lessonDao.findAll(pageNumber - 1, itemsPerPage);
-        viewProvider.printMessage(lessons.toString());
+    private void findLessons() {
+        viewProvider.printMessage("\nPlease, type a page number: ");
+        String pageNumber = viewProvider.read();
+        viewProvider.printMessage(lessonService.findAll(pageNumber).toString());
     }
 
     private void findLessonById() {
         viewProvider.printMessage("\nPlease, type lesson's id:");
         int id = viewProvider.readInt();
-        viewProvider.printMessage(lessonDao.findById(id).toString());
+        viewProvider.printMessage(lessonService.findById(id).toString());
     }
 
     private void saveLesson() {
-        Lesson lesson = makeNewLesson();
-        Lesson savedLesson = lessonDao.save(lesson);
+        LessonRequest lesson = makeNewLesson();
+        LessonResponse savedLesson = lessonService.register(lesson);
         viewProvider.printMessage("The lesson with these parameters has been added to database: \n" +
                 savedLesson);
     }
 
-    private Lesson makeNewLesson() {
+    private LessonRequest makeNewLesson() {
+        LessonRequest l = new LessonRequest();
         viewProvider.printMessage("\nPlease, type lesson name:");
-        String name = viewProvider.read();
+        l.setName(viewProvider.read());
         viewProvider.printMessage("\nPlease, type group id:");
-        int groupId = viewProvider.readInt();
+        l.setGroup(Group.builder().withId(viewProvider.readInt()).build());
         viewProvider.printMessage("\nPlease, type teacher id:");
-        int teacherId = viewProvider.readInt();
+        l.setTeacher(Teacher.builder().withId(viewProvider.readInt()).build());
         viewProvider.printMessage("\nPlease, type course id:");
-        int courseId = viewProvider.readInt();
+        l.setCourse(Course.builder().withId(viewProvider.readInt()).build());
         viewProvider.printMessage("\nPlease, type lesson type id:");
-        int lessonTypeId = viewProvider.readInt();
-        LocalDateTime now = LocalDateTime.now();
-        viewProvider.printMessage("\nStart time will be set automatically as  LocalDateTime.now(): " + now);
+        l.setLessonType(LessonType.builder().withId(viewProvider.readInt()).build());
+        l.setStartTime(LocalDateTime.now());
+        viewProvider.printMessage("\nStart time will be set automatically as  LocalDateTime.now(): " + LocalDateTime.now());
 
-        return Lesson.builder()
-                .withName(name)
-                .withGroup(Group.builder().withId(groupId).build())
-                .withTeacher(Teacher.builder().withId(teacherId).build())
-                .withCourse(Course.builder().withId(courseId).build())
-                .withLessonType(LessonType.builder().withId(lessonTypeId).build())
-                .withStartTime(now)
-                .build();
+        return l;
     }
 
     private void deleteLesson() {
         viewProvider.printMessage("Which lesson do you want to delete? Please, type the lesson id: \n");
         int lessonId = viewProvider.readInt();
-        lessonDao.deleteById(lessonId);
+        lessonService.deleteById(lessonId);
         viewProvider.printMessage("The lesson with id = " + lessonId + " has been deleted from database\n");
     }
 
-    private void changeGroupInLesson() {
-        viewProvider.printMessage("\nPlease, type lesson id where you want to change group id:");
-        int lessonId = viewProvider.readInt();
+    private void findLessonsRelateToGroup() {
         viewProvider.printMessage("\nPlease, type group id:");
-        int groupId = viewProvider.readInt();
-        lessonDao.changeGroup(lessonId, groupId);
-        viewProvider.printMessage("Changes was successful");
-    }
-
-    private void changeTeacherInLesson() {
-        viewProvider.printMessage("\nPlease, type lesson id where you want to change teacher id:");
-        int lessonId = viewProvider.readInt();
-        viewProvider.printMessage("\nPlease, type teacher id:");
-        int teacherId = viewProvider.readInt();
-        lessonDao.changeTeacher(lessonId, teacherId);
-        viewProvider.printMessage("Changes was successful");
-    }
-
-    private void changeCourseInLesson() {
-        viewProvider.printMessage("\nPlease, type lesson id where you want to change course id:");
-        int lessonId = viewProvider.readInt();
-        viewProvider.printMessage("\nPlease, type course id:");
-        int teacherId = viewProvider.readInt();
-        lessonDao.changeCourse(lessonId, teacherId);
-        viewProvider.printMessage("Changes was successful");
-    }
-
-    private void changeLessonTypeInLesson() {
-        viewProvider.printMessage("\nPlease, type lesson id where you want to change lesson type id:");
-        int lessonId = viewProvider.readInt();
-        viewProvider.printMessage("\nPlease, type lesson type id:");
-        int lessonTypeId = viewProvider.readInt();
-        lessonDao.changeLessonType(lessonId, lessonTypeId);
-        viewProvider.printMessage("Changes was successful");
-    }
-
-    private void changeStartTimeInLesson() {
-        viewProvider.printMessage("\nPlease, type lesson id where you want to change start time:");
-        int lessonId = viewProvider.readInt();
-        LocalDateTime now = LocalDateTime.now();
-        viewProvider.printMessage("\nStart time will be set automatically as LocalDateTime.now(): " + now);
-        lessonDao.changeStartTime(lessonId, now);
-        viewProvider.printMessage("Changes was successful");
+        viewProvider.printMessage(lessonService.findLessonsRelateToGroup(viewProvider.readInt()).toString());
     }
 
     //Teacher titles
 
-    private void findTeacherTitles(int pages, int itemsPerPage) {
-        viewProvider.printMessage("\nPlease, type a page number from 1 to " + pages + ":");
-        int pageNumber = viewProvider.readInt();
-        if (pageNumber <= 0 || pageNumber > pages) {
-            viewProvider.printMessage("You typed an incorrect page number, please, try again\n");
-            return;
-        }
-        List<TeacherTitle> teacherTitles = teacherTitleDao.findAll(pageNumber - 1, itemsPerPage);
-        viewProvider.printMessage(teacherTitles.toString());
+    private void findTeacherTitles() {
+        viewProvider.printMessage("\nPlease, type a page number: ");
+        String pageNumber = viewProvider.read();
+        viewProvider.printMessage(teacherTitleService.findAll(pageNumber).toString());
     }
 
     private void findTeacherTitleById() {
         viewProvider.printMessage("\nPlease, type teacher title id:");
         int id = viewProvider.readInt();
-        viewProvider.printMessage(teacherTitleDao.findById(id).toString());
+        viewProvider.printMessage(teacherTitleService.findById(id).toString());
     }
 
     private void saveTeacherTitle() {
-        TeacherTitle teacherTitle = makeNewTeacherTitle();
-        TeacherTitle savedTeacherTitle = teacherTitleDao.save(teacherTitle);
+        TeacherTitleRequest teacherTitle = makeNewTeacherTitle();
+        TeacherTitleResponse savedTeacherTitle = teacherTitleService.register(teacherTitle);
         viewProvider.printMessage("The teacher title with these parameters has been added to database: \n" +
                 savedTeacherTitle);
     }
 
-    private TeacherTitle makeNewTeacherTitle() {
+    private TeacherTitleRequest makeNewTeacherTitle() {
+        TeacherTitleRequest t = new TeacherTitleRequest();
         viewProvider.printMessage("\nPlease, type teacher title name:");
-        String name = viewProvider.read();
+        t.setName(viewProvider.read());
 
-        return TeacherTitle.builder()
-                .withName(name)
-                .build();
+        return t;
     }
 
     private void deleteTeacherTitle() {
         viewProvider.printMessage("Which teacher title do you want to delete? Please, type the teacher title id: \n");
         int teacherTitleId = viewProvider.readInt();
-        teacherTitleDao.deleteById(teacherTitleId);
+        teacherTitleService.deleteById(teacherTitleId);
         viewProvider.printMessage("The teacher title with id = " + teacherTitleId + " has been deleted from database\n");
     }
 
     //Lesson types
 
-    private void findLessonTypes(int pages, int itemsPerPage) {
-        viewProvider.printMessage("\nPlease, type a page number from 1 to " + pages + ":");
-        int pageNumber = viewProvider.readInt();
-        if (pageNumber <= 0 || pageNumber > pages) {
-            viewProvider.printMessage("You typed an incorrect page number, please, try again\n");
-            return;
-        }
-        List<LessonType> lessonTypes = lessonTypeDao.findAll(pageNumber - 1, itemsPerPage);
-        viewProvider.printMessage(lessonTypes.toString());
+    private void findLessonTypes() {
+        viewProvider.printMessage("\nPlease, type a page number: ");
+        String pageNumber = viewProvider.read();
+        viewProvider.printMessage(teacherTitleService.findAll(pageNumber).toString());
     }
 
     private void findLessonTypeById() {
         viewProvider.printMessage("\nPlease, type lesson type id:");
         int id = viewProvider.readInt();
-        viewProvider.printMessage(lessonTypeDao.findById(id).toString());
+        viewProvider.printMessage(lessonTypeService.findById(id).toString());
     }
 
     private void saveLessonType() {
-        LessonType lessonType = makeNewLessonType();
-        LessonType savedLessonType = lessonTypeDao.save(lessonType);
+        LessonTypeRequest lessonType = makeNewLessonType();
+        LessonTypeResponse savedLessonType = lessonTypeService.register(lessonType);
         viewProvider.printMessage("The lesson type parameters has been added to database: \n" +
                 savedLessonType);
     }
 
-    private LessonType makeNewLessonType() {
+    private LessonTypeRequest makeNewLessonType() {
+        LessonTypeRequest lt = new LessonTypeRequest();
         viewProvider.printMessage("\nPlease, type lesson type name:");
-        String name = viewProvider.read();
+        lt.setName(viewProvider.read());
         viewProvider.printMessage("\nPlease, type lesson duration in minutes:");
-        Duration duration = Duration.ofMinutes(viewProvider.readInt());
+        lt.setDuration(Duration.ofMinutes(viewProvider.readInt()));
 
-        return LessonType.builder()
-                .withName(name)
-                .withDuration(duration)
-                .build();
+        return lt;
     }
 
     private void deleteLessonType() {
         viewProvider.printMessage("Which lesson type do you want to delete? Please, type the lesson type id: \n");
         int lessonTypeId = viewProvider.readInt();
-        lessonTypeDao.deleteById(lessonTypeId);
+        lessonTypeService.deleteById(lessonTypeId);
         viewProvider.printMessage("The lesson type with id = " + lessonTypeId + " has been deleted from database\n");
-    }
-
-    private void changeDurationInLessonType() {
-        viewProvider.printMessage("\nPlease, type lesson type id where you want to change duration:");
-        int lessonTypeId = viewProvider.readInt();
-        viewProvider.printMessage("\nPlease, type new lesson duration in minutes:");
-        Duration duration = Duration.ofMinutes(viewProvider.readInt());
-        lessonTypeDao.changeDuration(lessonTypeId, duration);
-        viewProvider.printMessage("Changes was successful");
     }
 
     //    Faculties
 
-    private void findFaculties(int pages, int itemsPerPage) {
-        viewProvider.printMessage("\nPlease, type a page number from 1 to " + pages + ":");
-        int pageNumber = viewProvider.readInt();
-        if (pageNumber <= 0 || pageNumber > pages) {
-            viewProvider.printMessage("You typed an incorrect page number, please, try again\n");
-            return;
-        }
-        List<Faculty> faculties = facultyDao.findAll(pageNumber - 1, itemsPerPage);
-        viewProvider.printMessage(faculties.toString());
+    private void findFaculties() {
+        viewProvider.printMessage("\nPlease, type a page number: ");
+        String pageNumber = viewProvider.read();
+        viewProvider.printMessage(facultyService.findAll(pageNumber).toString());
     }
 
     private void findFacultyById() {
         viewProvider.printMessage("\nPlease, type faculty's id:");
         int id = viewProvider.readInt();
-        viewProvider.printMessage(facultyDao.findById(id).toString());
+        viewProvider.printMessage(facultyService.findById(id).toString());
     }
 
     private void saveFaculty() {
-        Faculty faculty = makeNewFaculty();
-        Faculty savedFaculty = facultyDao.save(faculty);
+        FacultyRequest faculty = makeNewFaculty();
+        FacultyResponse savedFaculty = facultyService.register(faculty);
         viewProvider.printMessage("The faculty with these parameters has been added to database: \n" +
                 savedFaculty);
     }
 
-    private Faculty makeNewFaculty() {
+    private FacultyRequest makeNewFaculty() {
+        FacultyRequest f = new FacultyRequest();
         viewProvider.printMessage("\nPlease, type faculty's name:");
-        String name = viewProvider.read();
+        f.setName(viewProvider.read());
         viewProvider.printMessage("\nPlease, type faculty's description:");
-        String description = viewProvider.read();
+        f.setDescription(viewProvider.read());
 
-        return Faculty.builder()
-                .withName(name)
-                .withDescription(description)
-                .build();
+        return f;
     }
 
     private void deleteFaculty() {
         viewProvider.printMessage("Which faculty do you want to delete? Please, type the faculty id: \n");
         int facultyId = viewProvider.readInt();
-        facultyDao.deleteById(facultyId);
+        facultyService.deleteById(facultyId);
         viewProvider.printMessage("The faculty with id = " + facultyId + " has been deleted from database\n");
     }
 
     //    Education Forms
 
-    private void findEducationForms(int pages, int itemsPerPage) {
-        viewProvider.printMessage("\nPlease, type a page number from 1 to " + pages + ":");
-        int pageNumber = viewProvider.readInt();
-        if (pageNumber <= 0 || pageNumber > pages) {
-            viewProvider.printMessage("You typed an incorrect page number, please, try again\n");
-            return;
-        }
-        List<EducationForm> educationForms = educationFormDao.findAll(pageNumber - 1, itemsPerPage);
-        viewProvider.printMessage(educationForms.toString());
+    private void findEducationForms() {
+        viewProvider.printMessage("\nPlease, type a page number: ");
+        String pageNumber = viewProvider.read();
+        viewProvider.printMessage(educationFormService.findAll(pageNumber).toString());
     }
 
     private void findEducationFormById() {
         viewProvider.printMessage("\nPlease, type education form id:");
         int id = viewProvider.readInt();
-        viewProvider.printMessage(educationFormDao.findById(id).toString());
+        viewProvider.printMessage(educationFormService.findById(id).toString());
     }
 
     private void saveEducationForm() {
-        EducationForm educationForm = makeNewEducationForm();
-        EducationForm savedEducationForm = educationFormDao.save(educationForm);
+        EducationFormRequest educationForm = makeNewEducationForm();
+        EducationFormResponse savedEducationForm = educationFormService.register(educationForm);
         viewProvider.printMessage("The education form with these parameters has been added to database: \n" +
                 savedEducationForm);
     }
 
-    private EducationForm makeNewEducationForm() {
+    private EducationFormRequest makeNewEducationForm() {
+        EducationFormRequest e = new EducationFormRequest();
         viewProvider.printMessage("\nPlease, type education form name:");
-        String name = viewProvider.read();
+        e.setName(viewProvider.read());
 
-        return EducationForm.builder()
-                .withName(name)
-                .build();
+        return e;
     }
 
     private void deleteEducationForm() {
         viewProvider.printMessage("Which education form do you want to delete? Please, type the education form id: \n");
         int educationFormId = viewProvider.readInt();
-        educationFormDao.deleteById(educationFormId);
+        educationFormService.deleteById(educationFormId);
         viewProvider.printMessage("The education form with id = " + educationFormId + " has been deleted from database\n");
     }
 
-
 //    General
 
-    private void returnToMenu(int itemsPerPage) {
+    private void returnToMenu() {
         viewProvider.printMessage("\nPlease, enter any symbol to return to menu\n");
         viewProvider.read();
-        startMenu(itemsPerPage);
+        startMenu();
     }
+
 }

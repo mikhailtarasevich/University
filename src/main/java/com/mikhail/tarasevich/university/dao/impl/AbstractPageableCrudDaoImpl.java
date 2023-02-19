@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.util.List;
+import java.util.Optional;
 
 public abstract class AbstractPageableCrudDaoImpl<E> extends AbstractCrudDaoImpl<E> implements CrudPageableDao<E> {
 
@@ -12,23 +13,25 @@ public abstract class AbstractPageableCrudDaoImpl<E> extends AbstractCrudDaoImpl
     private final String countTableRowsQuery;
 
     protected AbstractPageableCrudDaoImpl(JdbcOperations jdbcTemplate, RowMapper<E> mapper,
-                                       String saveQuery, String findByIdQuery,
-                                       String findAllQuery, String findAllPageableQuery, String updateQuery,
-                                       String deleteByIdQuery, String countTableRowsQuery) {
-        super(jdbcTemplate, mapper, saveQuery, findByIdQuery, findAllQuery, updateQuery, deleteByIdQuery);
+                                          String saveQuery, String findByIdQuery,
+                                          String findAllQuery, String findAllPageableQuery, String findByNameQuery,
+                                          String updateQuery, String deleteByIdQuery, String countTableRowsQuery) {
+        super(jdbcTemplate, mapper, saveQuery, findByIdQuery, findAllQuery, findByNameQuery,
+                updateQuery, deleteByIdQuery);
         this.findAllPageableQuery = findAllPageableQuery;
         this.countTableRowsQuery = countTableRowsQuery;
     }
 
     @Override
     public List<E> findAll(int page, int itemsPerPage) {
-        int offsetToPage = page * itemsPerPage;
-        return jdbcTemplate.query(findAllPageableQuery, new Object[]{itemsPerPage, offsetToPage}, mapper);
+        int offsetToPage = (page-1) * itemsPerPage;
+        return jdbcTemplate.query(findAllPageableQuery, mapper, itemsPerPage, offsetToPage);
     }
 
     @Override
     public long count() {
-        return jdbcTemplate.queryForObject(countTableRowsQuery, Long.class);
+        Optional<Long> count = Optional.ofNullable(jdbcTemplate.queryForObject(countTableRowsQuery, Long.class));
+        return count.orElse(0L);
     }
 
 }

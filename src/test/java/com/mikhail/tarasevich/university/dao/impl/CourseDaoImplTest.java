@@ -134,6 +134,14 @@ class CourseDaoImplTest {
     }
 
     @Test
+    void findByName_inputEntityName_expectedEntitiesListReturnedFromDB() {
+        Optional<Course> foundEntity = courseDao.findByName("Software Engineering");
+
+        assertTrue(foundEntity.isPresent());
+        assertEquals(course2, foundEntity.get());
+    }
+
+    @Test
     void findAll_inputNothing_expectedAllEntitiesFromDB() {
         List<Course> foundEntities = courseDao.findAll();
 
@@ -141,8 +149,8 @@ class CourseDaoImplTest {
     }
 
     @Test
-    void findAllPageable_inputNothing_expectedEntitiesFromThePage() {
-        List<Course> foundEntities = courseDao.findAll(1, 2);
+    void findAllPageable_inputPageNumber_expectedEntitiesFromThePage() {
+        List<Course> foundEntities = courseDao.findAll(2, 2);
 
         List<Course> expectedEntities = new ArrayList<>();
         expectedEntities.add(course3);
@@ -262,6 +270,28 @@ class CourseDaoImplTest {
         expectedEntities.add(course6);
 
         assertEquals(expectedEntities, foundEntities);
+    }
+
+    @Test
+    void unbindCoursesFromTeacher_inputTeacherId_expectedThereAreNoTeacher() {
+        assertEquals(2L, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate, "user_courses", "user_id = 6"));
+
+        courseDao.unbindCoursesFromTeacher(6);
+
+        assertEquals(0L, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate, "user_courses", "user_id = 6"));
+    }
+
+    @Test
+    void unbindCoursesFromDepartment_inputDepartmentId_expectedThereAreNoDepartment() {
+        assertEquals(4L, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate, "department_courses", "department_id = 1"));
+
+        courseDao.unbindCoursesFromDepartment(1);
+
+        assertEquals(0L, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate, "department_courses", "department_id = 1"));
     }
 
 }

@@ -100,6 +100,14 @@ class DepartmentDaoImplTest {
     }
 
     @Test
+    void findByName_inputEntityName_expectedEntitiesListReturnedFromDB() {
+        Optional<Department> foundEntity = departmentDao.findByName("Mathematics and mechanics");
+
+        assertTrue(foundEntity.isPresent());
+        assertEquals(department1, foundEntity.get());
+    }
+
+    @Test
     void findAll_inputNothing_expectedAllEntitiesFromDB() {
         List<Department> foundEntities = departmentDao.findAll();
 
@@ -107,8 +115,8 @@ class DepartmentDaoImplTest {
     }
 
     @Test
-    void findAllPageable_inputNothing_expectedEntitiesFromThePage() {
-        List<Department> foundEntities = departmentDao.findAll(1, 2);
+    void findAllPageable_inputPageNumber_expectedEntitiesFromThePage() {
+        List<Department> foundEntities = departmentDao.findAll(2, 2);
 
         List<Department> expectedEntities = new ArrayList<>();
         expectedEntities.add(department3);
@@ -230,6 +238,17 @@ class DepartmentDaoImplTest {
 
         assertEquals(0L, JdbcTestUtils.countRowsInTableWhere(
                 jdbcTemplate, "department_courses", "department_id = 1 AND course_id = 1"));
+    }
+
+    @Test
+    void unbindDepartmentsFromCourse_inputCourseId_expectedDepartmentsFromCourse(){
+        assertEquals(1L, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate, "department_courses", "course_id = 2"));
+
+        departmentDao.unbindDepartmentsFromCourse(2);
+
+        assertEquals(0L, JdbcTestUtils.countRowsInTableWhere(
+                jdbcTemplate, "department_courses", "course_id = 2"));
     }
 
 }

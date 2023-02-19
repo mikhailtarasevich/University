@@ -1,22 +1,30 @@
 package com.mikhail.tarasevich.university.config;
 
-import com.mikhail.tarasevich.university.dao.impl.CourseDaoImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.util.ResourceBundle;
 
 @Configuration
 @ComponentScan("com.mikhail.tarasevich.university")
-public class SpringConfig {
+@Import(SecurityConfig.class)
+@EnableTransactionManagement
+public class PersistenceConfig {
 
     private static final String DB_PROPERTIES_FILE_PATH = "database";
+
+    @Bean
+    public PlatformTransactionManager transactionManager() {
+        return new DataSourceTransactionManager(dataSource());
+    }
 
     @Bean
     public DataSource dataSource(){

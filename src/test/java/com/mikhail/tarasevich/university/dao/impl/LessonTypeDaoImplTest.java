@@ -91,6 +91,14 @@ class LessonTypeDaoImplTest {
     }
 
     @Test
+    void findByName_inputEntityName_expectedEntitiesListReturnedFromDB() {
+        Optional<LessonType> foundEntity = lessonTypeDao.findByName("Lecture");
+
+        assertTrue(foundEntity.isPresent());
+        assertEquals(lessonType1, foundEntity.get());
+    }
+
+    @Test
     void findAll_inputNothing_expectedAllEntitiesFromDB() {
         List<LessonType> foundEntities = lessonTypeDao.findAll();
 
@@ -98,8 +106,8 @@ class LessonTypeDaoImplTest {
     }
 
     @Test
-    void findAllPageable_inputNothing_expectedEntitiesFromThePage() {
-        List<LessonType> foundEntities = lessonTypeDao.findAll(0, 2);
+    void findAllPageable_inputPageNumber_expectedEntitiesFromThePage() {
+        List<LessonType> foundEntities = lessonTypeDao.findAll(1, 2);
 
         List<LessonType> expectedEntities = new ArrayList<>();
         expectedEntities.add(lessonType1);

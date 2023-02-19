@@ -90,6 +90,14 @@ class TeacherTitleDaoImplTest {
     }
 
     @Test
+    void findByName_inputEntityName_expectedEntitiesListReturnedFromDB() {
+        Optional<TeacherTitle> foundEntity = teacherTitleDao.findByName("Professor");
+
+        assertTrue(foundEntity.isPresent());
+        assertEquals(teacherTitle1, foundEntity.get());
+    }
+
+    @Test
     void findAll_inputNothing_expectedAllEntitiesFromDB() {
         List<TeacherTitle> foundEntities = teacherTitleDao.findAll();
 
@@ -97,8 +105,8 @@ class TeacherTitleDaoImplTest {
     }
 
     @Test
-    void findAllPageable_inputNothing_expectedEntitiesFromThePage() {
-        List<TeacherTitle> foundEntities = teacherTitleDao.findAll(1, 2);
+    void findAllPageable_inputPageNumber_expectedEntitiesFromThePage() {
+        List<TeacherTitle> foundEntities = teacherTitleDao.findAll(2, 2);
 
         List<TeacherTitle> expectedEntities = new ArrayList<>();
         expectedEntities.add(teacherTitle3);

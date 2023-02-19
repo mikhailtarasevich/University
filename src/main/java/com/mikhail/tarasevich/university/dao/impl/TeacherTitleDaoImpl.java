@@ -16,6 +16,7 @@ public class TeacherTitleDaoImpl extends AbstractPageableCrudDaoImpl<TeacherTitl
     private static final String SAVE_QUERY = "INSERT INTO teacher_titles (name) VALUES(?)";
     private static final String FIND_ALL_QUERY = "SELECT * FROM teacher_titles ORDER BY id";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM teacher_titles WHERE id = ?";
+    private static final String FIND_BY_NAME_QUERY = "SELECT * FROM teacher_titles WHERE name = ? ORDER BY id";
     private static final String FIND_ALL_PAGEABLE_QUERY = "SELECT * FROM teacher_titles ORDER BY id LIMIT ? OFFSET ?";
     private static final String UPDATE_QUERY = "UPDATE teacher_titles SET name = ? WHERE id = ?";
     private static final String DELETE_BY_ID_QUERY = "DELETE FROM teacher_titles WHERE id = ?";
@@ -28,8 +29,8 @@ public class TeacherTitleDaoImpl extends AbstractPageableCrudDaoImpl<TeacherTitl
 
     @Autowired
     public TeacherTitleDaoImpl(JdbcOperations jdbcTemplate) {
-        super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY,
-                FIND_ALL_PAGEABLE_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY);
+        super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY, FIND_ALL_PAGEABLE_QUERY,
+                FIND_BY_NAME_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY);
     }
 
     @Override

@@ -11,8 +11,10 @@ public interface CrudDao<E> {
     void saveAll(List<E> entity);
 
     //read
-    Optional<E> findById(Integer id);
+    Optional<E> findById(int id);
     List<E> findAll();
+    Optional<E> findByName(String name);
+//    List<E> findByName(String name);
 
     //update
     void update(E entity);

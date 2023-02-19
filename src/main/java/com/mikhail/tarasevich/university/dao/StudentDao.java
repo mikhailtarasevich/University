@@ -8,5 +8,6 @@ public interface StudentDao extends UserDao<Student> {
 
     void deleteStudentFromGroup(int userId);
     List<Student> findStudentsRelateToGroup(int groupId);
+    void unbindStudentsFromGroup(int groupId);
 
 }

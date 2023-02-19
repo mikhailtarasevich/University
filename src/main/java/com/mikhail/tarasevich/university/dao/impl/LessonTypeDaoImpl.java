@@ -17,6 +17,7 @@ public class LessonTypeDaoImpl extends AbstractPageableCrudDaoImpl<LessonType> i
     private static final String SAVE_QUERY = "INSERT INTO lesson_types (name, duration) VALUES(?, ?)";
     private static final String FIND_ALL_QUERY = "SELECT * FROM lesson_types ORDER BY id";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM lesson_types WHERE id = ?";
+    private static final String FIND_BY_NAME_QUERY = "SELECT * FROM lesson_types WHERE name = ? ORDER BY id";
     private static final String FIND_ALL_PAGEABLE_QUERY = "SELECT * FROM lesson_types ORDER BY id LIMIT ? OFFSET ?";
     private static final String UPDATE_QUERY = "UPDATE lesson_types SET name = ?, duration = ? WHERE id = ?";
     private static final String DELETE_BY_ID_QUERY = "DELETE FROM lesson_types WHERE id = ?";
@@ -31,8 +32,8 @@ public class LessonTypeDaoImpl extends AbstractPageableCrudDaoImpl<LessonType> i
 
     @Autowired
     public LessonTypeDaoImpl(JdbcOperations jdbcTemplate) {
-        super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY,
-                FIND_ALL_PAGEABLE_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY);
+        super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY, FIND_ALL_PAGEABLE_QUERY,
+                FIND_BY_NAME_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY);
     }
 
     @Override

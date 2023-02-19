@@ -18,6 +18,8 @@ public class CourseDaoImpl extends AbstractPageableCrudDaoImpl<Course> implement
             "INSERT INTO courses (name, description) VALUES(?, ?)";
     private static final String FIND_ALL_QUERY = "SELECT id, name, description FROM courses ORDER BY id";
     private static final String FIND_BY_ID_QUERY = "SELECT id, name, description FROM courses WHERE id = ?";
+    private static final String FIND_BY_NAME_QUERY =
+            "SELECT id, name, description FROM courses WHERE name = ? ORDER BY id";
     private static final String FIND_ALL_PAGEABLE_QUERY =
             "SELECT id, name, description FROM courses ORDER BY id LIMIT ? OFFSET ?";
     private static final String UPDATE_QUERY =
@@ -27,37 +29,51 @@ public class CourseDaoImpl extends AbstractPageableCrudDaoImpl<Course> implement
     private static final String COUNT_TABLE_ROWS_QUERY = "SELECT COUNT(*) FROM courses";
     private static final String FIND_COURSES_RELATE_TO_DEPARTMENT_QUERY =
             "SELECT id, name, description " +
-            "FROM courses " +
-            "JOIN department_courses ON courses.id = course_id " +
-            "WHERE department_id = ? " +
-            "ORDER BY courses.id";
+                    "FROM courses " +
+                    "JOIN department_courses ON courses.id = course_id " +
+                    "WHERE department_id = ? " +
+                    "ORDER BY courses.id";
     private static final String FIND_COURSES_RELATE_TO_TEACHER_QUERY =
             "SELECT id, name, description " +
                     "FROM courses " +
                     "JOIN user_courses ON courses.id = course_id " +
                     "WHERE user_id = ? " +
                     "ORDER BY courses.id";
+    private static final String UNBIND_COURSES_FROM_TEACHER_QUERY =
+            "DELETE FROM user_courses WHERE user_id = ?";
+    private static final String UNBIND_COURSES_FROM_DEPARTMENT_QUERY =
+            "DELETE FROM department_courses WHERE department_id = ?";
     private static final RowMapper<Course> ROW_MAPPER = (resultSet, rowNum) ->
             Course.builder()
                     .withId(resultSet.getInt("id"))
-            .withName(resultSet.getString("name"))
-            .withDescription(resultSet.getString("description"))
-            .build();
+                    .withName(resultSet.getString("name"))
+                    .withDescription(resultSet.getString("description"))
+                    .build();
 
     @Autowired
     public CourseDaoImpl(JdbcOperations jdbcTemplate) {
-        super(jdbcTemplate, ROW_MAPPER,SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY,
-                FIND_ALL_PAGEABLE_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY);
+        super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY, FIND_ALL_PAGEABLE_QUERY,
+                FIND_BY_NAME_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY);
     }
 
     @Override
-    public List<Course> findCoursesRelateToDepartment(int departmentId){
+    public List<Course> findCoursesRelateToDepartment(int departmentId) {
         return jdbcTemplate.query(FIND_COURSES_RELATE_TO_DEPARTMENT_QUERY, ROW_MAPPER, departmentId);
     }
 
     @Override
-    public List<Course> findCoursesRelateToTeacher(int teacherId){
+    public List<Course> findCoursesRelateToTeacher(int teacherId) {
         return jdbcTemplate.query(FIND_COURSES_RELATE_TO_TEACHER_QUERY, ROW_MAPPER, teacherId);
+    }
+
+    @Override
+    public void unbindCoursesFromTeacher(int teacherId) {
+        jdbcTemplate.update(UNBIND_COURSES_FROM_TEACHER_QUERY, teacherId);
+    }
+
+    @Override
+    public void unbindCoursesFromDepartment(int departmentId) {
+        jdbcTemplate.update(UNBIND_COURSES_FROM_DEPARTMENT_QUERY, departmentId);
     }
 
     @Override
