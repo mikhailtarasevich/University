@@ -19,7 +19,11 @@ public class TeacherTitleMapperImpl implements TeacherTitleMapper {
 
     @Override
     public TeacherTitleResponse toResponse(TeacherTitle t) {
-        return new TeacherTitleResponse(t.getId(), t.getName());
+        TeacherTitleResponse teacherTitleResponse = new TeacherTitleResponse();
+        teacherTitleResponse.setId(t.getId());
+        teacherTitleResponse.setName(t.getName());
+
+        return teacherTitleResponse;
     }
 
 }

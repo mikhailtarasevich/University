@@ -10,8 +10,8 @@ import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
 import com.mikhail.tarasevich.university.mapper.DepartmentMapper;
 import com.mikhail.tarasevich.university.service.DepartmentService;
 import com.mikhail.tarasevich.university.validator.DepartmentValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,25 +23,15 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@AllArgsConstructor
+@Log4j2
 public class DepartmentServiceImpl extends AbstractPageableService implements DepartmentService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(DepartmentServiceImpl.class);
 
     private final DepartmentDao departmentDao;
     private final CourseDao courseDao;
     private final TeacherDao teacherDao;
     private final DepartmentMapper mapper;
     private final DepartmentValidator validator;
-
-
-    public DepartmentServiceImpl(DepartmentDao departmentDao, CourseDao courseDao, TeacherDao teacherDao,
-                                 DepartmentMapper mapper, DepartmentValidator validator) {
-        this.departmentDao = departmentDao;
-        this.courseDao = courseDao;
-        this.teacherDao = teacherDao;
-        this.mapper = mapper;
-        this.validator = validator;
-    }
 
     @Override
     public DepartmentResponse register(DepartmentRequest r) {
@@ -61,14 +51,14 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
             } catch (IncorrectRequestData e) {
-                LOG.info("The departments were deleted from the save list. Request: {} .", r);
+                log.info("The departments were deleted from the save list. Request: {} .", r);
             }
         });
 
         departmentDao.saveAll(acceptableRequests.stream()
                 .map(mapper::toEntity)
                 .collect(Collectors.toList()));
-        LOG.info("Departments were saved in the database. Saved requests: {} .", acceptableRequests);
+        log.info("Departments were saved in the database. Saved requests: {} .", acceptableRequests);
     }
 
     @Override
@@ -101,7 +91,7 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
             } catch (IncorrectRequestData e) {
-                LOG.info("The department was deleted from the update list. The department: {} .", r);
+                log.info("The department was deleted from the update list. The department: {} .", r);
             }
         });
 
@@ -122,7 +112,8 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
 
             return departmentDao.deleteById(id);
         } else {
-            LOG.info("Delete was rejected. There is no department with specified id in the database. Id = {}", id);
+            log.info("Delete was rejected. There is no department with specified id in the database. Id = {}",
+                    id);
             return false;
         }
     }
@@ -133,7 +124,7 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
 
         boolean result = departmentDao.deleteByIds(ids);
 
-        if (result) LOG.info("The department have been deleted. Deleted departments: {}", ids);
+        if (result) log.info("The department have been deleted. Deleted departments: {}", ids);
 
         return result;
     }

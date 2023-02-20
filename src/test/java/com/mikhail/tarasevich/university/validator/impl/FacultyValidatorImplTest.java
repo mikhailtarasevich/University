@@ -24,7 +24,13 @@ class FacultyValidatorImplTest {
     @Mock
     FacultyDao facultyDao;
 
-    private static final FacultyRequest FACULTY_REQUEST = new FacultyRequest(1, "faculty", "description");
+    private static final FacultyRequest FACULTY_REQUEST = new FacultyRequest();
+
+    static {
+        FACULTY_REQUEST.setId(1);
+        FACULTY_REQUEST.setName("faculty");
+        FACULTY_REQUEST.setDescription("description");
+    }
 
     @Test
     void validateUniqueNameInDB_inputWithUniqueName_expectedNothing() {
@@ -51,14 +57,20 @@ class FacultyValidatorImplTest {
 
     @Test
     void validateNameNotNullOrEmpty_inputEmptyName_expectedException() {
-        final FacultyRequest FACULTY_REQUEST = new FacultyRequest(1, "   ", "description");
+        final FacultyRequest FACULTY_REQUEST = new FacultyRequest();
+        FACULTY_REQUEST.setId(1);
+        FACULTY_REQUEST.setName("    ");
+        FACULTY_REQUEST.setDescription("description");
 
         assertThrows(IncorrectRequestData.class, () -> facultyValidator.validateNameNotNullOrEmpty(FACULTY_REQUEST));
     }
 
     @Test
     void validateNameNotNullOrEmpty_inputNullName_expectedException() {
-        final FacultyRequest FACULTY_REQUEST = new FacultyRequest(1, null, "description");
+        final FacultyRequest FACULTY_REQUEST = new FacultyRequest();
+        FACULTY_REQUEST.setId(1);
+        FACULTY_REQUEST.setName(null);
+        FACULTY_REQUEST.setDescription("description");
 
         assertThrows(IncorrectRequestData.class, () -> facultyValidator.validateNameNotNullOrEmpty(FACULTY_REQUEST));
     }

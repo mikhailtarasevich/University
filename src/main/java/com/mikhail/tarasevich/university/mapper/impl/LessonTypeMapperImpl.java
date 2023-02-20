@@ -20,7 +20,12 @@ public class LessonTypeMapperImpl implements LessonTypeMapper {
 
     @Override
     public LessonTypeResponse toResponse(LessonType lt) {
-        return new LessonTypeResponse(lt.getId(), lt.getName(), lt.getDuration());
+        LessonTypeResponse lessonTypeResponse = new LessonTypeResponse();
+        lessonTypeResponse.setId(lt.getId());
+        lessonTypeResponse.setName(lt.getName());
+        lessonTypeResponse.setDuration(lt.getDuration());
+
+        return lessonTypeResponse;
     }
 
 }

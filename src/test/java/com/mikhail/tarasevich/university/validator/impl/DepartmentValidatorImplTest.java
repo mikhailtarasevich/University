@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -25,9 +24,13 @@ class DepartmentValidatorImplTest {
     @Mock
     DepartmentDao departmentDao;
 
-    private static final DepartmentRequest DEPARTMENT_REQUEST = new DepartmentRequest(
-            1, "name", "description", new ArrayList<>(), new ArrayList<>()
-    );
+    private static final DepartmentRequest DEPARTMENT_REQUEST = new DepartmentRequest();
+
+    static {
+        DEPARTMENT_REQUEST.setId(1);
+        DEPARTMENT_REQUEST.setName("name");
+        DEPARTMENT_REQUEST.setDescription("description");
+    }
 
     @Test
     void validateUniqueNameInDB_inputWithUniqueName_expectedNothing() {
@@ -55,9 +58,10 @@ class DepartmentValidatorImplTest {
 
     @Test
     void validateNameNotNullOrEmpty_inputEmptyName_expectedException() {
-        DepartmentRequest DEPARTMENT_REQUEST = new DepartmentRequest(
-                1, " ", "description", new ArrayList<>(), new ArrayList<>()
-        );
+        final DepartmentRequest DEPARTMENT_REQUEST = new DepartmentRequest();
+        DEPARTMENT_REQUEST.setId(1);
+        DEPARTMENT_REQUEST.setName("   ");
+        DEPARTMENT_REQUEST.setDescription("description");
 
         assertThrows(IncorrectRequestData.class,
                 () -> departmentValidator.validateNameNotNullOrEmpty(DEPARTMENT_REQUEST));
@@ -65,9 +69,10 @@ class DepartmentValidatorImplTest {
 
     @Test
     void validateNameNotNullOrEmpty_inputNullName_expectedException() {
-        final DepartmentRequest DEPARTMENT_REQUEST = new DepartmentRequest(
-                1, null, "description", new ArrayList<>(), new ArrayList<>()
-        );
+        final DepartmentRequest DEPARTMENT_REQUEST = new DepartmentRequest();
+        DEPARTMENT_REQUEST.setId(1);
+        DEPARTMENT_REQUEST.setName(null);
+        DEPARTMENT_REQUEST.setDescription("description");
 
         assertThrows(IncorrectRequestData.class,
                 () -> departmentValidator.validateNameNotNullOrEmpty(DEPARTMENT_REQUEST));

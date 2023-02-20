@@ -34,29 +34,43 @@ class EducationFormServiceImplTest {
     @Mock
     EducationFormValidator educationFormValidator;
 
-    private static final EducationForm EF_ENTITY_1 =
-            EducationForm.builder().withName("name1").build();
-    private static final EducationForm EF_ENTITY_WITH_ID_1 =
-            EducationForm.builder().withId(1).withName("name1").build();
-    private static final EducationFormRequest EF_REQUEST_1 =
-            new EducationFormRequest(0, "name1");
-    private static final EducationFormResponse EF_RESPONSE_WITH_ID_1 =
-            new EducationFormResponse(1, "name1");
+    private static final EducationForm EF_ENTITY_1 = EducationForm.builder()
+            .withName("name1")
+            .build();
+    private static final EducationForm EF_ENTITY_WITH_ID_1 = EducationForm.builder()
+            .withId(1)
+            .withName("name1")
+            .build();
+    private static final EducationFormRequest EF_REQUEST_1 = new EducationFormRequest();
+    private static final EducationFormResponse EF_RESPONSE_WITH_ID_1 = new EducationFormResponse();
 
-    private static final EducationForm EF_ENTITY_2 =
-            EducationForm.builder().withName("name2").build();
-    private static final EducationForm EF_ENTITY_WITH_ID_2 =
-            EducationForm.builder().withId(2).withName("name2").build();
-    private static final EducationFormRequest EF_REQUEST_2 =
-            new EducationFormRequest(0, "name2");
-    private static final EducationFormResponse EF_RESPONSE_WITH_ID_2 =
-            new EducationFormResponse(2, "name2");
+    private static final EducationForm EF_ENTITY_2 = EducationForm.builder()
+            .withName("name2")
+            .build();
+    private static final EducationForm EF_ENTITY_WITH_ID_2 = EducationForm.builder()
+            .withId(2)
+            .withName("name2")
+            .build();
+    private static final EducationFormRequest EF_REQUEST_2 = new EducationFormRequest();
+    private static final EducationFormResponse EF_RESPONSE_WITH_ID_2 = new EducationFormResponse();
 
-    private final List<EducationForm> educationFormEntities = new ArrayList<>();
-    private final List<EducationForm> educationFormEntitiesWithId = new ArrayList<>();
-    private final List<EducationFormResponse> educationFormResponses = new ArrayList<>();
+    private static final List<EducationForm> educationFormEntities = new ArrayList<>();
+    private static final List<EducationForm> educationFormEntitiesWithId = new ArrayList<>();
+    private static final List<EducationFormResponse> educationFormResponses = new ArrayList<>();
 
-    {
+    static {
+        EF_REQUEST_1.setId(0);
+        EF_REQUEST_1.setName("name1");
+
+        EF_RESPONSE_WITH_ID_1.setId(1);
+        EF_RESPONSE_WITH_ID_1.setName("name1");
+
+        EF_REQUEST_2.setId(0);
+        EF_REQUEST_2.setName("name2");
+
+        EF_RESPONSE_WITH_ID_2.setId(2);
+        EF_RESPONSE_WITH_ID_2.setName("name2");
+
         educationFormEntities.add(EF_ENTITY_1);
         educationFormEntities.add(EF_ENTITY_2);
 
@@ -142,10 +156,14 @@ class EducationFormServiceImplTest {
 
     @Test
     void edit_inputEducationFormRequest_expectedNothing() {
-        final EducationForm EF_ENTITY_FOR_UPDATE_1 =
-                EducationForm.builder().withId(1).withName("update1").build();
-        final EducationFormRequest EF_REQUEST_FOR_UPDATE_1 =
-                new EducationFormRequest(1, "update1");
+        final EducationForm EF_ENTITY_FOR_UPDATE_1 = EducationForm.builder()
+                .withId(1)
+                .withName("update1")
+                .build();
+
+        final EducationFormRequest EF_REQUEST_FOR_UPDATE_1 = new EducationFormRequest();
+        EF_REQUEST_FOR_UPDATE_1.setId(1);
+        EF_REQUEST_FOR_UPDATE_1.setName("update1");
 
         doNothing().when(educationFormDao).update(EF_ENTITY_FOR_UPDATE_1);
         when(educationFormMapper.toEntity(EF_REQUEST_FOR_UPDATE_1)).thenReturn(EF_ENTITY_FOR_UPDATE_1);
@@ -158,16 +176,27 @@ class EducationFormServiceImplTest {
 
     @Test
     void editAll_inputEducationFormRequestListWhereOneEducationFormHasIncorrectName_expectedNothing() {
-        final EducationForm EF_ENTITY_FOR_UPDATE_1 =
-                EducationForm.builder().withId(1).withName("update1").build();
-        final EducationFormRequest EF_REQUEST_FOR_UPDATE_1 =
-                new EducationFormRequest(1, "update1");
-        final EducationForm EF_ENTITY_FOR_UPDATE_2 =
-                EducationForm.builder().withId(2).withName("update2").build();
-        final EducationFormRequest EF_REQUEST_FOR_UPDATE_2 =
-                new EducationFormRequest(2, "update2");
-        final EducationFormRequest EF_REQUEST_FOR_UPDATE_INCORRECT =
-                new EducationFormRequest(3, " ");
+        final EducationForm EF_ENTITY_FOR_UPDATE_1 = EducationForm.builder()
+                .withId(1)
+                .withName("update1")
+                .build();
+
+        final EducationFormRequest EF_REQUEST_FOR_UPDATE_1 = new EducationFormRequest();
+        EF_REQUEST_FOR_UPDATE_1.setId(1);
+        EF_REQUEST_FOR_UPDATE_1.setName("update1");
+
+        final EducationForm EF_ENTITY_FOR_UPDATE_2 = EducationForm.builder()
+                .withId(2)
+                .withName("update2")
+                .build();
+
+        final EducationFormRequest EF_REQUEST_FOR_UPDATE_2 = new EducationFormRequest();
+        EF_REQUEST_FOR_UPDATE_2.setId(2);
+        EF_REQUEST_FOR_UPDATE_2.setName("update2");
+
+        final EducationFormRequest EF_REQUEST_FOR_UPDATE_INCORRECT = new EducationFormRequest();
+        EF_REQUEST_FOR_UPDATE_INCORRECT.setId(3);
+        EF_REQUEST_FOR_UPDATE_INCORRECT.setName("  ");
 
         final List<EducationFormRequest> inputList = new ArrayList<>();
         inputList.add(EF_REQUEST_FOR_UPDATE_1);
@@ -180,7 +209,8 @@ class EducationFormServiceImplTest {
 
         doNothing().when(educationFormValidator).validateNameNotNullOrEmpty(EF_REQUEST_FOR_UPDATE_1);
         doNothing().when(educationFormValidator).validateNameNotNullOrEmpty(EF_REQUEST_FOR_UPDATE_2);
-        doThrow(new IncorrectRequestData()).when(educationFormValidator).validateNameNotNullOrEmpty(EF_REQUEST_FOR_UPDATE_INCORRECT);
+        doThrow(new IncorrectRequestData()).when(educationFormValidator)
+                .validateNameNotNullOrEmpty(EF_REQUEST_FOR_UPDATE_INCORRECT);
 
         when(educationFormMapper.toEntity(EF_REQUEST_FOR_UPDATE_1)).thenReturn(EF_ENTITY_FOR_UPDATE_1);
         when(educationFormMapper.toEntity(EF_REQUEST_FOR_UPDATE_2)).thenReturn(EF_ENTITY_FOR_UPDATE_2);

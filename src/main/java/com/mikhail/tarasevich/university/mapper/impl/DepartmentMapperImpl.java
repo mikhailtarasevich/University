@@ -20,7 +20,14 @@ public class DepartmentMapperImpl implements DepartmentMapper {
 
     @Override
     public DepartmentResponse toResponse(Department d) {
-        return new DepartmentResponse(d.getId(), d.getName(), d.getDescription(), d.getCourses(), d.getTeachers());
+        DepartmentResponse departmentResponse = new DepartmentResponse();
+        departmentResponse.setId(d.getId());
+        departmentResponse.setName(d.getName());
+        departmentResponse.setDescription(d.getDescription());
+        departmentResponse.setCourses(d.getCourses());
+        departmentResponse.setTeachers(d.getTeachers());
+
+        return departmentResponse;
     }
 
 }

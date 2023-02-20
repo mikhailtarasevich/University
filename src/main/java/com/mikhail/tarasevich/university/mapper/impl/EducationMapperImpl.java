@@ -19,7 +19,11 @@ public class EducationMapperImpl implements EducationFormMapper {
 
     @Override
     public EducationFormResponse toResponse(EducationForm e) {
-        return new EducationFormResponse(e.getId(), e.getName());
+        EducationFormResponse educationFormResponse = new EducationFormResponse();
+        educationFormResponse.setId(e.getId());
+        educationFormResponse.setName(e.getName());
+
+        return educationFormResponse;
     }
 
 }

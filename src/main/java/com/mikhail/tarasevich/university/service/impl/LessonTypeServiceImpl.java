@@ -9,9 +9,8 @@ import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
 import com.mikhail.tarasevich.university.mapper.LessonTypeMapper;
 import com.mikhail.tarasevich.university.service.LessonTypeService;
 import com.mikhail.tarasevich.university.validator.LessonTypeValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,23 +22,14 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@AllArgsConstructor
+@Log4j2
 public class LessonTypeServiceImpl extends AbstractPageableService implements LessonTypeService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(LessonTypeServiceImpl.class);
 
     private final LessonTypeDao lessonTypeDao;
     private final LessonDao lessonDao;
     private final LessonTypeMapper mapper;
     private final LessonTypeValidator validator;
-
-    @Autowired
-    public LessonTypeServiceImpl(LessonTypeDao lessonTypeDao, LessonDao lessonDao, LessonTypeMapper mapper,
-                                 LessonTypeValidator validator) {
-        this.lessonTypeDao = lessonTypeDao;
-        this.lessonDao = lessonDao;
-        this.mapper = mapper;
-        this.validator = validator;
-    }
 
     @Override
     public LessonTypeResponse register(LessonTypeRequest r) {
@@ -59,14 +49,14 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
             } catch (IncorrectRequestData e) {
-                LOG.info("The lesson type was deleted from the save list. The lesson type: {} .", r);
+                log.info("The lesson type was deleted from the save list. The lesson type: {} .", r);
             }
         });
 
         lessonTypeDao.saveAll(acceptableRequests.stream()
                 .map(mapper::toEntity)
                 .collect(Collectors.toList()));
-        LOG.info("The lesson types were saved in the database. Saved lesson types: {} .", acceptableRequests);
+        log.info("The lesson types were saved in the database. Saved lesson types: {} .", acceptableRequests);
     }
 
     @Override
@@ -99,7 +89,7 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
             } catch (IncorrectRequestData e) {
-                LOG.info("The lesson type was deleted from the update list. The lesson type: {} .", r);
+                log.info("The lesson type was deleted from the update list. The lesson type: {} .", r);
             }
         });
 
@@ -120,7 +110,8 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
 
             return lessonTypeDao.deleteById(id);
         } else {
-            LOG.info("Delete was rejected. There is no lesson type with specified id in the database. Id = {}", id);
+            log.info("Delete was rejected. There is no lesson type with specified id in the database. Id = {}",
+                    id);
             return false;
         }
     }
@@ -131,7 +122,7 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
 
         boolean result = lessonTypeDao.deleteByIds(ids);
 
-        if (result) LOG.info("The lesson types have been deleted. Deleted lesson types: {}", ids);
+        if (result) log.info("The lesson types have been deleted. Deleted lesson types: {}", ids);
 
         return result;
     }

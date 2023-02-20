@@ -1,20 +1,11 @@
 package com.mikhail.tarasevich.university.dto;
 
-public class EducationFormRequest extends DtoWithUniqueName {
+import lombok.*;
 
-    public EducationFormRequest() {
-    }
+@Data
+public class EducationFormRequest {
 
-    public EducationFormRequest(int id, String name) {
-        super(id, name);
-    }
-
-    @Override
-    public String toString() {
-        return "EducationFormRequest{" +
-                "id=" + id +
-                ", name=" + name +
-                '}';
-    }
+    private int id;
+    private String name;
 
 }

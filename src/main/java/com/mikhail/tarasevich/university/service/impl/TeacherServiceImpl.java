@@ -10,6 +10,7 @@ import com.mikhail.tarasevich.university.entity.Teacher;
 import com.mikhail.tarasevich.university.mapper.TeacherMapper;
 import com.mikhail.tarasevich.university.service.TeacherService;
 import com.mikhail.tarasevich.university.validator.UserValidator;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@Log4j2
 public class TeacherServiceImpl
         extends AbstractUserPageableService<TeacherDao, TeacherRequest, TeacherResponse, Teacher>
         implements TeacherService {
@@ -50,7 +52,7 @@ public class TeacherServiceImpl
             groupDao.unbindGroupsFromTeacher(id);
             return userDao.deleteById(id);
         } else {
-            LOG.info("Delete was rejected. There is no teacher with specified id in the database. Id = {}", id);
+            log.info("Delete was rejected. There is no teacher with specified id in the database. Id = {}", id);
             return false;
         }
     }
@@ -63,8 +65,8 @@ public class TeacherServiceImpl
 
         boolean result = userDao.deleteByIds(ids);
 
-        if (result) LOG.info("Teachers have been deleted. Deleted teachers: {}", ids);
-        else LOG.info("Teachers haven't been deleted. Teachers ids: {}", ids);
+        if (result) log.info("Teachers have been deleted. Deleted teachers: {}", ids);
+        else log.info("Teachers haven't been deleted. Teachers ids: {}", ids);
 
         return result;
     }
@@ -72,25 +74,25 @@ public class TeacherServiceImpl
     @Override
     public void subscribeUserToGroup(int teacherId, int groupId) {
         userDao.addUserToGroup(teacherId, groupId);
-        LOG.info("Teacher with id = {} have been subscribed to group with id = {}", teacherId, groupId);
+        log.info("Teacher with id = {} have been subscribed to group with id = {}", teacherId, groupId);
     }
 
     @Override
     public void unsubscribeTeacherFromGroup(int teacherId, int groupId) {
         userDao.deleteTeacherFromGroup(teacherId, groupId);
-        LOG.info("Teacher with id = {} have been unsubscribed from group with id = {}", teacherId, groupId);
+        log.info("Teacher with id = {} have been unsubscribed from group with id = {}", teacherId, groupId);
     }
 
     @Override
     public void subscribeTeacherToCourse(int teacherId, int courseId) {
         userDao.addTeacherToCourse(teacherId, courseId);
-        LOG.info("Teacher with id = {} have been subscribed to course with id = {}", teacherId, courseId);
+        log.info("Teacher with id = {} have been subscribed to course with id = {}", teacherId, courseId);
     }
 
     @Override
     public void unsubscribeTeacherFromCourse(int teacherId, int courseId) {
         userDao.deleteTeacherFromCourse(teacherId, courseId);
-        LOG.info("Teacher with id = {} have been unsubscribed from course with id = {}", teacherId, courseId);
+        log.info("Teacher with id = {} have been unsubscribed from course with id = {}", teacherId, courseId);
     }
 
     @Override

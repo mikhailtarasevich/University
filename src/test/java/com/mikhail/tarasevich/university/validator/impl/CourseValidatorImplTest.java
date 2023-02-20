@@ -25,7 +25,13 @@ class CourseValidatorImplTest {
     @Mock
     CourseDao courseDao;
 
-    private static final CourseRequest COURSE_REQUEST = new CourseRequest(1, "course", "description");
+    private static final CourseRequest COURSE_REQUEST = new CourseRequest();
+
+    static {
+        COURSE_REQUEST.setId(1);
+        COURSE_REQUEST.setName("course");
+        COURSE_REQUEST.setDescription("description");
+    }
 
     @Test
     void validateUniqueNameInDB_inputWithUniqueName_expectedNothing() {
@@ -52,14 +58,20 @@ class CourseValidatorImplTest {
 
     @Test
     void validateNameNotNullOrEmpty_inputEmptyName_expectedException() {
-        final CourseRequest COURSE_REQUEST = new CourseRequest(1, "   ", "description");
+        final CourseRequest COURSE_REQUEST = new CourseRequest();
+        COURSE_REQUEST.setId(1);
+        COURSE_REQUEST.setName("  ");
+        COURSE_REQUEST.setDescription("description");
 
         assertThrows(IncorrectRequestData.class, () -> courseValidator.validateNameNotNullOrEmpty(COURSE_REQUEST));
     }
 
     @Test
     void validateNameNotNullOrEmpty_inputNullName_expectedException() {
-        final CourseRequest COURSE_REQUEST = new CourseRequest(1, null, "description");
+        final CourseRequest COURSE_REQUEST = new CourseRequest();
+        COURSE_REQUEST.setId(1);
+        COURSE_REQUEST.setName(null);
+        COURSE_REQUEST.setDescription("description");
 
         assertThrows(IncorrectRequestData.class, () -> courseValidator.validateNameNotNullOrEmpty(COURSE_REQUEST));
     }

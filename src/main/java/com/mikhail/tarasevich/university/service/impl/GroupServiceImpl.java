@@ -11,9 +11,8 @@ import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
 import com.mikhail.tarasevich.university.mapper.GroupMapper;
 import com.mikhail.tarasevich.university.service.GroupService;
 import com.mikhail.tarasevich.university.validator.GroupValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,9 +24,9 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@AllArgsConstructor
+@Log4j2
 public class GroupServiceImpl extends AbstractPageableService implements GroupService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(GroupServiceImpl.class);
 
     private final GroupDao groupDao;
     private final LessonDao lessonDao;
@@ -35,17 +34,6 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     private final TeacherDao teacherDao;
     private final GroupMapper mapper;
     private final GroupValidator validator;
-
-    @Autowired
-    public GroupServiceImpl(GroupDao groupDao, LessonDao lessonDao, StudentDao studentDao, TeacherDao teacherDao,
-                            GroupMapper mapper, GroupValidator validator) {
-        this.groupDao = groupDao;
-        this.lessonDao = lessonDao;
-        this.studentDao = studentDao;
-        this.teacherDao = teacherDao;
-        this.mapper = mapper;
-        this.validator = validator;
-    }
 
     @Override
     public GroupResponse register(GroupRequest r) {
@@ -65,14 +53,14 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
             } catch (IncorrectRequestData e) {
-                LOG.info("The group were deleted from the save list. The group: {} .", r);
+                log.info("The group were deleted from the save list. The group: {} .", r);
             }
         });
 
         groupDao.saveAll(acceptableRequests.stream()
                 .map(mapper::toEntity)
                 .collect(Collectors.toList()));
-        LOG.info("The groups were saved in the database. Saved groups: {} .", acceptableRequests);
+        log.info("The groups were saved in the database. Saved groups: {} .", acceptableRequests);
     }
 
     @Override
@@ -105,7 +93,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
             } catch (IncorrectRequestData e) {
-                LOG.info("The group was deleted from the update list. The group: {} .", r);
+                log.info("The group was deleted from the update list. The group: {} .", r);
             }
         });
 
@@ -126,7 +114,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
 
             return groupDao.deleteById(id);
         } else {
-            LOG.info("Delete was rejected. There is no group with specified id in the database. Id = {}", id);
+            log.info("Delete was rejected. There is no group with specified id in the database. Id = {}", id);
             return false;
         }
     }
@@ -137,7 +125,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
 
         boolean result = groupDao.deleteByIds(ids);
 
-        if (result) LOG.info("The group have been deleted. Deleted groups: {}", ids);
+        if (result) log.info("The group have been deleted. Deleted groups: {}", ids);
 
         return result;
     }

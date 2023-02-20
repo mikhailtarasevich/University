@@ -24,8 +24,15 @@ public class StudentMapperImpl implements StudentMapper {
 
     @Override
     public StudentResponse toResponse(Student s) {
-        return new StudentResponse(s.getId(), s.getFirstName(), s.getLastName(),
-                s.getGender(), s.getEmail(), s.getGroup());
+        StudentResponse studentResponse = new StudentResponse();
+        studentResponse.setId(s.getId());
+        studentResponse.setFirstName(s.getFirstName());
+        studentResponse.setLastName(s.getLastName());
+        studentResponse.setGender(s.getGender());
+        studentResponse.setEmail(s.getEmail());
+        studentResponse.setGroup(s.getGroup());
+
+        return studentResponse;
     }
 
 }

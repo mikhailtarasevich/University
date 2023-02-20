@@ -33,25 +33,33 @@ class LessonServiceImplTest {
             Lesson.builder().withName("name1").build();
     private static final Lesson LESSON_ENTITY_WITH_ID_1 =
             Lesson.builder().withId(1).withName("name1").build();
-    private static final LessonRequest LESSON_REQUEST_1 =
-            new LessonRequest(0, "name1", null, null, null, null, null);
-    private static final LessonResponse LESSON_RESPONSE_WITH_ID_1 =
-            new LessonResponse(1, "name1", null, null, null, null, null);
+    private static final LessonRequest LESSON_REQUEST_1 = new LessonRequest();
+    private static final LessonResponse LESSON_RESPONSE_WITH_ID_1 = new LessonResponse();
 
     private static final Lesson LESSON_ENTITY_2 =
             Lesson.builder().withName("name2").build();
     private static final Lesson LESSON_ENTITY_WITH_ID_2 =
             Lesson.builder().withId(2).withName("name2").build();
-    private static final LessonRequest LESSON_REQUEST_2 =
-            new LessonRequest(0, "name2", null, null, null, null, null);
-    private static final LessonResponse LESSON_RESPONSE_WITH_ID_2 =
-            new LessonResponse(2, "name2", null, null, null, null, null);
+    private static final LessonRequest LESSON_REQUEST_2 = new LessonRequest();
+    private static final LessonResponse LESSON_RESPONSE_WITH_ID_2 = new LessonResponse();
 
-    private final List<Lesson> lessonEntities = new ArrayList<>();
-    private final List<Lesson> lessonEntitiesWithId = new ArrayList<>();
-    private final List<LessonResponse> lessonResponses = new ArrayList<>();
+    private static final List<Lesson> lessonEntities = new ArrayList<>();
+    private static final List<Lesson> lessonEntitiesWithId = new ArrayList<>();
+    private static final List<LessonResponse> lessonResponses = new ArrayList<>();
 
-    {
+    static {
+        LESSON_REQUEST_1.setId(0);
+        LESSON_REQUEST_1.setName("name1");
+
+        LESSON_RESPONSE_WITH_ID_1.setId(1);
+        LESSON_RESPONSE_WITH_ID_1.setName("name1");
+
+        LESSON_REQUEST_2.setId(0);
+        LESSON_REQUEST_2.setName("name2");
+
+        LESSON_RESPONSE_WITH_ID_2.setId(2);
+        LESSON_RESPONSE_WITH_ID_2.setName("name2");
+
         lessonEntities.add(LESSON_ENTITY_1);
         lessonEntities.add(LESSON_ENTITY_2);
 
@@ -136,10 +144,10 @@ class LessonServiceImplTest {
 
     @Test
     void edit_inputCourseRequest_expectedNothing() {
-        final Lesson LESSON_ENTITY_FOR_UPDATE_1 =
-                Lesson.builder().withId(1).withName("update1").build();
-        final LessonRequest LESSON_REQUEST_FOR_UPDATE_1 =
-                new LessonRequest(0, "name1", null, null, null, null, null);
+        final Lesson LESSON_ENTITY_FOR_UPDATE_1 = Lesson.builder().withId(1).withName("update1").build();
+        final LessonRequest LESSON_REQUEST_FOR_UPDATE_1 = new LessonRequest();
+        LESSON_REQUEST_FOR_UPDATE_1.setId(0);
+        LESSON_REQUEST_FOR_UPDATE_1.setName("update1");
 
         doNothing().when(lessonDao).update(LESSON_ENTITY_FOR_UPDATE_1);
         when(lessonMapper.toEntity(LESSON_REQUEST_FOR_UPDATE_1)).thenReturn(LESSON_ENTITY_FOR_UPDATE_1);
@@ -152,16 +160,19 @@ class LessonServiceImplTest {
 
     @Test
     void editAll_inputCourseRequestListWhereOneCourseHasIncorrectName_expectedNothing() {
-        final Lesson LESSON_ENTITY_FOR_UPDATE_1 =
-                Lesson.builder().withId(1).withName("update1").build();
-        final LessonRequest LESSON_REQUEST_FOR_UPDATE_1 =
-                new LessonRequest(0, "name1", null, null, null, null, null);
-        final Lesson LESSON_ENTITY_FOR_UPDATE_2 =
-                Lesson.builder().withId(2).withName("update2").build();
-        final LessonRequest LESSON_REQUEST_FOR_UPDATE_2 =
-                new LessonRequest(0, "name2", null, null, null, null, null);
-        final LessonRequest LESSON_REQUEST_FOR_UPDATE_INCORRECT =
-                new LessonRequest(3, " ", null, null, null, null, null);
+        final Lesson LESSON_ENTITY_FOR_UPDATE_1 = Lesson.builder().withId(1).withName("update1").build();
+        final LessonRequest LESSON_REQUEST_FOR_UPDATE_1 = new LessonRequest();
+        LESSON_REQUEST_FOR_UPDATE_1.setId(1);
+        LESSON_REQUEST_FOR_UPDATE_1.setName("update1");
+
+        final Lesson LESSON_ENTITY_FOR_UPDATE_2 = Lesson.builder().withId(2).withName("update2").build();
+        final LessonRequest LESSON_REQUEST_FOR_UPDATE_2 = new LessonRequest();
+        LESSON_REQUEST_FOR_UPDATE_2.setId(2);
+        LESSON_REQUEST_FOR_UPDATE_2.setName("update2");
+
+        final LessonRequest LESSON_REQUEST_FOR_UPDATE_INCORRECT = new LessonRequest();
+        LESSON_REQUEST_FOR_UPDATE_INCORRECT.setId(3);
+        LESSON_REQUEST_FOR_UPDATE_INCORRECT.setName("  ");
 
         final List<LessonRequest> inputList = new ArrayList<>();
         inputList.add(LESSON_REQUEST_FOR_UPDATE_1);
@@ -174,7 +185,8 @@ class LessonServiceImplTest {
 
         doNothing().when(lessonValidator).validateNameNotNullOrEmpty(LESSON_REQUEST_FOR_UPDATE_1);
         doNothing().when(lessonValidator).validateNameNotNullOrEmpty(LESSON_REQUEST_FOR_UPDATE_2);
-        doThrow(new IncorrectRequestData()).when(lessonValidator).validateNameNotNullOrEmpty(LESSON_REQUEST_FOR_UPDATE_INCORRECT);
+        doThrow(new IncorrectRequestData()).when(lessonValidator)
+                .validateNameNotNullOrEmpty(LESSON_REQUEST_FOR_UPDATE_INCORRECT);
 
         when(lessonMapper.toEntity(LESSON_REQUEST_FOR_UPDATE_1)).thenReturn(LESSON_ENTITY_FOR_UPDATE_1);
         when(lessonMapper.toEntity(LESSON_REQUEST_FOR_UPDATE_2)).thenReturn(LESSON_ENTITY_FOR_UPDATE_2);
@@ -186,9 +198,12 @@ class LessonServiceImplTest {
         verify(lessonMapper, times(1)).toEntity(LESSON_REQUEST_FOR_UPDATE_1);
         verify(lessonMapper, times(1)).toEntity(LESSON_REQUEST_FOR_UPDATE_2);
         verify(lessonDao, times(1)).updateAll(listForUpdate);
-        verify(lessonValidator, times(1)).validateNameNotNullOrEmpty(LESSON_REQUEST_FOR_UPDATE_1);
-        verify(lessonValidator, times(1)).validateNameNotNullOrEmpty(LESSON_REQUEST_FOR_UPDATE_2);
-        verify(lessonValidator, times(1)).validateNameNotNullOrEmpty(LESSON_REQUEST_FOR_UPDATE_INCORRECT);
+        verify(lessonValidator, times(1))
+                .validateNameNotNullOrEmpty(LESSON_REQUEST_FOR_UPDATE_1);
+        verify(lessonValidator, times(1))
+                .validateNameNotNullOrEmpty(LESSON_REQUEST_FOR_UPDATE_2);
+        verify(lessonValidator, times(1))
+                .validateNameNotNullOrEmpty(LESSON_REQUEST_FOR_UPDATE_INCORRECT);
     }
 
     @Test

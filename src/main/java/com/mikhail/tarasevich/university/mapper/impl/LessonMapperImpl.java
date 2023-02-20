@@ -24,8 +24,16 @@ public class LessonMapperImpl implements LessonMapper {
 
     @Override
     public LessonResponse toResponse(Lesson l) {
-        return new LessonResponse(l.getId(), l.getName(), l.getGroup(), l.getTeacher(), l.getCourse(),
-                l.getLessonType(), l.getStartTime());
+        LessonResponse lessonResponse = new LessonResponse();
+        lessonResponse.setId(l.getId());
+        lessonResponse.setName(l.getName());
+        lessonResponse.setGroup(l.getGroup());
+        lessonResponse.setTeacher(l.getTeacher());
+        lessonResponse.setCourse(l.getCourse());
+        lessonResponse.setLessonType(l.getLessonType());
+        lessonResponse.setStartTime(l.getStartTime());
+
+        return lessonResponse;
     }
 
 }

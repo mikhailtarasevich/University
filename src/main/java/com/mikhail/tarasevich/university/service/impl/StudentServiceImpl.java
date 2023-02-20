@@ -8,6 +8,7 @@ import com.mikhail.tarasevich.university.entity.Student;
 import com.mikhail.tarasevich.university.mapper.StudentMapper;
 import com.mikhail.tarasevich.university.service.StudentService;
 import com.mikhail.tarasevich.university.validator.UserValidator;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@Log4j2
 public class StudentServiceImpl
         extends AbstractUserPageableService<StudentDao, StudentRequest, StudentResponse, Student>
         implements StudentService {
@@ -43,7 +45,8 @@ public class StudentServiceImpl
             groupDao.unbindGroupsFromStudent(id);
             return userDao.deleteById(id);
         } else {
-            LOG.info("Delete was rejected. There is no student with specified id in the database. Id = {}", id);
+            log.info("Delete was rejected. There is no student with specified id in the database. Id = {}",
+                    id);
             return false;
         }
     }
@@ -54,8 +57,8 @@ public class StudentServiceImpl
 
         boolean result = userDao.deleteByIds(ids);
 
-        if (result) LOG.info("Students have been deleted. Deleted students: {}", ids);
-        else LOG.info("Students haven't been deleted. Student ids: {}", ids);
+        if (result) log.info("Students have been deleted. Deleted students: {}", ids);
+        else log.info("Students haven't been deleted. Student ids: {}", ids);
 
         return result;
     }
@@ -63,13 +66,13 @@ public class StudentServiceImpl
     @Override
     public void subscribeUserToGroup(int userId, int groupId) {
         userDao.addUserToGroup(userId, groupId);
-        LOG.info("Student with id = {} have been subscribed to group with id = {}", userId, groupId);
+        log.info("Student with id = {} have been subscribed to group with id = {}", userId, groupId);
     }
 
     @Override
     public void unsubscribeStudentFromGroup(int userId) {
         userDao.deleteStudentFromGroup(userId);
-        LOG.info("Student with id = {} have been unsubscribed from group", userId);
+        log.info("Student with id = {} have been unsubscribed from group", userId);
     }
 
     @Override

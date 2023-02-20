@@ -24,8 +24,12 @@ class TeacherTitleValidatorImplTest {
     @Mock
     TeacherTitleDao teacherTitleDao;
 
-    private static final TeacherTitleRequest TEACHER_TITLE_REQUEST = 
-            new TeacherTitleRequest(1, "name1");
+    private static final TeacherTitleRequest TEACHER_TITLE_REQUEST = new TeacherTitleRequest();
+
+    static {
+        TEACHER_TITLE_REQUEST.setId(1);
+        TEACHER_TITLE_REQUEST.setName("name1");
+    }
 
     @Test
     void validateUniqueNameInDB_inputWithUniqueName_expectedNothing() {
@@ -54,19 +58,21 @@ class TeacherTitleValidatorImplTest {
 
     @Test
     void validateNameNotNullOrEmpty_inputEmptyName_expectedException() {
-        final TeacherTitleRequest TEACHER_TITLE_REQUEST =
-                new TeacherTitleRequest(1, "  ");
+        final TeacherTitleRequest TEACHER_TITLE_REQUEST = new TeacherTitleRequest();
+        TEACHER_TITLE_REQUEST.setId(1);
+        TEACHER_TITLE_REQUEST.setName("  ");
 
-        assertThrows(IncorrectRequestData.class, 
+        assertThrows(IncorrectRequestData.class,
                 () -> teacherTitleValidator.validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST));
     }
 
     @Test
     void validateNameNotNullOrEmpty_inputNullName_expectedException() {
-        final TeacherTitleRequest TEACHER_TITLE_REQUEST =
-                new TeacherTitleRequest(1, null);
+        final TeacherTitleRequest TEACHER_TITLE_REQUEST = new TeacherTitleRequest();
+        TEACHER_TITLE_REQUEST.setId(1);
+        TEACHER_TITLE_REQUEST.setName(null);
 
-        assertThrows(IncorrectRequestData.class, 
+        assertThrows(IncorrectRequestData.class,
                 () -> teacherTitleValidator.validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST));
     }
 

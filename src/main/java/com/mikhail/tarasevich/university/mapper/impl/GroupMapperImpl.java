@@ -22,7 +22,14 @@ public class GroupMapperImpl implements GroupMapper {
 
     @Override
     public GroupResponse toResponse(Group g) {
-        return new GroupResponse(g.getId(), g.getName(), g.getFaculty(), g.getHeadStudent(), g.getEducationForm());
+        GroupResponse groupResponse = new GroupResponse();
+        groupResponse.setId(g.getId());
+        groupResponse.setName(g.getName());
+        groupResponse.setFaculty(g.getFaculty());
+        groupResponse.setHeadStudent(g.getHeadStudent());
+        groupResponse.setEducationForm(g.getEducationForm());
+
+        return groupResponse;
     }
 
 }

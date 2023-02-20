@@ -1045,7 +1045,7 @@ public class FrontController {
     private void findLessonTypes() {
         viewProvider.printMessage("\nPlease, type a page number: ");
         String pageNumber = viewProvider.read();
-        viewProvider.printMessage(teacherTitleService.findAll(pageNumber).toString());
+        viewProvider.printMessage(lessonTypeService.findAll(pageNumber).toString());
     }
 
     private void findLessonTypeById() {

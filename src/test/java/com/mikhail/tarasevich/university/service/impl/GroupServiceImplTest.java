@@ -41,29 +41,33 @@ class GroupServiceImplTest {
     @Mock
     GroupValidator groupValidator;
 
-    private static final Group GROUP_ENTITY_1 =
-            Group.builder().withName("name1").build();
-    private static final Group GROUP_ENTITY_WITH_ID_1 =
-            Group.builder().withId(1).withName("name1").build();
-    private static final GroupRequest GROUP_REQUEST_1 =
-            new GroupRequest(0, "name1", null, null, null);
-    private static final GroupResponse GROUP_RESPONSE_WITH_ID_1 =
-            new GroupResponse(1, "name1", null, null, null);
+    private static final Group GROUP_ENTITY_1 = Group.builder().withName("name1").build();
+    private static final Group GROUP_ENTITY_WITH_ID_1 = Group.builder().withId(1).withName("name1").build();
+    private static final GroupRequest GROUP_REQUEST_1 = new GroupRequest();
+    private static final GroupResponse GROUP_RESPONSE_WITH_ID_1 = new GroupResponse();
 
-    private static final Group GROUP_ENTITY_2 =
-            Group.builder().withName("name2").build();
-    private static final Group GROUP_ENTITY_WITH_ID_2 =
-            Group.builder().withId(2).withName("name2").build();
-    private static final GroupRequest GROUP_REQUEST_2 =
-            new GroupRequest(0, "name2", null, null, null);
-    private static final GroupResponse GROUP_RESPONSE_WITH_ID_2 =
-            new GroupResponse(2, "name2", null, null, null);
+    private static final Group GROUP_ENTITY_2 = Group.builder().withName("name2").build();
+    private static final Group GROUP_ENTITY_WITH_ID_2 = Group.builder().withId(2).withName("name2").build();
+    private static final GroupRequest GROUP_REQUEST_2 = new GroupRequest();
+    private static final GroupResponse GROUP_RESPONSE_WITH_ID_2 = new GroupResponse();
 
-    private final List<Group> groupEntities = new ArrayList<>();
-    private final List<Group> groupEntitiesWithId = new ArrayList<>();
-    private final List<GroupResponse> groupResponses = new ArrayList<>();
+    private static final List<Group> groupEntities = new ArrayList<>();
+    private static final List<Group> groupEntitiesWithId = new ArrayList<>();
+    private static final List<GroupResponse> groupResponses = new ArrayList<>();
 
-    {
+    static {
+        GROUP_REQUEST_1.setId(0);
+        GROUP_REQUEST_1.setName("name1");
+
+        GROUP_RESPONSE_WITH_ID_1.setId(1);
+        GROUP_RESPONSE_WITH_ID_1.setName("name1");
+
+        GROUP_REQUEST_2.setId(0);
+        GROUP_REQUEST_2.setName("name2");
+
+        GROUP_RESPONSE_WITH_ID_2.setId(2);
+        GROUP_RESPONSE_WITH_ID_2.setName("name2");
+
         groupEntities.add(GROUP_ENTITY_1);
         groupEntities.add(GROUP_ENTITY_2);
 
@@ -148,10 +152,11 @@ class GroupServiceImplTest {
 
     @Test
     void edit_inputGroupRequest_expectedNothing() {
-        final Group GROUP_ENTITY_FOR_UPDATE_1 =
-                Group.builder().withId(1).withName("update1").build();
-        final GroupRequest GROUP_REQUEST_FOR_UPDATE_1 =
-                new GroupRequest(0, "update1", null, null, null);
+        final Group GROUP_ENTITY_FOR_UPDATE_1 = Group.builder().withId(1).withName("update1").build();
+        final GroupRequest GROUP_REQUEST_FOR_UPDATE_1 = new GroupRequest();
+        GROUP_REQUEST_FOR_UPDATE_1.setId(1);
+        GROUP_REQUEST_FOR_UPDATE_1.setName("update1");
+
 
         doNothing().when(groupDao).update(GROUP_ENTITY_FOR_UPDATE_1);
         when(groupMapper.toEntity(GROUP_REQUEST_FOR_UPDATE_1)).thenReturn(GROUP_ENTITY_FOR_UPDATE_1);
@@ -164,16 +169,19 @@ class GroupServiceImplTest {
 
     @Test
     void editAll_inputGroupRequestListWhereOneGroupHasIncorrectName_expectedNothing() {
-        final Group GROUP_ENTITY_FOR_UPDATE_1 =
-                Group.builder().withId(1).withName("update1").build();
-        final GroupRequest GROUP_REQUEST_FOR_UPDATE_1 =
-                new GroupRequest(0, "update1", null, null, null);
-        final Group GROUP_ENTITY_FOR_UPDATE_2 =
-                Group.builder().withId(2).withName("update2").build();
-        final GroupRequest GROUP_REQUEST_FOR_UPDATE_2 =
-                new GroupRequest(0, "update2", null, null, null);
-        final GroupRequest GROUP_REQUEST_FOR_UPDATE_INCORRECT =
-                new GroupRequest(0, "  ", null, null, null);
+        final Group GROUP_ENTITY_FOR_UPDATE_1 = Group.builder().withId(1).withName("update1").build();
+        final GroupRequest GROUP_REQUEST_FOR_UPDATE_1 = new GroupRequest();
+        GROUP_REQUEST_FOR_UPDATE_1.setId(1);
+        GROUP_REQUEST_FOR_UPDATE_1.setName("update1");
+
+        final Group GROUP_ENTITY_FOR_UPDATE_2 = Group.builder().withId(2).withName("update2").build();
+        final GroupRequest GROUP_REQUEST_FOR_UPDATE_2 = new GroupRequest();
+        GROUP_REQUEST_FOR_UPDATE_2.setId(2);
+        GROUP_REQUEST_FOR_UPDATE_2.setName("update2");
+
+        final GroupRequest GROUP_REQUEST_FOR_UPDATE_INCORRECT = new GroupRequest();
+        GROUP_REQUEST_FOR_UPDATE_INCORRECT.setId(0);
+        GROUP_REQUEST_FOR_UPDATE_INCORRECT.setName("   ");
 
         final List<GroupRequest> inputList = new ArrayList<>();
         inputList.add(GROUP_REQUEST_FOR_UPDATE_1);
@@ -186,7 +194,8 @@ class GroupServiceImplTest {
 
         doNothing().when(groupValidator).validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_1);
         doNothing().when(groupValidator).validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_2);
-        doThrow(new IncorrectRequestData()).when(groupValidator).validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_INCORRECT);
+        doThrow(new IncorrectRequestData()).when(groupValidator)
+                .validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_INCORRECT);
 
         when(groupMapper.toEntity(GROUP_REQUEST_FOR_UPDATE_1)).thenReturn(GROUP_ENTITY_FOR_UPDATE_1);
         when(groupMapper.toEntity(GROUP_REQUEST_FOR_UPDATE_2)).thenReturn(GROUP_ENTITY_FOR_UPDATE_2);
@@ -200,7 +209,8 @@ class GroupServiceImplTest {
         verify(groupDao, times(1)).updateAll(listForUpdate);
         verify(groupValidator, times(1)).validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_1);
         verify(groupValidator, times(1)).validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_2);
-        verify(groupValidator, times(1)).validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_INCORRECT);
+        verify(groupValidator, times(1))
+                .validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_INCORRECT);
     }
 
     @Test
