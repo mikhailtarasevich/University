@@ -24,45 +24,52 @@ class GroupValidatorImplTest {
     @Mock
     GroupDao groupDao;
 
-    private static final GroupRequest groupRequest = new GroupRequest(0, "name", null, null, null);
+    private static final GroupRequest GROUP_REQUEST = new GroupRequest();
+
+    static {
+        GROUP_REQUEST.setId(1);
+        GROUP_REQUEST.setName("groupName");
+    }
 
     @Test
     void validateUniqueNameInDB_inputWithUniqueName_expectedNothing() {
-        when(groupDao.findByName(groupRequest.getName())).thenReturn(Optional.empty());
+        when(groupDao.findByName(GROUP_REQUEST.getName())).thenReturn(Optional.empty());
 
-        assertDoesNotThrow(() -> groupValidator.validateUniqueNameInDB(groupRequest));
+        assertDoesNotThrow(() -> groupValidator.validateUniqueNameInDB(GROUP_REQUEST));
 
-        verify(groupDao, times(1)).findByName(groupRequest.getName());
+        verify(groupDao, times(1)).findByName(GROUP_REQUEST.getName());
     }
 
     @Test
     void validateUniqueNameInDB_inputWithNotUniqueName_expectedException() {
-        when(groupDao.findByName(groupRequest.getName())).thenReturn(Optional.of(Group.builder().build()));
+        when(groupDao.findByName(GROUP_REQUEST.getName())).thenReturn(Optional.of(Group.builder().build()));
 
-        assertThrows(IncorrectRequestData.class, () -> groupValidator.validateUniqueNameInDB(groupRequest));
+        assertThrows(IncorrectRequestData.class, () -> groupValidator.validateUniqueNameInDB(GROUP_REQUEST));
 
-        verify(groupDao, times(1)).findByName(groupRequest.getName());
+        verify(groupDao, times(1)).findByName(GROUP_REQUEST.getName());
     }
 
     @Test
     void validateNameNotNullOrEmpty_inputCorrectName_expectedNothing() {
-        assertDoesNotThrow(() -> groupValidator.validateNameNotNullOrEmpty(groupRequest));
+        assertDoesNotThrow(() -> groupValidator.validateNameNotNullOrEmpty(GROUP_REQUEST));
     }
 
     @Test
     void validateNameNotNullOrEmpty_inputEmptyName_expectedException() {
-        final GroupRequest groupRequest =
-                new GroupRequest(0, "  ", null, null, null);
+        final GroupRequest GROUP_REQUEST = new GroupRequest();
+        GROUP_REQUEST.setId(1);
+        GROUP_REQUEST.setName("  ");
 
-        assertThrows(IncorrectRequestData.class, () -> groupValidator.validateNameNotNullOrEmpty(groupRequest));
+        assertThrows(IncorrectRequestData.class, () -> groupValidator.validateNameNotNullOrEmpty(GROUP_REQUEST));
     }
 
     @Test
     void validateNameNotNullOrEmpty_inputNullName_expectedException() {
-        final GroupRequest groupRequest =
-                new GroupRequest(0, null, null, null, null);
+        final GroupRequest GROUP_REQUEST = new GroupRequest();
+        GROUP_REQUEST.setId(1);
+        GROUP_REQUEST.setName(null);
 
-        assertThrows(IncorrectRequestData.class, () -> groupValidator.validateNameNotNullOrEmpty(groupRequest));
+        assertThrows(IncorrectRequestData.class, () -> groupValidator.validateNameNotNullOrEmpty(GROUP_REQUEST));
     }
 
 }

@@ -39,29 +39,52 @@ class CourseServiceImplTest {
     @Mock
     CourseValidator validator;
 
-    private static final Course COURSE_ENTITY_1 =
-            Course.builder().withName("name1").withDescription("description1").build();
-    private static final Course COURSE_ENTITY_WITH_ID_1 =
-            Course.builder().withId(1).withName("name1").withDescription("description1").build();
-    private static final CourseRequest COURSE_REQUEST_1 =
-            new CourseRequest(0, "name1", "description1");
-    private static final CourseResponse COURSE_RESPONSE_WITH_ID_1 =
-            new CourseResponse(1, "name1", "description1");
+    private static final Course COURSE_ENTITY_1 = Course.builder()
+            .withName("name1")
+            .withDescription("description1")
+            .build();
+    private static final Course COURSE_ENTITY_WITH_ID_1 = Course.builder()
+            .withId(1)
+            .withName("name1")
+            .withDescription("description1")
+            .build();
+    private static final CourseRequest COURSE_REQUEST_1 = new CourseRequest();
+    private static final CourseResponse COURSE_RESPONSE_WITH_ID_1 = new CourseResponse();
 
-    private static final Course COURSE_ENTITY_2 =
-            Course.builder().withName("name2").withDescription("description2").build();
-    private static final Course COURSE_ENTITY_WITH_ID_2 =
-            Course.builder().withId(2).withName("name2").withDescription("description2").build();
-    private static final CourseRequest COURSE_REQUEST_2 =
-            new CourseRequest(0, "name2", "description2");
-    private static final CourseResponse COURSE_RESPONSE_WITH_ID_2 =
-            new CourseResponse(2, "name2", "description2");
+    private static final Course COURSE_ENTITY_2 = Course.builder()
+            .withName("name2")
+            .withDescription("description2")
+            .build();
+    private static final Course COURSE_ENTITY_WITH_ID_2 = Course.builder()
+            .withId(2)
+            .withName("name2")
+            .withDescription("description2")
+            .build();
+    private static final CourseRequest COURSE_REQUEST_2 = new CourseRequest();
+    private static final CourseResponse COURSE_RESPONSE_WITH_ID_2 = new CourseResponse();
 
-    private final List<Course> courseEntities = new ArrayList<>();
-    private final List<Course> courseEntitiesWithId = new ArrayList<>();
-    private final List<CourseResponse> courseResponses = new ArrayList<>();
+    private static final List<Course> courseEntities = new ArrayList<>();
+    private static final List<Course> courseEntitiesWithId = new ArrayList<>();
+    private static final List<CourseResponse> courseResponses = new ArrayList<>();
 
-    {
+    static {
+        COURSE_REQUEST_1.setId(0);
+        COURSE_REQUEST_1.setName("name1");
+        COURSE_REQUEST_1.setDescription("description");
+
+        COURSE_RESPONSE_WITH_ID_1.setId(1);
+        COURSE_RESPONSE_WITH_ID_1.setName("name1");
+        COURSE_RESPONSE_WITH_ID_1.setDescription("description");
+
+        COURSE_REQUEST_2.setId(0);
+        COURSE_REQUEST_2.setName("name2");
+        COURSE_REQUEST_2.setDescription("description2");
+
+        COURSE_RESPONSE_WITH_ID_2.setId(2);
+        COURSE_RESPONSE_WITH_ID_2.setName("name2");
+        COURSE_RESPONSE_WITH_ID_2.setDescription("description");
+
+
         courseEntities.add(COURSE_ENTITY_1);
         courseEntities.add(COURSE_ENTITY_2);
 
@@ -194,10 +217,15 @@ class CourseServiceImplTest {
 
     @Test
     void edit_inputCourseRequest_expectedNothing() {
-        final Course COURSE_ENTITY_FOR_UPDATE_1 =
-                Course.builder().withId(1).withName("update1").withDescription("update1").build();
-        final CourseRequest COURSE_REQUEST_FOR_UPDATE_1 =
-                new CourseRequest(1, "update1", "update1");
+        final Course COURSE_ENTITY_FOR_UPDATE_1 = Course.builder()
+                .withId(1)
+                .withName("update1")
+                .withDescription("update1")
+                .build();
+        final CourseRequest COURSE_REQUEST_FOR_UPDATE_1 = new CourseRequest();
+        COURSE_REQUEST_FOR_UPDATE_1.setId(1);
+        COURSE_REQUEST_FOR_UPDATE_1.setName("update1");
+        COURSE_REQUEST_FOR_UPDATE_1.setDescription("update1");
 
         doNothing().when(courseDao).update(COURSE_ENTITY_FOR_UPDATE_1);
         when(courseMapper.toEntity(COURSE_REQUEST_FOR_UPDATE_1)).thenReturn(COURSE_ENTITY_FOR_UPDATE_1);
@@ -210,16 +238,30 @@ class CourseServiceImplTest {
 
     @Test
     void editAll_inputCourseRequestListWhereOneCourseHasIncorrectName_expectedNothing() {
-        final Course COURSE_ENTITY_FOR_UPDATE_1 =
-                Course.builder().withId(1).withName("update1").withDescription("update1").build();
-        final CourseRequest COURSE_REQUEST_FOR_UPDATE_1 =
-                new CourseRequest(1, "update1", "update1");
-        final Course COURSE_ENTITY_FOR_UPDATE_2 =
-                Course.builder().withId(2).withName("update2").withDescription("update2").build();
-        final CourseRequest COURSE_REQUEST_FOR_UPDATE_2 =
-                new CourseRequest(2, "update2", "update2");
-        final CourseRequest COURSE_REQUEST_FOR_UPDATE_INCORRECT =
-                new CourseRequest(3, " ", "update3");
+        final Course COURSE_ENTITY_FOR_UPDATE_1 = Course.builder()
+                .withId(1)
+                .withName("update1")
+                .withDescription("update1")
+                .build();
+        final CourseRequest COURSE_REQUEST_FOR_UPDATE_1 = new CourseRequest();
+        COURSE_REQUEST_FOR_UPDATE_1.setId(1);
+        COURSE_REQUEST_FOR_UPDATE_1.setName("update1");
+        COURSE_REQUEST_FOR_UPDATE_1.setDescription("update1");
+
+        final Course COURSE_ENTITY_FOR_UPDATE_2 = Course.builder()
+                .withId(2)
+                .withName("update2")
+                .withDescription("update2")
+                .build();
+        final CourseRequest COURSE_REQUEST_FOR_UPDATE_2 = new CourseRequest();
+        COURSE_REQUEST_FOR_UPDATE_2.setId(2);
+        COURSE_REQUEST_FOR_UPDATE_2.setName("update2");
+        COURSE_REQUEST_FOR_UPDATE_2.setDescription("update2");
+
+        final CourseRequest COURSE_REQUEST_FOR_UPDATE_INCORRECT = new CourseRequest();
+        COURSE_REQUEST_FOR_UPDATE_INCORRECT.setId(3);
+        COURSE_REQUEST_FOR_UPDATE_INCORRECT.setName("   ");
+        COURSE_REQUEST_FOR_UPDATE_INCORRECT.setDescription("update3");
 
         final List<CourseRequest> inputList = new ArrayList<>();
         inputList.add(COURSE_REQUEST_FOR_UPDATE_1);

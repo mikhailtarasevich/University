@@ -24,7 +24,12 @@ class EducationFormValidatorImplTest {
     @Mock
     EducationFormDao educationFormDao;
 
-    private static final EducationFormRequest EDUCATION_FORM_REQUEST = new EducationFormRequest(1, "name");
+    private static final EducationFormRequest EDUCATION_FORM_REQUEST = new EducationFormRequest();
+
+    static {
+        EDUCATION_FORM_REQUEST.setId(1);
+        EDUCATION_FORM_REQUEST.setName("name");
+    }
 
     @Test
     void validateUniqueNameInDB_inputWithUniqueName_expectedNothing() {
@@ -53,7 +58,9 @@ class EducationFormValidatorImplTest {
 
     @Test
     void validateNameNotNullOrEmpty_inputEmptyName_expectedException() {
-        EducationFormRequest EDUCATION_FORM_REQUEST = new EducationFormRequest(1, " ");
+        EducationFormRequest EDUCATION_FORM_REQUEST = new EducationFormRequest();
+        EDUCATION_FORM_REQUEST.setId(1);
+        EDUCATION_FORM_REQUEST.setName("   ");
 
         assertThrows(IncorrectRequestData.class,
                 () -> educationFormValidator.validateNameNotNullOrEmpty(EDUCATION_FORM_REQUEST));
@@ -61,7 +68,9 @@ class EducationFormValidatorImplTest {
 
     @Test
     void validateNameNotNullOrEmpty_inputNullName_expectedException() {
-        EducationFormRequest EDUCATION_FORM_REQUEST = new EducationFormRequest(1, null);
+        EducationFormRequest EDUCATION_FORM_REQUEST = new EducationFormRequest();
+        EDUCATION_FORM_REQUEST.setId(1);
+        EDUCATION_FORM_REQUEST.setName(null);
 
         assertThrows(IncorrectRequestData.class,
                 () -> educationFormValidator.validateNameNotNullOrEmpty(EDUCATION_FORM_REQUEST));

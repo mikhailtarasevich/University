@@ -12,49 +12,64 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith(MockitoExtension.class)
 class StudentValidatorImplTest {
 
-    UserValidatorImpl<StudentRequest> studentValidator = new UserValidatorImpl<>();
+    private static final UserValidatorImpl<StudentRequest> studentValidator = new UserValidatorImpl<>();
 
     @Test
     void validateUserNameNotNullOrEmpty_inputCorrectNames_expectedNothing() {
-        StudentRequest studentRequest =
-                new StudentRequest(0, "firstName1", "lastName1",
-                        null, "1@email.com", null, null);
+        final StudentRequest studentRequest = new StudentRequest();
+        studentRequest.setId(1);
+        studentRequest.setFirstName("firstName1");
+        studentRequest.setLastName("lastName1");
+        studentRequest.setEmail("1@email.com");
+        studentRequest.setPassword("1111");
 
         assertDoesNotThrow(() -> studentValidator.validateUserNameNotNullOrEmpty(studentRequest));
     }
 
     @Test
     void validateUserNameNotNullOrEmpty_inputEmptyFirstName_expectedException() {
-        final StudentRequest studentRequest =
-                new StudentRequest(0, "  ", "lastName1",
-                        null, "1@email.com", null, null);
+        final StudentRequest studentRequest = new StudentRequest();
+        studentRequest.setId(1);
+        studentRequest.setFirstName("   ");
+        studentRequest.setLastName("lastName1");
+        studentRequest.setEmail("1@email.com");
+        studentRequest.setPassword("1111");
 
         assertThrows(IncorrectRequestData.class, () -> studentValidator.validateUserNameNotNullOrEmpty(studentRequest));
     }
 
     @Test
     void validateUserNameNotNullOrEmpty_inputLastNameEmpty_expectedException() {
-        final StudentRequest studentRequest =
-                new StudentRequest(0, "firstName1", "  ",
-                        null, "1@email.com", null, null);
+        final StudentRequest studentRequest = new StudentRequest();
+        studentRequest.setId(1);
+        studentRequest.setFirstName("firstName1");
+        studentRequest.setLastName("   ");
+        studentRequest.setEmail("1@email.com");
+        studentRequest.setPassword("1111");
 
         assertThrows(IncorrectRequestData.class, () -> studentValidator.validateUserNameNotNullOrEmpty(studentRequest));
     }
 
     @Test
     void validateUserNameNotNullOrEmpty_inputFirstNameNull_expectedException() {
-        final StudentRequest studentRequest =
-                new StudentRequest(0, null, "lastName1",
-                        null, "1@email.com", null, null);
+        final StudentRequest studentRequest = new StudentRequest();
+        studentRequest.setId(1);
+        studentRequest.setFirstName(null);
+        studentRequest.setLastName("lastName1");
+        studentRequest.setEmail("1@email.com");
+        studentRequest.setPassword("1111");
 
         assertThrows(IncorrectRequestData.class, () -> studentValidator.validateUserNameNotNullOrEmpty(studentRequest));
     }
 
     @Test
     void validateUserNameNotNullOrEmpty_inputLastNameNull_expectedException() {
-        final StudentRequest studentRequest =
-                new StudentRequest(0, "firstName1", null,
-                        null, "1@email.com", null, null);
+        final StudentRequest studentRequest = new StudentRequest();
+        studentRequest.setId(1);
+        studentRequest.setFirstName("firstName1");
+        studentRequest.setLastName(null);
+        studentRequest.setEmail("1@email.com");
+        studentRequest.setPassword("1111");
 
         assertThrows(IncorrectRequestData.class, () -> studentValidator.validateUserNameNotNullOrEmpty(studentRequest));
     }

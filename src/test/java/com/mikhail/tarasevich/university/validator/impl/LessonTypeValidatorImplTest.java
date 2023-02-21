@@ -24,8 +24,12 @@ class LessonTypeValidatorImplTest {
     @Mock
     LessonTypeDao lessonTypeDao;
 
-    private static final LessonTypeRequest LESSON_TYPE_REQUEST =
-            new LessonTypeRequest(1, "name1", null);
+    private static final LessonTypeRequest LESSON_TYPE_REQUEST = new LessonTypeRequest();
+
+    static {
+        LESSON_TYPE_REQUEST.setId(1);
+        LESSON_TYPE_REQUEST.setName("name1");
+    }
 
     @Test
     void validateUniqueNameInDB_inputWithUniqueName_expectedNothing() {
@@ -38,7 +42,8 @@ class LessonTypeValidatorImplTest {
 
     @Test
     void validateUniqueNameInDB_inputWithNotUniqueName_expectedException() {
-        when(lessonTypeDao.findByName(LESSON_TYPE_REQUEST.getName())).thenReturn(Optional.of(LessonType.builder().build()));
+        when(lessonTypeDao.findByName(LESSON_TYPE_REQUEST.getName()))
+                .thenReturn(Optional.of(LessonType.builder().build()));
 
         assertThrows(IncorrectRequestData.class, () -> lessonTypeValidator.validateUniqueNameInDB(LESSON_TYPE_REQUEST));
 
@@ -52,8 +57,9 @@ class LessonTypeValidatorImplTest {
 
     @Test
     void validateNameNotNullOrEmpty_inputEmptyName_expectedException() {
-        final LessonTypeRequest LESSON_TYPE_REQUEST =
-                new LessonTypeRequest(1, "  ", null);
+        final LessonTypeRequest LESSON_TYPE_REQUEST = new LessonTypeRequest();
+        LESSON_TYPE_REQUEST.setId(1);
+        LESSON_TYPE_REQUEST.setName("   ");
 
         assertThrows(IncorrectRequestData.class,
                 () -> lessonTypeValidator.validateNameNotNullOrEmpty(LESSON_TYPE_REQUEST));
@@ -61,8 +67,9 @@ class LessonTypeValidatorImplTest {
 
     @Test
     void validateNameNotNullOrEmpty_inputNullName_expectedException() {
-        final LessonTypeRequest LESSON_TYPE_REQUEST =
-                new LessonTypeRequest(1, null, null);
+        final LessonTypeRequest LESSON_TYPE_REQUEST = new LessonTypeRequest();
+        LESSON_TYPE_REQUEST.setId(1);
+        LESSON_TYPE_REQUEST.setName(null);
 
         assertThrows(IncorrectRequestData.class,
                 () -> lessonTypeValidator.validateNameNotNullOrEmpty(LESSON_TYPE_REQUEST));

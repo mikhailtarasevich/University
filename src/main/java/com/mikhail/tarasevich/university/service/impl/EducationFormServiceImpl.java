@@ -9,9 +9,8 @@ import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
 import com.mikhail.tarasevich.university.mapper.EducationFormMapper;
 import com.mikhail.tarasevich.university.service.EducationFormService;
 import com.mikhail.tarasevich.university.validator.EducationFormValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,23 +22,14 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@AllArgsConstructor
+@Log4j2
 public class EducationFormServiceImpl extends AbstractPageableService implements EducationFormService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(EducationFormServiceImpl.class);
 
     private final EducationFormDao educationFormDao;
     private final GroupDao groupDao;
     private final EducationFormMapper mapper;
     private final EducationFormValidator validator;
-
-    @Autowired
-    public EducationFormServiceImpl(EducationFormDao educationFormDao, GroupDao groupDao,
-                                    EducationFormMapper mapper, EducationFormValidator validator) {
-        this.educationFormDao = educationFormDao;
-        this.groupDao = groupDao;
-        this.mapper = mapper;
-        this.validator = validator;
-    }
 
     @Override
     public EducationFormResponse register(EducationFormRequest r) {
@@ -59,14 +49,15 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
             } catch (IncorrectRequestData e) {
-                LOG.info("The education forms were deleted from the save list. Request: {} .", r);
+                log.info("The education forms were deleted from the save list. Request: {} .", r);
             }
         });
 
         educationFormDao.saveAll(acceptableRequests.stream()
                 .map(mapper::toEntity)
                 .collect(Collectors.toList()));
-        LOG.info("The eduction forms were saved in the database. Saved education forms: {} .", acceptableRequests);
+        log.info("The eduction forms were saved in the database. Saved education forms: {} .",
+                acceptableRequests);
     }
 
     @Override
@@ -99,7 +90,7 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
             } catch (IncorrectRequestData e) {
-                LOG.info("The education form was deleted from the update list. Education form: {} .", r);
+                log.info("The education form was deleted from the update list. Education form: {} .", r);
             }
         });
 
@@ -120,7 +111,8 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
 
             return educationFormDao.deleteById(id);
         } else {
-            LOG.info("Delete was rejected. There is no education form with specified id in the database. Id = {}", id);
+            log.info("Delete was rejected. There is no education form with specified id in the database. Id = {}",
+                    id);
             return false;
         }
     }
@@ -131,7 +123,7 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
 
         boolean result = educationFormDao.deleteByIds(ids);
 
-        if (result) LOG.info("Education forms have been deleted. Deleted courses: {}", ids);
+        if (result) log.info("Education forms have been deleted. Deleted courses: {}", ids);
 
         return result;
     }

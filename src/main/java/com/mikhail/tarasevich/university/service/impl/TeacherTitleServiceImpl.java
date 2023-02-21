@@ -9,9 +9,8 @@ import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
 import com.mikhail.tarasevich.university.mapper.TeacherTitleMapper;
 import com.mikhail.tarasevich.university.service.TeacherTitleService;
 import com.mikhail.tarasevich.university.validator.TeacherTitleValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,23 +22,14 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@AllArgsConstructor
+@Log4j2
 public class TeacherTitleServiceImpl extends AbstractPageableService implements TeacherTitleService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(TeacherTitleServiceImpl.class);
 
     private final TeacherTitleDao teacherTitleDao;
     private final TeacherDao teacherDao;
     private final TeacherTitleMapper mapper;
     private final TeacherTitleValidator validator;
-
-    @Autowired
-    public TeacherTitleServiceImpl(TeacherTitleDao teacherTitleDao, TeacherDao teacherDao, TeacherTitleMapper mapper,
-                                   TeacherTitleValidator validator) {
-        this.teacherTitleDao = teacherTitleDao;
-        this.teacherDao = teacherDao;
-        this.mapper = mapper;
-        this.validator = validator;
-    }
 
     @Override
     public TeacherTitleResponse register(TeacherTitleRequest r) {
@@ -59,14 +49,15 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
             } catch (IncorrectRequestData e) {
-                LOG.info("The teacher title were deleted from the save list. The teacher title: {} .", r);
+                log.info("The teacher title were deleted from the save list. The teacher title: {} .", r);
             }
         });
 
         teacherTitleDao.saveAll(acceptableRequests.stream()
                 .map(mapper::toEntity)
                 .collect(Collectors.toList()));
-        LOG.info("The teacher titles were saved in the database. Saved teacher titles: {} .", acceptableRequests);
+        log.info("The teacher titles were saved in the database. Saved teacher titles: {} .",
+                acceptableRequests);
     }
 
     @Override
@@ -99,7 +90,7 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
             } catch (IncorrectRequestData e) {
-                LOG.info("The teacher title was deleted from the update list. The teacher title: {} .", r);
+                log.info("The teacher title was deleted from the update list. The teacher title: {} .", r);
             }
         });
 
@@ -120,7 +111,8 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
 
             return teacherTitleDao.deleteById(id);
         } else {
-            LOG.info("Delete was rejected. There is no teacher title with specified id in the database. Id = {}", id);
+            log.info("Delete was rejected. There is no teacher title with specified id in the database. Id = {}",
+                    id);
             return false;
         }
     }
@@ -131,7 +123,7 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
 
         boolean result = teacherTitleDao.deleteByIds(ids);
 
-        if (result) LOG.info("The teacher titles have been deleted. Deleted teacher titles: {}", ids);
+        if (result) log.info("The teacher titles have been deleted. Deleted teacher titles: {}", ids);
 
         return result;
     }

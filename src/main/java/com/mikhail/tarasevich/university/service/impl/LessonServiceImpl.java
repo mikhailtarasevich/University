@@ -8,9 +8,8 @@ import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
 import com.mikhail.tarasevich.university.mapper.LessonMapper;
 import com.mikhail.tarasevich.university.service.LessonService;
 import com.mikhail.tarasevich.university.validator.LessonValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,20 +21,13 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@AllArgsConstructor
+@Log4j2
 public class LessonServiceImpl extends AbstractPageableService implements LessonService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(LessonServiceImpl.class);
 
     private final LessonDao lessonDao;
     private final LessonMapper mapper;
     private final LessonValidator validator;
-
-    @Autowired
-    public LessonServiceImpl(LessonDao lessonDao, LessonMapper mapper, LessonValidator validator) {
-        this.lessonDao = lessonDao;
-        this.mapper = mapper;
-        this.validator = validator;
-    }
 
     @Override
     public LessonResponse register(LessonRequest r) {
@@ -55,14 +47,14 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
             } catch (IncorrectRequestData e) {
-                LOG.info("The lesson were deleted from the save list. The lesson: {} .", r);
+                log.info("The lesson were deleted from the save list. The lesson: {} .", r);
             }
         });
 
         lessonDao.saveAll(acceptableRequests.stream()
                 .map(mapper::toEntity)
                 .collect(Collectors.toList()));
-        LOG.info("The lessons were saved in the database. Saved lessons: {} .", acceptableRequests);
+        log.info("The lessons were saved in the database. Saved lessons: {} .", acceptableRequests);
     }
 
     @Override
@@ -95,7 +87,7 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
             } catch (IncorrectRequestData e) {
-                LOG.info("The lesson was deleted from the update list. The lesson: {} .", r);
+                log.info("The lesson was deleted from the update list. The lesson: {} .", r);
             }
         });
 
@@ -113,7 +105,7 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
         if (optionalCourseEntities.isPresent()) {
             return lessonDao.deleteById(id);
         } else {
-            LOG.info("Delete was rejected. There is no lesson with specified id in the database. Id = {}", id);
+            log.info("Delete was rejected. There is no lesson with specified id in the database. Id = {}", id);
             return false;
         }
     }
@@ -122,7 +114,7 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
     public boolean deleteByIds(Set<Integer> ids) {
         boolean result = lessonDao.deleteByIds(ids);
 
-        if (result) LOG.info("The lesson have been deleted. Deleted lessons: {}", ids);
+        if (result) log.info("The lesson have been deleted. Deleted lessons: {}", ids);
 
         return result;
     }

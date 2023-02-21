@@ -4,7 +4,6 @@ import com.mikhail.tarasevich.university.dto.TeacherRequest;
 import com.mikhail.tarasevich.university.dto.TeacherResponse;
 import com.mikhail.tarasevich.university.entity.Teacher;
 import com.mikhail.tarasevich.university.mapper.TeacherMapper;
-import com.mikhail.tarasevich.university.mapper.UserMapper;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -26,8 +25,16 @@ public class TeacherMapperImpl implements TeacherMapper {
 
     @Override
     public TeacherResponse toResponse(Teacher t) {
-        return new TeacherResponse(t.getId(), t.getFirstName(), t.getLastName(), t.getGender(), t.getEmail(),
-                t.getGroups(), t.getCourses(), t.getTeacherTitle(), t.getDepartment());
+        TeacherResponse teacherResponse = new TeacherResponse();
+        teacherResponse.setId(t.getId());
+        teacherResponse.setFirstName(t.getFirstName());
+        teacherResponse.setLastName(t.getLastName());
+        teacherResponse.setGender(t.getGender());
+        teacherResponse.setEmail(t.getEmail());
+        teacherResponse.setTeacherTitle(t.getTeacherTitle());
+        teacherResponse.setDepartment(t.getDepartment());
+
+        return teacherResponse;
     }
 
 }

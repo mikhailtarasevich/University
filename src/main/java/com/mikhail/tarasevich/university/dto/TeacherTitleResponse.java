@@ -1,20 +1,11 @@
 package com.mikhail.tarasevich.university.dto;
 
-public class TeacherTitleResponse extends DtoWithUniqueName{
+import lombok.*;
 
-    public TeacherTitleResponse() {
-    }
+@Data
+public class TeacherTitleResponse {
 
-    public TeacherTitleResponse(int id, String name) {
-        super(id, name);
-    }
-
-    @Override
-    public String toString() {
-        return "TeacherTitleResponse{" +
-                "id=" + id +
-                ", name='" + name +
-                '}';
-    }
+    private int id;
+    private String name;
 
 }

@@ -9,8 +9,7 @@ import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
 import com.mikhail.tarasevich.university.mapper.UserMapper;
 import com.mikhail.tarasevich.university.service.UserService;
 import com.mikhail.tarasevich.university.validator.UserValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
@@ -18,11 +17,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Log4j2
 public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST extends UserRequest,
         RESPONSE extends UserResponse, U extends User>
         extends AbstractPageableService implements UserService<REQUEST, RESPONSE> {
-
-    protected static final Logger LOG = LoggerFactory.getLogger(AbstractUserPageableService.class);
 
     protected final D userDao;
     protected final PasswordEncoder passwordEncoder;
@@ -61,7 +59,7 @@ public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST 
                     u.setPassword(passwordEncoder.encode(u.getPassword()));
                     acceptableRequests.add(u);
                 } catch (IncorrectRequestData e) {
-                    LOG.info("The users were deleted from the save list. User: {} .", u);
+                    log.info("The users were deleted from the save list. User: {} .", u);
                 }
             }
         });
@@ -70,7 +68,7 @@ public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST 
                 .map(userMapper::toEntity)
                 .collect(Collectors.toList()));
 
-        LOG.info("The users were saved in the database. Saved courses: {} .", acceptableRequests);
+        log.info("The users were saved in the database. Saved courses: {} .", acceptableRequests);
     }
 
     @Override
@@ -105,7 +103,7 @@ public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST 
                 u.setPassword(passwordEncoder.encode(u.getPassword()));
                 acceptableRequests.add(u);
             } catch (IncorrectRequestData e) {
-                LOG.info("The users were deleted from the update list. User: {} .", u);
+                log.info("The users were deleted from the update list. User: {} .", u);
             }
         });
 

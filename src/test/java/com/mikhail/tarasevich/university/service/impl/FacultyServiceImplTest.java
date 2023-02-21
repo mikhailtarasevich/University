@@ -34,29 +34,51 @@ class FacultyServiceImplTest {
     @Mock
     FacultyValidator facultyValidator;
 
-    private static final Faculty FACULTY_ENTITY_1 =
-            Faculty.builder().withName("name1").withDescription("description1").build();
-    private static final Faculty FACULTY_ENTITY_WITH_ID_1 =
-            Faculty.builder().withId(1).withName("name1").withDescription("description1").build();
-    private static final FacultyRequest FACULTY_REQUEST_1 =
-            new FacultyRequest(0, "name1", "description1");
-    private static final FacultyResponse FACULTY_RESPONSE_WITH_ID_1 =
-            new FacultyResponse(1, "name1", "description1");
+    private static final Faculty FACULTY_ENTITY_1 = Faculty.builder()
+            .withName("name1")
+            .withDescription("description1")
+            .build();
+    private static final Faculty FACULTY_ENTITY_WITH_ID_1 = Faculty.builder()
+            .withId(1)
+            .withName("name1")
+            .withDescription("description1")
+            .build();
+    private static final FacultyRequest FACULTY_REQUEST_1 = new FacultyRequest();
+    private static final FacultyResponse FACULTY_RESPONSE_WITH_ID_1 = new FacultyResponse();
 
-    private static final Faculty FACULTY_ENTITY_2 =
-            Faculty.builder().withName("name2").withDescription("description2").build();
-    private static final Faculty FACULTY_ENTITY_WITH_ID_2 =
-            Faculty.builder().withId(2).withName("name2").withDescription("description2").build();
-    private static final FacultyRequest FACULTY_REQUEST_2 =
-            new FacultyRequest(0, "name2", "description2");
-    private static final FacultyResponse FACULTY_RESPONSE_WITH_ID_2 =
-            new FacultyResponse(2, "name2", "description2");
+    private static final Faculty FACULTY_ENTITY_2 = Faculty.builder()
+            .withName("name2")
+            .withDescription("description2")
+            .build();
+    private static final Faculty FACULTY_ENTITY_WITH_ID_2 = Faculty.builder()
+            .withId(2)
+            .withName("name2")
+            .withDescription("description2")
+            .build();
+    private static final FacultyRequest FACULTY_REQUEST_2 = new FacultyRequest();
+    private static final FacultyResponse FACULTY_RESPONSE_WITH_ID_2 = new FacultyResponse();
 
-    private final List<Faculty> facultyEntities = new ArrayList<>();
-    private final List<Faculty> facultyEntitiesWithId = new ArrayList<>();
-    private final List<FacultyResponse> facultyResponses = new ArrayList<>();
+    private static final List<Faculty> facultyEntities = new ArrayList<>();
+    private static final List<Faculty> facultyEntitiesWithId = new ArrayList<>();
+    private static final List<FacultyResponse> facultyResponses = new ArrayList<>();
 
-    {
+    static {
+        FACULTY_REQUEST_1.setId(0);
+        FACULTY_REQUEST_1.setName("name1");
+        FACULTY_REQUEST_1.setDescription("description1");
+
+        FACULTY_RESPONSE_WITH_ID_1.setId(1);
+        FACULTY_RESPONSE_WITH_ID_1.setName("name1");
+        FACULTY_RESPONSE_WITH_ID_1.setDescription("description1");
+
+        FACULTY_REQUEST_2.setId(0);
+        FACULTY_REQUEST_2.setName("name2");
+        FACULTY_REQUEST_2.setDescription("description2");
+
+        FACULTY_RESPONSE_WITH_ID_2.setId(2);
+        FACULTY_RESPONSE_WITH_ID_2.setName("name2");
+        FACULTY_RESPONSE_WITH_ID_2.setDescription("description2");
+
         facultyEntities.add(FACULTY_ENTITY_1);
         facultyEntities.add(FACULTY_ENTITY_2);
 
@@ -95,7 +117,8 @@ class FacultyServiceImplTest {
         when(facultyMapper.toEntity(FACULTY_REQUEST_1)).thenReturn(FACULTY_ENTITY_1);
         when(facultyMapper.toEntity(FACULTY_REQUEST_2)).thenReturn(FACULTY_ENTITY_2);
         doNothing().when(facultyDao).saveAll(facultyEntities);
-        doNothing().doThrow(new IncorrectRequestData()).when(facultyValidator).validateUniqueNameInDB(FACULTY_REQUEST_1);
+        doNothing().doThrow(new IncorrectRequestData())
+                .when(facultyValidator).validateUniqueNameInDB(FACULTY_REQUEST_1);
         doNothing().when(facultyValidator).validateNameNotNullOrEmpty(FACULTY_REQUEST_1);
         doNothing().when(facultyValidator).validateUniqueNameInDB(FACULTY_REQUEST_2);
         doNothing().when(facultyValidator).validateNameNotNullOrEmpty(FACULTY_REQUEST_2);
@@ -141,10 +164,15 @@ class FacultyServiceImplTest {
 
     @Test
     void edit_inputFacultyRequest_expectedNothing() {
-        final Faculty FACULTY_ENTITY_FOR_UPDATE_1 =
-                Faculty.builder().withId(1).withName("update1").withDescription("update1").build();
-        final FacultyRequest FACULTY_REQUEST_FOR_UPDATE_1 =
-                new FacultyRequest(1, "update1", "update1");
+        final Faculty FACULTY_ENTITY_FOR_UPDATE_1 = Faculty.builder()
+                .withId(1)
+                .withName("update1")
+                .withDescription("update1")
+                .build();
+        final FacultyRequest FACULTY_REQUEST_FOR_UPDATE_1 = new FacultyRequest();
+        FACULTY_REQUEST_FOR_UPDATE_1.setId(1);
+        FACULTY_REQUEST_FOR_UPDATE_1.setName("update1");
+        FACULTY_REQUEST_FOR_UPDATE_1.setDescription("update1");
 
         doNothing().when(facultyDao).update(FACULTY_ENTITY_FOR_UPDATE_1);
         when(facultyMapper.toEntity(FACULTY_REQUEST_FOR_UPDATE_1)).thenReturn(FACULTY_ENTITY_FOR_UPDATE_1);
@@ -157,16 +185,30 @@ class FacultyServiceImplTest {
 
     @Test
     void editAll_inputFacultyRequestListWhereOneFacultyHasIncorrectName_expectedNothing() {
-        final Faculty FACULTY_ENTITY_FOR_UPDATE_1 =
-                Faculty.builder().withId(1).withName("update1").withDescription("update1").build();
-        final FacultyRequest FACULTY_REQUEST_FOR_UPDATE_1 =
-                new FacultyRequest(1, "update1", "update1");
-        final Faculty FACULTY_ENTITY_FOR_UPDATE_2 =
-                Faculty.builder().withId(2).withName("update2").withDescription("update2").build();
-        final FacultyRequest FACULTY_REQUEST_FOR_UPDATE_2 =
-                new FacultyRequest(2, "update2", "update2");
-        final FacultyRequest FACULTY_REQUEST_FOR_UPDATE_INCORRECT =
-                new FacultyRequest(3, " ", "update3");
+        final Faculty FACULTY_ENTITY_FOR_UPDATE_1 = Faculty.builder()
+                .withId(1)
+                .withName("update1")
+                .withDescription("update1")
+                .build();
+        final FacultyRequest FACULTY_REQUEST_FOR_UPDATE_1 = new FacultyRequest();
+        FACULTY_REQUEST_FOR_UPDATE_1.setId(1);
+        FACULTY_REQUEST_FOR_UPDATE_1.setName("update1");
+        FACULTY_REQUEST_FOR_UPDATE_1.setDescription("update1");
+
+        final Faculty FACULTY_ENTITY_FOR_UPDATE_2 = Faculty.builder()
+                .withId(2)
+                .withName("update2")
+                .withDescription("update2")
+                .build();
+        final FacultyRequest FACULTY_REQUEST_FOR_UPDATE_2 = new FacultyRequest();
+        FACULTY_REQUEST_FOR_UPDATE_2.setId(2);
+        FACULTY_REQUEST_FOR_UPDATE_2.setName("update2");
+        FACULTY_REQUEST_FOR_UPDATE_2.setDescription("update2");
+
+        final FacultyRequest FACULTY_REQUEST_FOR_UPDATE_INCORRECT = new FacultyRequest();
+        FACULTY_REQUEST_FOR_UPDATE_INCORRECT.setId(3);
+        FACULTY_REQUEST_FOR_UPDATE_INCORRECT.setName("  ");
+        FACULTY_REQUEST_FOR_UPDATE_INCORRECT.setDescription("update3");
 
         final List<FacultyRequest> inputList = new ArrayList<>();
         inputList.add(FACULTY_REQUEST_FOR_UPDATE_1);
@@ -179,7 +221,8 @@ class FacultyServiceImplTest {
 
         doNothing().when(facultyValidator).validateNameNotNullOrEmpty(FACULTY_REQUEST_FOR_UPDATE_1);
         doNothing().when(facultyValidator).validateNameNotNullOrEmpty(FACULTY_REQUEST_FOR_UPDATE_2);
-        doThrow(new IncorrectRequestData()).when(facultyValidator).validateNameNotNullOrEmpty(FACULTY_REQUEST_FOR_UPDATE_INCORRECT);
+        doThrow(new IncorrectRequestData()).when(facultyValidator)
+                .validateNameNotNullOrEmpty(FACULTY_REQUEST_FOR_UPDATE_INCORRECT);
 
         when(facultyMapper.toEntity(FACULTY_REQUEST_FOR_UPDATE_1)).thenReturn(FACULTY_ENTITY_FOR_UPDATE_1);
         when(facultyMapper.toEntity(FACULTY_REQUEST_FOR_UPDATE_2)).thenReturn(FACULTY_ENTITY_FOR_UPDATE_2);
@@ -191,9 +234,12 @@ class FacultyServiceImplTest {
         verify(facultyMapper, times(1)).toEntity(FACULTY_REQUEST_FOR_UPDATE_1);
         verify(facultyMapper, times(1)).toEntity(FACULTY_REQUEST_FOR_UPDATE_2);
         verify(facultyDao, times(1)).updateAll(listForUpdate);
-        verify(facultyValidator, times(1)).validateNameNotNullOrEmpty(FACULTY_REQUEST_FOR_UPDATE_1);
-        verify(facultyValidator, times(1)).validateNameNotNullOrEmpty(FACULTY_REQUEST_FOR_UPDATE_2);
-        verify(facultyValidator, times(1)).validateNameNotNullOrEmpty(FACULTY_REQUEST_FOR_UPDATE_INCORRECT);
+        verify(facultyValidator, times(1))
+                .validateNameNotNullOrEmpty(FACULTY_REQUEST_FOR_UPDATE_1);
+        verify(facultyValidator, times(1))
+                .validateNameNotNullOrEmpty(FACULTY_REQUEST_FOR_UPDATE_2);
+        verify(facultyValidator, times(1))
+                .validateNameNotNullOrEmpty(FACULTY_REQUEST_FOR_UPDATE_INCORRECT);
     }
 
     @Test

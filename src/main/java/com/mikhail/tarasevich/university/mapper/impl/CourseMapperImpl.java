@@ -19,8 +19,13 @@ public class CourseMapperImpl implements CourseMapper {
     }
 
     @Override
-    public CourseResponse toResponse(Course course) {
-        return new CourseResponse(course.getId(), course.getName(), course.getDescription());
+    public CourseResponse toResponse(Course c) {
+        CourseResponse courseResponse = new CourseResponse();
+        courseResponse.setId(c.getId());
+        courseResponse.setName(c.getName());
+        courseResponse.setDescription(c.getDescription());
+
+        return courseResponse;
     }
 
 }

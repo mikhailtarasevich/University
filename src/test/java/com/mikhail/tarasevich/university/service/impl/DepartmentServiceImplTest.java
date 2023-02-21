@@ -37,30 +37,53 @@ class DepartmentServiceImplTest {
     @Mock
     DepartmentValidator departmentValidator;
 
-    private static final Department DEPARTMENT_ENTITY_1 =
-            Department.builder().withName("name1").withDescription("description1").build();
-    private static final Department DEPARTMENT_ENTITY_WITH_ID_1 =
-            Department.builder().withId(1).withName("name1").withDescription("description1").build();
-    private static final DepartmentRequest DEPARTMENT_REQUEST_1 =
-            new DepartmentRequest(0, "name1", "description1", new ArrayList<>(), new ArrayList<>());
-    private static final DepartmentResponse DEPARTMENT_RESPONSE_WITH_ID_1 =
-            new DepartmentResponse(1, "name1", "description1", new ArrayList<>(), new ArrayList<>());
+    private static final Department DEPARTMENT_ENTITY_1 = Department.builder()
+            .withName("name1")
+            .withDescription("description1")
+            .build();
+    private static final Department DEPARTMENT_ENTITY_WITH_ID_1 = Department.builder()
+            .withId(1)
+            .withName("name1")
+            .withDescription("description1")
+            .build();
+    private static final DepartmentRequest DEPARTMENT_REQUEST_1 = new DepartmentRequest();
+    private static final DepartmentResponse DEPARTMENT_RESPONSE_WITH_ID_1 = new DepartmentResponse();
 
-    private static final Department DEPARTMENT_ENTITY_2 =
-            Department.builder().withName("name2").withDescription("description2").build();
-    private static final Department DEPARTMENT_ENTITY_WITH_ID_2 =
-            Department.builder().withId(2).withName("name2").withDescription("description2").build();
-    private static final DepartmentRequest DEPARTMENT_REQUEST_2 =
-            new DepartmentRequest(0, "name2", "description2", new ArrayList<>(), new ArrayList<>());
-    private static final DepartmentResponse DEPARTMENT_RESPONSE_WITH_ID_2 =
-            new DepartmentResponse(2, "name2", "description2", new ArrayList<>(), new ArrayList<>());
+    private static final Department DEPARTMENT_ENTITY_2 = Department.builder()
+            .withName("name2")
+            .withDescription("description2")
+            .build();
+    private static final Department DEPARTMENT_ENTITY_WITH_ID_2 = Department.builder()
+            .withId(2)
+            .withName("name2")
+            .withDescription("description2")
+            .build();
+    private static final DepartmentRequest DEPARTMENT_REQUEST_2 = new DepartmentRequest();
+    private static final DepartmentResponse DEPARTMENT_RESPONSE_WITH_ID_2 = new DepartmentResponse();
 
 
-    private final List<Department> departmentEntities = new ArrayList<>();
-    private final List<Department> departmentEntitiesWithId = new ArrayList<>();
-    private final List<DepartmentResponse> departmentResponses = new ArrayList<>();
+    private static final List<Department> departmentEntities = new ArrayList<>();
+    private static final List<Department> departmentEntitiesWithId = new ArrayList<>();
+    private static final List<DepartmentResponse> departmentResponses = new ArrayList<>();
 
-    {
+    static {
+        DEPARTMENT_REQUEST_1.setId(0);
+        DEPARTMENT_REQUEST_1.setName("name1");
+        DEPARTMENT_REQUEST_1.setDescription("description1");
+
+        DEPARTMENT_RESPONSE_WITH_ID_1.setId(1);
+        DEPARTMENT_RESPONSE_WITH_ID_1.setName("name1");
+        DEPARTMENT_RESPONSE_WITH_ID_1.setDescription("description1");
+
+        DEPARTMENT_REQUEST_2.setId(0);
+        DEPARTMENT_REQUEST_2.setName("name2");
+        DEPARTMENT_REQUEST_2.setDescription("description2");
+
+        DEPARTMENT_RESPONSE_WITH_ID_2.setId(2);
+        DEPARTMENT_RESPONSE_WITH_ID_2.setName("name2");
+        DEPARTMENT_RESPONSE_WITH_ID_2.setDescription("description2");
+
+
         departmentEntities.add(DEPARTMENT_ENTITY_1);
         departmentEntities.add(DEPARTMENT_ENTITY_2);
 
@@ -99,7 +122,8 @@ class DepartmentServiceImplTest {
         when(departmentMapper.toEntity(DEPARTMENT_REQUEST_1)).thenReturn(DEPARTMENT_ENTITY_1);
         when(departmentMapper.toEntity(DEPARTMENT_REQUEST_2)).thenReturn(DEPARTMENT_ENTITY_2);
         doNothing().when(departmentDao).saveAll(departmentEntities);
-        doNothing().doThrow(new IncorrectRequestData()).when(departmentValidator).validateUniqueNameInDB(DEPARTMENT_REQUEST_1);
+        doNothing().doThrow(new IncorrectRequestData()).when(departmentValidator)
+                .validateUniqueNameInDB(DEPARTMENT_REQUEST_1);
         doNothing().when(departmentValidator).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_1);
         doNothing().when(departmentValidator).validateUniqueNameInDB(DEPARTMENT_REQUEST_2);
         doNothing().when(departmentValidator).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_2);
@@ -129,7 +153,8 @@ class DepartmentServiceImplTest {
 
     @Test
     void findAll_inputPageOne_expectedFoundDepartmentsFromPageOne() {
-        when(departmentDao.findAll(1, AbstractPageableService.ITEMS_PER_PAGE)).thenReturn(departmentEntitiesWithId);
+        when(departmentDao.findAll(1, AbstractPageableService.ITEMS_PER_PAGE))
+                .thenReturn(departmentEntitiesWithId);
         when(departmentDao.count()).thenReturn(2L);
         when(departmentMapper.toResponse(DEPARTMENT_ENTITY_WITH_ID_1)).thenReturn(DEPARTMENT_RESPONSE_WITH_ID_1);
         when(departmentMapper.toResponse(DEPARTMENT_ENTITY_WITH_ID_2)).thenReturn(DEPARTMENT_RESPONSE_WITH_ID_2);
@@ -145,10 +170,16 @@ class DepartmentServiceImplTest {
 
     @Test
     void edit_inputDepartmentRequest_expectedNothing() {
-        final Department DEPARTMENT_ENTITY_FOR_UPDATE_1 =
-                Department.builder().withId(1).withName("update1").withDescription("update1").build();
-        final DepartmentRequest DEPARTMENT_REQUEST_FOR_UPDATE_1 =
-                new DepartmentRequest(1, "update1", "update1", new ArrayList<>(), new ArrayList<>());
+        final Department DEPARTMENT_ENTITY_FOR_UPDATE_1 = Department.builder()
+                .withId(1)
+                .withName("update1")
+                .withDescription("update1")
+                .build();
+
+        final DepartmentRequest DEPARTMENT_REQUEST_FOR_UPDATE_1 = new DepartmentRequest();
+        DEPARTMENT_REQUEST_FOR_UPDATE_1.setId(1);
+        DEPARTMENT_REQUEST_FOR_UPDATE_1.setName("update1");
+        DEPARTMENT_REQUEST_FOR_UPDATE_1.setDescription("update1");
 
         doNothing().when(departmentDao).update(DEPARTMENT_ENTITY_FOR_UPDATE_1);
         when(departmentMapper.toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_1)).thenReturn(DEPARTMENT_ENTITY_FOR_UPDATE_1);
@@ -161,16 +192,31 @@ class DepartmentServiceImplTest {
 
     @Test
     void editAll_inputDepartmentRequestListWhereOneDepartmentHasIncorrectName_expectedNothing() {
-        final Department DEPARTMENT_ENTITY_FOR_UPDATE_1 =
-                Department.builder().withId(1).withName("update1").withDescription("update1").build();
-        final DepartmentRequest DEPARTMENT_REQUEST_FOR_UPDATE_1 =
-                new DepartmentRequest(1, "update1", "update1", new ArrayList<>(), new ArrayList<>());
-        final Department DEPARTMENT_ENTITY_FOR_UPDATE_2 =
-                Department.builder().withId(2).withName("update2").withDescription("update2").build();
-        final DepartmentRequest DEPARTMENT_REQUEST_FOR_UPDATE_2 =
-                new DepartmentRequest(2, "update2", "update2", new ArrayList<>(), new ArrayList<>());
-        final DepartmentRequest DEPARTMENT_REQUEST_FOR_UPDATE_INCORRECT =
-                new DepartmentRequest(3, " ", "update3", new ArrayList<>(), new ArrayList<>());
+        final Department DEPARTMENT_ENTITY_FOR_UPDATE_1 = Department.builder()
+                .withId(1)
+                .withName("update1")
+                .withDescription("update1")
+                .build();
+
+        final DepartmentRequest DEPARTMENT_REQUEST_FOR_UPDATE_1 = new DepartmentRequest();
+        DEPARTMENT_REQUEST_FOR_UPDATE_1.setId(1);
+        DEPARTMENT_REQUEST_FOR_UPDATE_1.setName("update1");
+        DEPARTMENT_REQUEST_FOR_UPDATE_1.setDescription("update1");
+
+        final Department DEPARTMENT_ENTITY_FOR_UPDATE_2 = Department.builder()
+                .withId(2)
+                .withName("update2")
+                .withDescription("update2")
+                .build();
+        final DepartmentRequest DEPARTMENT_REQUEST_FOR_UPDATE_2 = new DepartmentRequest();
+        DEPARTMENT_REQUEST_FOR_UPDATE_2.setId(2);
+        DEPARTMENT_REQUEST_FOR_UPDATE_2.setName("update2");
+        DEPARTMENT_REQUEST_FOR_UPDATE_2.setDescription("update2");
+
+        final DepartmentRequest DEPARTMENT_REQUEST_FOR_UPDATE_INCORRECT = new DepartmentRequest();
+        DEPARTMENT_REQUEST_FOR_UPDATE_INCORRECT.setId(3);
+        DEPARTMENT_REQUEST_FOR_UPDATE_INCORRECT.setName("   ");
+        DEPARTMENT_REQUEST_FOR_UPDATE_INCORRECT.setDescription("update3");
 
         final List<DepartmentRequest> inputList = new ArrayList<>();
         inputList.add(DEPARTMENT_REQUEST_FOR_UPDATE_1);
@@ -183,7 +229,8 @@ class DepartmentServiceImplTest {
 
         doNothing().when(departmentValidator).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_1);
         doNothing().when(departmentValidator).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_2);
-        doThrow(new IncorrectRequestData()).when(departmentValidator).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_INCORRECT);
+        doThrow(new IncorrectRequestData()).when(departmentValidator)
+                .validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_INCORRECT);
 
         when(departmentMapper.toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_1)).thenReturn(DEPARTMENT_ENTITY_FOR_UPDATE_1);
         when(departmentMapper.toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_2)).thenReturn(DEPARTMENT_ENTITY_FOR_UPDATE_2);
@@ -195,9 +242,12 @@ class DepartmentServiceImplTest {
         verify(departmentMapper, times(1)).toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_1);
         verify(departmentMapper, times(1)).toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_2);
         verify(departmentDao, times(1)).updateAll(listForUpdate);
-        verify(departmentValidator, times(1)).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_1);
-        verify(departmentValidator, times(1)).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_2);
-        verify(departmentValidator, times(1)).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_INCORRECT);
+        verify(departmentValidator, times(1))
+                .validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_1);
+        verify(departmentValidator, times(1))
+                .validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_2);
+        verify(departmentValidator, times(1))
+                .validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_INCORRECT);
     }
 
     @Test

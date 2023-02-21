@@ -8,9 +8,8 @@ import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
 import com.mikhail.tarasevich.university.mapper.CourseMapper;
 import com.mikhail.tarasevich.university.service.CourseService;
 import com.mikhail.tarasevich.university.validator.CourseValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,9 +21,10 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@AllArgsConstructor
+@Log4j2
 public class CourseServiceImpl extends AbstractPageableService implements CourseService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CourseServiceImpl.class);
 
     private final CourseDao courseDao;
     private final DepartmentDao departmentDao;
@@ -32,18 +32,6 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     private final TeacherDao teacherDao;
     private final CourseMapper mapper;
     private final CourseValidator validator;
-
-    @Autowired
-    public CourseServiceImpl(CourseDao courseDao, DepartmentDao departmentDao, LessonDao lessonDao,
-                             TeacherDao teacherDao, CourseMapper mapper,
-                             CourseValidator validator) {
-        this.courseDao = courseDao;
-        this.departmentDao = departmentDao;
-        this.lessonDao = lessonDao;
-        this.teacherDao = teacherDao;
-        this.mapper = mapper;
-        this.validator = validator;
-    }
 
 
     @Override
@@ -64,14 +52,14 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
             } catch (IncorrectRequestData e) {
-                LOG.info("The request were deleted from the save list. Request: {} .", r);
+                log.info("The request were deleted from the save list. Request: {} .", r);
             }
         });
 
         courseDao.saveAll(acceptableRequests.stream()
                 .map(mapper::toEntity)
                 .collect(Collectors.toList()));
-        LOG.info("Courses were saved in the database. Saved courses: {} .", acceptableRequests);
+        log.info("Courses were saved in the database. Saved courses: {} .", acceptableRequests);
     }
 
     @Override
@@ -104,7 +92,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
             } catch (IncorrectRequestData e) {
-                LOG.info("The course was deleted from the update list. The course: {} .", r);
+                log.info("The course was deleted from the update list. The course: {} .", r);
             }
         });
 
@@ -125,7 +113,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
 
             return courseDao.deleteById(id);
         } else {
-            LOG.info("Delete was rejected. There is no courses with specified id in the database. Id = {}", id);
+            log.info("Delete was rejected. There is no courses with specified id in the database. Id = {}", id);
             return false;
         }
     }
@@ -136,7 +124,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
 
         boolean result = courseDao.deleteByIds(ids);
 
-        if (result) LOG.info("Courses have been deleted. Deleted courses: {}", ids);
+        if (result) log.info("Courses have been deleted. Deleted courses: {}", ids);
 
         return result;
     }
@@ -158,13 +146,15 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     @Override
     public void subscribeCourseToDepartment(int departmentId, int courseId) {
         departmentDao.addCourseToDepartment(departmentId, courseId);
-        LOG.info("Course with id = {} have been subscribed to department with id = {}", courseId, departmentId);
+        log.info("Course with id = {} have been subscribed to department with id = {}",
+                courseId, departmentId);
     }
 
     @Override
     public void unsubscribeCourseFromDepartment(int departmentId, int courseId) {
         departmentDao.deleteCourseFromDepartment(departmentId, courseId);
-        LOG.info("Course with id = {} have been unsubscribed from department with id = {}", courseId, departmentId);
+        log.info("Course with id = {} have been unsubscribed from department with id = {}",
+                courseId, departmentId);
     }
 
     private void unbindDependenciesBeforeDelete(int id) {

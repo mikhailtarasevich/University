@@ -24,8 +24,12 @@ class LessonValidatorImplTest {
     @Mock
     LessonDao lessonDao;
 
-    private static final LessonRequest LESSON_REQUEST =
-            new LessonRequest(1, "name1", null, null, null, null, null);
+    private static final LessonRequest LESSON_REQUEST = new LessonRequest();
+
+    static {
+        LESSON_REQUEST.setId(1);
+        LESSON_REQUEST.setName("name1");
+    }
 
     @Test
     void validateUniqueNameInDB_inputWithUniqueName_expectedNothing() {
@@ -52,16 +56,18 @@ class LessonValidatorImplTest {
 
     @Test
     void validateNameNotNullOrEmpty_inputEmptyName_expectedException() {
-        final LessonRequest LESSON_REQUEST =
-                new LessonRequest(1, "  ", null, null, null, null, null);
+        final LessonRequest LESSON_REQUEST = new LessonRequest();
+        LESSON_REQUEST.setId(1);
+        LESSON_REQUEST.setName("  ");
 
         assertThrows(IncorrectRequestData.class, () -> lessonValidator.validateNameNotNullOrEmpty(LESSON_REQUEST));
     }
 
     @Test
     void validateNameNotNullOrEmpty_inputNullName_expectedException() {
-        final LessonRequest LESSON_REQUEST =
-                new LessonRequest(1, null, null, null, null, null, null);
+        final LessonRequest LESSON_REQUEST = new LessonRequest();
+        LESSON_REQUEST.setId(1);
+        LESSON_REQUEST.setName(null);
 
         assertThrows(IncorrectRequestData.class, () -> lessonValidator.validateNameNotNullOrEmpty(LESSON_REQUEST));
     }

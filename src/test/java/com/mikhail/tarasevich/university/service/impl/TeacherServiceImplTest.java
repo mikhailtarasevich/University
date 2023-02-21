@@ -57,12 +57,8 @@ class TeacherServiceImplTest {
                     .withLastName("lastName1")
                     .withEmail("1@email.com")
                     .build();
-    private static final TeacherRequest TEACHER_REQUEST_1 =
-            new TeacherRequest(0, "firstName1", "lastName1",
-                    null, "1@email.com", null, null, null, null, null);
-    private static final TeacherResponse TEACHER_RESPONSE_WITH_ID_1 =
-            new TeacherResponse(1, "firstName1", "lastName1",
-                    null, "1@email.com", null, null, null, null);
+    private static final TeacherRequest TEACHER_REQUEST_1 = new TeacherRequest();
+    private static final TeacherResponse TEACHER_RESPONSE_WITH_ID_1 = new TeacherResponse();
 
     private static final Teacher TEACHER_ENTITY_2 =
             Teacher.builder()
@@ -77,18 +73,36 @@ class TeacherServiceImplTest {
                     .withLastName("lastName2")
                     .withEmail("2@email.com")
                     .build();
-    private static final TeacherRequest TEACHER_REQUEST_2 =
-            new TeacherRequest(0, "firstName2", "lastName2",
-                    null, "2@email.com", null, null, null, null, null);
-    private static final TeacherResponse TEACHER_RESPONSE_WITH_ID_2 =
-            new TeacherResponse(2, "firstName2", "lastName2",
-                    null, "2@email.com", null, null, null, null);
+    private static final TeacherRequest TEACHER_REQUEST_2 = new TeacherRequest();
+    private static final TeacherResponse TEACHER_RESPONSE_WITH_ID_2 = new TeacherResponse();
 
-    private final List<Teacher> teacherEntities = new ArrayList<>();
-    private final List<Teacher> teacherEntitiesWithId = new ArrayList<>();
-    private final List<TeacherResponse> teacherResponses = new ArrayList<>();
+    private static final List<Teacher> teacherEntities = new ArrayList<>();
+    private static final List<Teacher> teacherEntitiesWithId = new ArrayList<>();
+    private static final List<TeacherResponse> teacherResponses = new ArrayList<>();
 
-    {
+    static {
+        TEACHER_REQUEST_1.setId(0);
+        TEACHER_REQUEST_1.setFirstName("firstName1");
+        TEACHER_REQUEST_1.setLastName("lastName1");
+        TEACHER_REQUEST_1.setEmail("1@email.com");
+        TEACHER_REQUEST_1.setPassword("1111");
+
+        TEACHER_RESPONSE_WITH_ID_1.setId(1);
+        TEACHER_RESPONSE_WITH_ID_1.setFirstName("firstName1");
+        TEACHER_RESPONSE_WITH_ID_1.setLastName("lastName1");
+        TEACHER_RESPONSE_WITH_ID_1.setEmail("1@email.com");
+
+        TEACHER_REQUEST_2.setId(0);
+        TEACHER_REQUEST_2.setFirstName("firstName2");
+        TEACHER_REQUEST_2.setLastName("lastName2");
+        TEACHER_REQUEST_2.setEmail("2@email.com");
+        TEACHER_REQUEST_2.setPassword("1234");
+
+        TEACHER_RESPONSE_WITH_ID_2.setId(2);
+        TEACHER_RESPONSE_WITH_ID_2.setFirstName("firstName2");
+        TEACHER_RESPONSE_WITH_ID_2.setLastName("lastName2");
+        TEACHER_RESPONSE_WITH_ID_2.setEmail("2@email.com");
+
         teacherEntities.add(TEACHER_ENTITY_1);
         teacherEntities.add(TEACHER_ENTITY_2);
 
@@ -202,9 +216,12 @@ class TeacherServiceImplTest {
                         .withLastName("update1")
                         .withEmail("update1@email.com")
                         .build();
-        final TeacherRequest TEACHER_REQUEST_FOR_UPDATE_1 =
-                new TeacherRequest(1, "update1", "update1",
-                        null, "update1@email.com", null, null, null, null, null);
+        final TeacherRequest TEACHER_REQUEST_FOR_UPDATE_1 = new TeacherRequest();
+        TEACHER_REQUEST_FOR_UPDATE_1.setId(1);
+        TEACHER_REQUEST_FOR_UPDATE_1.setFirstName("update1");
+        TEACHER_REQUEST_FOR_UPDATE_1.setLastName("update1");
+        TEACHER_REQUEST_FOR_UPDATE_1.setEmail("update1@email.com");
+        TEACHER_REQUEST_FOR_UPDATE_1.setPassword("0000");
 
         doNothing().when(teacherDao).update(TEACHER_ENTITY_FOR_UPDATE_1);
         when(mapper.toEntity(TEACHER_REQUEST_FOR_UPDATE_1)).thenReturn(TEACHER_ENTITY_FOR_UPDATE_1);
@@ -217,6 +234,7 @@ class TeacherServiceImplTest {
 
     @Test
     void editAll_inputTeacherRequestListWhereOneTeacherHasIncorrectName_expectedNothing() {
+
         final Teacher TEACHER_ENTITY_FOR_UPDATE_1 =
                 Teacher.builder()
                         .withId(1)
@@ -224,9 +242,13 @@ class TeacherServiceImplTest {
                         .withLastName("update1")
                         .withEmail("update1@email.com")
                         .build();
-        final TeacherRequest TEACHER_REQUEST_FOR_UPDATE_1 =
-                new TeacherRequest(1, "update1", "update1",
-                        null, "update1@email.com", null, null, null, null, null);
+        final TeacherRequest TEACHER_REQUEST_FOR_UPDATE_1 = new TeacherRequest();
+        TEACHER_REQUEST_FOR_UPDATE_1.setId(1);
+        TEACHER_REQUEST_FOR_UPDATE_1.setFirstName("update1");
+        TEACHER_REQUEST_FOR_UPDATE_1.setLastName("update1");
+        TEACHER_REQUEST_FOR_UPDATE_1.setEmail("update1@email.com");
+        TEACHER_REQUEST_FOR_UPDATE_1.setPassword("0000");
+
         final Teacher TEACHER_ENTITY_FOR_UPDATE_2 =
                 Teacher.builder()
                         .withId(2)
@@ -234,12 +256,19 @@ class TeacherServiceImplTest {
                         .withLastName("update2")
                         .withEmail("update2@email.com")
                         .build();
-        final TeacherRequest TEACHER_REQUEST_FOR_UPDATE_2 =
-                new TeacherRequest(2, "update2", "update2",
-                        null, "update2@email.com", null, null, null, null, null);
-        final TeacherRequest TEACHER_REQUEST_FOR_UPDATE_INCORRECT =
-                new TeacherRequest(3, " ", " ",
-                        null, " ", null, null, null, null, null);
+        final TeacherRequest TEACHER_REQUEST_FOR_UPDATE_2 = new TeacherRequest();
+        TEACHER_REQUEST_FOR_UPDATE_2.setId(2);
+        TEACHER_REQUEST_FOR_UPDATE_2.setFirstName("update2");
+        TEACHER_REQUEST_FOR_UPDATE_2.setLastName("update2");
+        TEACHER_REQUEST_FOR_UPDATE_2.setEmail("update2@email.com");
+        TEACHER_REQUEST_FOR_UPDATE_2.setPassword("4321");
+
+        final TeacherRequest TEACHER_REQUEST_FOR_UPDATE_INCORRECT = new TeacherRequest();
+        TEACHER_REQUEST_FOR_UPDATE_INCORRECT.setId(3);
+        TEACHER_REQUEST_FOR_UPDATE_INCORRECT.setFirstName("  ");
+        TEACHER_REQUEST_FOR_UPDATE_INCORRECT.setLastName("  ");
+        TEACHER_REQUEST_FOR_UPDATE_INCORRECT.setEmail("  ");
+        TEACHER_REQUEST_FOR_UPDATE_INCORRECT.setPassword("  ");
 
         final List<TeacherRequest> inputList = new ArrayList<>();
         inputList.add(TEACHER_REQUEST_FOR_UPDATE_1);

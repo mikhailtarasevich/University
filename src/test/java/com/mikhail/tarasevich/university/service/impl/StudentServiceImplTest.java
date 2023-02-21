@@ -50,12 +50,8 @@ class StudentServiceImplTest {
                     .withLastName("lastName1")
                     .withEmail("1@email.com")
                     .build();
-    private static final StudentRequest STUDENT_REQUEST_1 =
-            new StudentRequest(0, "firstName1", "lastName1",
-                    null, "1@email.com", null, null);
-    private static final StudentResponse STUDENT_RESPONSE_WITH_ID_1 =
-            new StudentResponse(1, "firstName1", "lastName1",
-                    null, "1@email.com", null);
+    private static final StudentRequest STUDENT_REQUEST_1 = new StudentRequest();
+    private static final StudentResponse STUDENT_RESPONSE_WITH_ID_1 = new StudentResponse();
 
     private static final Student STUDENT_ENTITY_2 =
             Student.builder()
@@ -70,18 +66,36 @@ class StudentServiceImplTest {
                     .withLastName("lastName2")
                     .withEmail("2@email.com")
                     .build();
-    private static final StudentRequest STUDENT_REQUEST_2 =
-            new StudentRequest(0, "firstName2", "lastName2",
-                    null, "2@email.com", null, null);
-    private static final StudentResponse STUDENT_RESPONSE_WITH_ID_2 =
-            new StudentResponse(2, "firstName2", "lastName2",
-                    null, "2@email.com", null);
+    private static final StudentRequest STUDENT_REQUEST_2 = new StudentRequest();
+    private static final StudentResponse STUDENT_RESPONSE_WITH_ID_2 = new StudentResponse();
 
-    private final List<Student> studentEntities = new ArrayList<>();
-    private final List<Student> studentEntitiesWithId = new ArrayList<>();
-    private final List<StudentResponse> studentResponses = new ArrayList<>();
+    private static final List<Student> studentEntities = new ArrayList<>();
+    private static final List<Student> studentEntitiesWithId = new ArrayList<>();
+    private static final List<StudentResponse> studentResponses = new ArrayList<>();
 
-    {
+    static {
+        STUDENT_REQUEST_1.setId(0);
+        STUDENT_REQUEST_1.setFirstName("firstName1");
+        STUDENT_REQUEST_1.setLastName("lastName1");
+        STUDENT_REQUEST_1.setEmail("1@email.com");
+        STUDENT_REQUEST_1.setPassword("1111");
+
+        STUDENT_RESPONSE_WITH_ID_1.setId(1);
+        STUDENT_RESPONSE_WITH_ID_1.setFirstName("firstName1");
+        STUDENT_RESPONSE_WITH_ID_1.setLastName("lastName1");
+        STUDENT_RESPONSE_WITH_ID_1.setEmail("1@email.com");
+
+        STUDENT_REQUEST_2.setId(0);
+        STUDENT_REQUEST_2.setFirstName("firstName2");
+        STUDENT_REQUEST_2.setLastName("lastName2");
+        STUDENT_REQUEST_2.setEmail("2@email.com");
+        STUDENT_REQUEST_2.setPassword("1234");
+
+        STUDENT_RESPONSE_WITH_ID_2.setId(2);
+        STUDENT_RESPONSE_WITH_ID_2.setFirstName("firstName2");
+        STUDENT_RESPONSE_WITH_ID_2.setLastName("lastName2");
+        STUDENT_RESPONSE_WITH_ID_2.setEmail("2@email.com");
+
         studentEntities.add(STUDENT_ENTITY_1);
         studentEntities.add(STUDENT_ENTITY_2);
 
@@ -139,7 +153,8 @@ class StudentServiceImplTest {
         when(studentDao.findByName(STUDENT_REQUEST_1.getEmail())).thenReturn(Optional.empty());
         when(studentDao.findByName(STUDENT_REQUEST_2.getEmail())).thenReturn(Optional.empty());
         when(studentDao.findByName(studentWithInvalidLastName.getEmail())).thenReturn(Optional.empty());
-        when(studentDao.findByName(studentWithExistingEmail.getEmail())).thenReturn(Optional.of(Student.builder().build()));
+        when(studentDao.findByName(studentWithExistingEmail.getEmail()))
+                .thenReturn(Optional.of(Student.builder().build()));
         when(studentMapper.toEntity(STUDENT_REQUEST_1)).thenReturn(STUDENT_ENTITY_1);
         when(studentMapper.toEntity(STUDENT_REQUEST_2)).thenReturn(STUDENT_ENTITY_2);
         doNothing().when(studentDao).saveAll(studentEntities);
@@ -195,9 +210,13 @@ class StudentServiceImplTest {
                         .withLastName("update1")
                         .withEmail("update1@email.com")
                         .build();
-        final StudentRequest STUDENT_REQUEST_FOR_UPDATE_1 =
-                new StudentRequest(1, "update1", "update1",
-                        null, "update1@email.com", null, null);
+        final StudentRequest STUDENT_REQUEST_FOR_UPDATE_1 = new StudentRequest();
+        STUDENT_REQUEST_FOR_UPDATE_1.setId(1);
+        STUDENT_REQUEST_FOR_UPDATE_1.setFirstName("update1");
+        STUDENT_REQUEST_FOR_UPDATE_1.setLastName("update1");
+        STUDENT_REQUEST_FOR_UPDATE_1.setEmail("update1@email.com");
+        STUDENT_REQUEST_FOR_UPDATE_1.setPassword("0000");
+
 
         doNothing().when(studentDao).update(STUDENT_ENTITY_FOR_UPDATE_1);
         when(studentMapper.toEntity(STUDENT_REQUEST_FOR_UPDATE_1)).thenReturn(STUDENT_ENTITY_FOR_UPDATE_1);
@@ -217,9 +236,13 @@ class StudentServiceImplTest {
                         .withLastName("update1")
                         .withEmail("update1@email.com")
                         .build();
-        final StudentRequest STUDENT_REQUEST_FOR_UPDATE_1 =
-                new StudentRequest(1, "update1", "update1",
-                        null, "update1@email.com", null, null);
+        final StudentRequest STUDENT_REQUEST_FOR_UPDATE_1 = new StudentRequest();
+        STUDENT_REQUEST_FOR_UPDATE_1.setId(1);
+        STUDENT_REQUEST_FOR_UPDATE_1.setFirstName("update1");
+        STUDENT_REQUEST_FOR_UPDATE_1.setLastName("update1");
+        STUDENT_REQUEST_FOR_UPDATE_1.setEmail("update1@email.com");
+        STUDENT_REQUEST_FOR_UPDATE_1.setPassword("0000");
+
         final Student STUDENT_ENTITY_FOR_UPDATE_2 =
                 Student.builder()
                         .withId(2)
@@ -227,12 +250,19 @@ class StudentServiceImplTest {
                         .withLastName("update2")
                         .withEmail("update2@email.com")
                         .build();
-        final StudentRequest STUDENT_REQUEST_FOR_UPDATE_2 =
-                new StudentRequest(2, "update2", "update2",
-                        null, "update2@email.com", null, null);
-        final StudentRequest STUDENT_REQUEST_FOR_UPDATE_INCORRECT =
-                new StudentRequest(3, " ", " ",
-                        null, " ", null, null);
+        final StudentRequest STUDENT_REQUEST_FOR_UPDATE_2 = new StudentRequest();
+        STUDENT_REQUEST_FOR_UPDATE_2.setId(2);
+        STUDENT_REQUEST_FOR_UPDATE_2.setFirstName("update2");
+        STUDENT_REQUEST_FOR_UPDATE_2.setLastName("update2");
+        STUDENT_REQUEST_FOR_UPDATE_2.setEmail("update2@email.com");
+        STUDENT_REQUEST_FOR_UPDATE_2.setPassword("4321");
+
+        final StudentRequest STUDENT_REQUEST_FOR_UPDATE_INCORRECT = new StudentRequest();
+        STUDENT_REQUEST_FOR_UPDATE_INCORRECT.setId(3);
+        STUDENT_REQUEST_FOR_UPDATE_INCORRECT.setFirstName("  ");
+        STUDENT_REQUEST_FOR_UPDATE_INCORRECT.setLastName(" ");
+        STUDENT_REQUEST_FOR_UPDATE_INCORRECT.setEmail("   ");
+        STUDENT_REQUEST_FOR_UPDATE_INCORRECT.setPassword("  ");
 
         final List<StudentRequest> inputList = new ArrayList<>();
         inputList.add(STUDENT_REQUEST_FOR_UPDATE_1);

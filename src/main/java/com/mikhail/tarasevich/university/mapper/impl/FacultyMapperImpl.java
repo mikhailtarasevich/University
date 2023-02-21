@@ -19,8 +19,13 @@ public class FacultyMapperImpl implements FacultyMapper {
     }
 
     @Override
-    public FacultyResponse toResponse(Faculty faculty) {
-        return new FacultyResponse(faculty.getId(), faculty.getName(), faculty.getDescription());
+    public FacultyResponse toResponse(Faculty f) {
+        FacultyResponse facultyResponse = new FacultyResponse();
+        facultyResponse.setId(f.getId());
+        facultyResponse.setName(f.getName());
+        facultyResponse.setDescription(f.getDescription());
+
+        return facultyResponse;
     }
 
 }

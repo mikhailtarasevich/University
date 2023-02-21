@@ -34,29 +34,39 @@ class TeacherTitleServiceImplTest {
     @Mock
     TeacherTitleValidator teacherTitleValidator;
 
-    private static final TeacherTitle TEACHER_TITLE_ENTITY_1 =
-            TeacherTitle.builder().withName("name1").build();
-    private static final TeacherTitle TEACHER_TITLE_ENTITY_WITH_ID_1 =
-            TeacherTitle.builder().withId(1).withName("name1").build();
-    private static final TeacherTitleRequest TEACHER_TITLE_REQUEST_1 =
-            new TeacherTitleRequest(0, "name1");
-    private static final TeacherTitleResponse TEACHER_TITLE_WITH_ID_1 =
-            new TeacherTitleResponse(1, "name1");
+    private static final TeacherTitle TEACHER_TITLE_ENTITY_1 = TeacherTitle.builder().withName("name1").build();
+    private static final TeacherTitle TEACHER_TITLE_ENTITY_WITH_ID_1 = TeacherTitle.builder()
+            .withId(1)
+            .withName("name1")
+            .build();
+    private static final TeacherTitleRequest TEACHER_TITLE_REQUEST_1 = new TeacherTitleRequest();
+    private static final TeacherTitleResponse TEACHER_TITLE_WITH_ID_1 = new TeacherTitleResponse();
 
-    private static final TeacherTitle TEACHER_TITLE_ENTITY_2 =
-            TeacherTitle.builder().withName("name2").build();
-    private static final TeacherTitle TEACHER_TITLE_ENTITY_WITH_ID_2 =
-            TeacherTitle.builder().withId(2).withName("name2").build();
-    private static final TeacherTitleRequest TEACHER_TITLE_REQUEST_2 =
-            new TeacherTitleRequest(0, "name2");
-    private static final TeacherTitleResponse TEACHER_TITLE_WITH_ID_2 =
-            new TeacherTitleResponse(2, "name2");
+    private static final TeacherTitle TEACHER_TITLE_ENTITY_2 = TeacherTitle.builder().withName("name2").build();
+    private static final TeacherTitle TEACHER_TITLE_ENTITY_WITH_ID_2 = TeacherTitle.builder()
+            .withId(2)
+            .withName("name2")
+            .build();
+    private static final TeacherTitleRequest TEACHER_TITLE_REQUEST_2 = new TeacherTitleRequest();
+    private static final TeacherTitleResponse TEACHER_TITLE_WITH_ID_2 = new TeacherTitleResponse();
 
-    private final List<TeacherTitle> teacherTitleEntities = new ArrayList<>();
-    private final List<TeacherTitle> teacherTitleEntitiesWithId = new ArrayList<>();
-    private final List<TeacherTitleResponse> teacherTitleResponses = new ArrayList<>();
+    private static final List<TeacherTitle> teacherTitleEntities = new ArrayList<>();
+    private static final List<TeacherTitle> teacherTitleEntitiesWithId = new ArrayList<>();
+    private static final List<TeacherTitleResponse> teacherTitleResponses = new ArrayList<>();
 
-    {
+    static {
+        TEACHER_TITLE_REQUEST_1.setId(0);
+        TEACHER_TITLE_REQUEST_1.setName("name1");
+
+        TEACHER_TITLE_WITH_ID_1.setId(1);
+        TEACHER_TITLE_WITH_ID_1.setName("name1");
+
+        TEACHER_TITLE_REQUEST_2.setId(0);
+        TEACHER_TITLE_REQUEST_2.setName("name2");
+
+        TEACHER_TITLE_WITH_ID_2.setId(2);
+        TEACHER_TITLE_WITH_ID_2.setName("name2");
+
         teacherTitleEntities.add(TEACHER_TITLE_ENTITY_1);
         teacherTitleEntities.add(TEACHER_TITLE_ENTITY_2);
 
@@ -95,7 +105,8 @@ class TeacherTitleServiceImplTest {
         when(teacherTitleMapper.toEntity(TEACHER_TITLE_REQUEST_1)).thenReturn(TEACHER_TITLE_ENTITY_1);
         when(teacherTitleMapper.toEntity(TEACHER_TITLE_REQUEST_2)).thenReturn(TEACHER_TITLE_ENTITY_2);
         doNothing().when(teacherTitleDao).saveAll(teacherTitleEntities);
-        doNothing().doThrow(new IncorrectRequestData()).when(teacherTitleValidator).validateUniqueNameInDB(TEACHER_TITLE_REQUEST_1);
+        doNothing().doThrow(new IncorrectRequestData()).when(teacherTitleValidator)
+                .validateUniqueNameInDB(TEACHER_TITLE_REQUEST_1);
         doNothing().when(teacherTitleValidator).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_1);
         doNothing().when(teacherTitleValidator).validateUniqueNameInDB(TEACHER_TITLE_REQUEST_2);
         doNothing().when(teacherTitleValidator).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_2);
@@ -105,10 +116,14 @@ class TeacherTitleServiceImplTest {
         verify(teacherTitleMapper, times(1)).toEntity(TEACHER_TITLE_REQUEST_1);
         verify(teacherTitleMapper, times(1)).toEntity(TEACHER_TITLE_REQUEST_2);
         verify(teacherTitleDao, times(1)).saveAll(teacherTitleEntities);
-        verify(teacherTitleValidator, times(2)).validateUniqueNameInDB(TEACHER_TITLE_REQUEST_1);
-        verify(teacherTitleValidator, times(1)).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_1);
-        verify(teacherTitleValidator, times(1)).validateUniqueNameInDB(TEACHER_TITLE_REQUEST_2);
-        verify(teacherTitleValidator, times(1)).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_2);
+        verify(teacherTitleValidator, times(2))
+                .validateUniqueNameInDB(TEACHER_TITLE_REQUEST_1);
+        verify(teacherTitleValidator, times(1))
+                .validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_1);
+        verify(teacherTitleValidator, times(1))
+                .validateUniqueNameInDB(TEACHER_TITLE_REQUEST_2);
+        verify(teacherTitleValidator, times(1))
+                .validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_2);
     }
 
     @Test
@@ -125,7 +140,8 @@ class TeacherTitleServiceImplTest {
 
     @Test
     void findAll_inputPageOne_expectedFoundTeacherTitlesFromPageOne() {
-        when(teacherTitleDao.findAll(1, AbstractPageableService.ITEMS_PER_PAGE)).thenReturn(teacherTitleEntitiesWithId);
+        when(teacherTitleDao.findAll(1, AbstractPageableService.ITEMS_PER_PAGE))
+                .thenReturn(teacherTitleEntitiesWithId);
         when(teacherTitleDao.count()).thenReturn(2L);
         when(teacherTitleMapper.toResponse(TEACHER_TITLE_ENTITY_WITH_ID_1)).thenReturn(TEACHER_TITLE_WITH_ID_1);
         when(teacherTitleMapper.toResponse(TEACHER_TITLE_ENTITY_WITH_ID_2)).thenReturn(TEACHER_TITLE_WITH_ID_2);
@@ -133,7 +149,8 @@ class TeacherTitleServiceImplTest {
         List<TeacherTitleResponse> foundTeacherTitles = teacherTitleService.findAll("1");
 
         assertEquals(teacherTitleResponses, foundTeacherTitles);
-        verify(teacherTitleDao, times(1)).findAll(1, AbstractPageableService.ITEMS_PER_PAGE);
+        verify(teacherTitleDao, times(1))
+                .findAll(1, AbstractPageableService.ITEMS_PER_PAGE);
         verify(teacherTitleDao, times(1)).count();
         verify(teacherTitleMapper, times(1)).toResponse(TEACHER_TITLE_ENTITY_WITH_ID_1);
         verify(teacherTitleMapper, times(1)).toResponse(TEACHER_TITLE_ENTITY_WITH_ID_2);
@@ -141,13 +158,17 @@ class TeacherTitleServiceImplTest {
 
     @Test
     void edit_inputTeacherTitleRequest_expectedNothing() {
-        final TeacherTitle TEACHER_TITLE_ENTITY_FOR_UPDATE_1 =
-                TeacherTitle.builder().withId(1).withName("update1").build();
-        final TeacherTitleRequest TEACHER_TITLE_REQUEST_FOR_UPDATE_1 =
-                new TeacherTitleRequest(1, "update1");
+        final TeacherTitle TEACHER_TITLE_ENTITY_FOR_UPDATE_1 = TeacherTitle.builder()
+                .withId(1)
+                .withName("update1")
+                .build();
+        final TeacherTitleRequest TEACHER_TITLE_REQUEST_FOR_UPDATE_1 = new TeacherTitleRequest();
+        TEACHER_TITLE_REQUEST_FOR_UPDATE_1.setId(1);
+        TEACHER_TITLE_REQUEST_FOR_UPDATE_1.setName("update1");
 
         doNothing().when(teacherTitleDao).update(TEACHER_TITLE_ENTITY_FOR_UPDATE_1);
-        when(teacherTitleMapper.toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_1)).thenReturn(TEACHER_TITLE_ENTITY_FOR_UPDATE_1);
+        when(teacherTitleMapper.toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_1))
+                .thenReturn(TEACHER_TITLE_ENTITY_FOR_UPDATE_1);
 
         teacherTitleService.edit(TEACHER_TITLE_REQUEST_FOR_UPDATE_1);
 
@@ -157,16 +178,25 @@ class TeacherTitleServiceImplTest {
 
     @Test
     void editAll_inputTeacherTitleRequestListWhereOneTeacherTitleHasIncorrectName_expectedNothing() {
-        final TeacherTitle TEACHER_TITLE_ENTITY_FOR_UPDATE_1 =
-                TeacherTitle.builder().withId(1).withName("update1").build();
-        final TeacherTitleRequest TEACHER_TITLE_REQUEST_FOR_UPDATE_1 =
-                new TeacherTitleRequest(1, "update1");
-        final TeacherTitle TEACHER_TITLE_ENTITY_FOR_UPDATE_2 =
-                TeacherTitle.builder().withId(2).withName("update2").build();
-        final TeacherTitleRequest TEACHER_TITLE_REQUEST_FOR_UPDATE_2 =
-                new TeacherTitleRequest(2, "update2");
-        final TeacherTitleRequest TEACHER_TITLE_REQUEST_FOR_UPDATE_INCORRECT =
-                new TeacherTitleRequest(3, " ");
+        final TeacherTitle TEACHER_TITLE_ENTITY_FOR_UPDATE_1 = TeacherTitle.builder()
+                .withId(1)
+                .withName("update1")
+                .build();
+        final TeacherTitleRequest TEACHER_TITLE_REQUEST_FOR_UPDATE_1 = new TeacherTitleRequest();
+        TEACHER_TITLE_REQUEST_FOR_UPDATE_1.setId(1);
+        TEACHER_TITLE_REQUEST_FOR_UPDATE_1.setName("update1");
+
+        final TeacherTitle TEACHER_TITLE_ENTITY_FOR_UPDATE_2 = TeacherTitle.builder()
+                .withId(2)
+                .withName("update2")
+                .build();
+        final TeacherTitleRequest TEACHER_TITLE_REQUEST_FOR_UPDATE_2 = new TeacherTitleRequest();
+        TEACHER_TITLE_REQUEST_FOR_UPDATE_2.setId(2);
+        TEACHER_TITLE_REQUEST_FOR_UPDATE_2.setName("update2");
+
+        final TeacherTitleRequest TEACHER_TITLE_REQUEST_FOR_UPDATE_INCORRECT = new TeacherTitleRequest();
+        TEACHER_TITLE_REQUEST_FOR_UPDATE_INCORRECT.setId(3);
+        TEACHER_TITLE_REQUEST_FOR_UPDATE_INCORRECT.setName("  ");
 
         final List<TeacherTitleRequest> inputList = new ArrayList<>();
         inputList.add(TEACHER_TITLE_REQUEST_FOR_UPDATE_1);
@@ -179,10 +209,13 @@ class TeacherTitleServiceImplTest {
 
         doNothing().when(teacherTitleValidator).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_FOR_UPDATE_1);
         doNothing().when(teacherTitleValidator).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_FOR_UPDATE_2);
-        doThrow(new IncorrectRequestData()).when(teacherTitleValidator).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_FOR_UPDATE_INCORRECT);
+        doThrow(new IncorrectRequestData()).when(teacherTitleValidator)
+                .validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_FOR_UPDATE_INCORRECT);
 
-        when(teacherTitleMapper.toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_1)).thenReturn(TEACHER_TITLE_ENTITY_FOR_UPDATE_1);
-        when(teacherTitleMapper.toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_2)).thenReturn(TEACHER_TITLE_ENTITY_FOR_UPDATE_2);
+        when(teacherTitleMapper.toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_1))
+                .thenReturn(TEACHER_TITLE_ENTITY_FOR_UPDATE_1);
+        when(teacherTitleMapper.toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_2))
+                .thenReturn(TEACHER_TITLE_ENTITY_FOR_UPDATE_2);
 
         doNothing().when(teacherTitleDao).updateAll(listForUpdate);
 
@@ -191,9 +224,12 @@ class TeacherTitleServiceImplTest {
         verify(teacherTitleMapper, times(1)).toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_1);
         verify(teacherTitleMapper, times(1)).toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_2);
         verify(teacherTitleDao, times(1)).updateAll(listForUpdate);
-        verify(teacherTitleValidator, times(1)).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_FOR_UPDATE_1);
-        verify(teacherTitleValidator, times(1)).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_FOR_UPDATE_2);
-        verify(teacherTitleValidator, times(1)).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_FOR_UPDATE_INCORRECT);
+        verify(teacherTitleValidator, times(1))
+                .validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_FOR_UPDATE_1);
+        verify(teacherTitleValidator, times(1))
+                .validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_FOR_UPDATE_2);
+        verify(teacherTitleValidator, times(1))
+                .validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_FOR_UPDATE_INCORRECT);
     }
 
     @Test
