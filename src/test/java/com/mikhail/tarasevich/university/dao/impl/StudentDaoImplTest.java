@@ -281,6 +281,36 @@ class StudentDaoImplTest {
     }
 
     @Test
+    void updateGeneralUserInfo_inputUpdatedEntity_expectedEntityInDBWasUpdated() {
+        assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
+                "id = 1 AND first_name = 'Updated' AND last_name = 'Updated' AND email = 'Updated'"));
+
+        final Student entityForUpdate = Student.builder()
+                .withId(1)
+                .withFirstName("Updated")
+                .withLastName("Updated")
+                .withGender(Gender.MALE)
+                .withEmail("Updated")
+                .build();
+
+        studentDao.updateGeneralUserInfo(entityForUpdate);
+
+        assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
+                "id = 1 AND first_name = 'Updated' AND last_name = 'Updated' AND email = 'Updated'"));
+    }
+
+    @Test
+    void updatePassword_inputUpdatedEntity_expectedEntityInDBWasUpdated() {
+        assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
+                "id = 1 AND password = 'hello12'"));
+
+        studentDao.updateUserPassword(1, "hello12");
+
+        assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
+                "id = 1 AND password = 'hello12'"));
+    }
+
+    @Test
     void updateAll_inputUpdatedEntities_expectedEntitiesInDBWereUpdated() {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "id = 1 AND first_name = 'Updated' AND last_name = 'Updated' AND email = 'Updated' AND " +

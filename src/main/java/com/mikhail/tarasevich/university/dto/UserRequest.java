@@ -12,5 +12,6 @@ public abstract class UserRequest {
     protected Gender gender;
     protected String email;
     protected String password;
+    protected String confirmPassword;
 
 }

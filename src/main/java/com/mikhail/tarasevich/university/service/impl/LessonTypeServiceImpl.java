@@ -5,7 +5,8 @@ import com.mikhail.tarasevich.university.dao.LessonTypeDao;
 import com.mikhail.tarasevich.university.dto.LessonTypeRequest;
 import com.mikhail.tarasevich.university.dto.LessonTypeResponse;
 import com.mikhail.tarasevich.university.entity.LessonType;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
+import com.mikhail.tarasevich.university.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.LessonTypeMapper;
 import com.mikhail.tarasevich.university.service.LessonTypeService;
 import com.mikhail.tarasevich.university.validator.LessonTypeValidator;
@@ -48,7 +49,7 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
                 validator.validateUniqueNameInDB(r);
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
-            } catch (IncorrectRequestData e) {
+            } catch (IncorrectRequestDataException e) {
                 log.info("The lesson type was deleted from the save list. The lesson type: {} .", r);
             }
         });
@@ -60,8 +61,14 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
     }
 
     @Override
-    public Optional<LessonTypeResponse> findById(int id) {
-        return lessonTypeDao.findById(id).map(mapper::toResponse);
+    public LessonTypeResponse findById(int id) {
+        Optional<LessonTypeResponse> foundLessonType = lessonTypeDao.findById(id).map(mapper::toResponse);
+
+        if (foundLessonType.isPresent()) {
+            return foundLessonType.get();
+        } else {
+            throw new ObjectWithSpecifiedIdNotFoundException("The lesson type with specified id doesn't exist in the database.");
+        }
     }
 
     @Override
@@ -70,6 +77,13 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
         int pageNumber = parsePageNumber(page, itemsCount, 1);
 
         return lessonTypeDao.findAll(pageNumber, ITEMS_PER_PAGE).stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LessonTypeResponse> findAll() {
+        return lessonTypeDao.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -88,7 +102,7 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
             try {
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
-            } catch (IncorrectRequestData e) {
+            } catch (IncorrectRequestDataException e) {
                 log.info("The lesson type was deleted from the update list. The lesson type: {} .", r);
             }
         });

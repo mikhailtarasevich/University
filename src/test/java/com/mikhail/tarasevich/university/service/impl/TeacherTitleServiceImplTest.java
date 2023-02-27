@@ -5,7 +5,7 @@ import com.mikhail.tarasevich.university.dao.TeacherTitleDao;
 import com.mikhail.tarasevich.university.dto.TeacherTitleRequest;
 import com.mikhail.tarasevich.university.dto.TeacherTitleResponse;
 import com.mikhail.tarasevich.university.entity.TeacherTitle;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.mapper.TeacherTitleMapper;
 import com.mikhail.tarasevich.university.validator.TeacherTitleValidator;
 import org.junit.jupiter.api.Test;
@@ -30,9 +30,9 @@ class TeacherTitleServiceImplTest {
     @Mock
     TeacherDao teacherDao;
     @Mock
-    TeacherTitleMapper teacherTitleMapper;
+    TeacherTitleMapper mapper;
     @Mock
-    TeacherTitleValidator teacherTitleValidator;
+    TeacherTitleValidator validator;
 
     private static final TeacherTitle TEACHER_TITLE_ENTITY_1 = TeacherTitle.builder().withName("name1").build();
     private static final TeacherTitle TEACHER_TITLE_ENTITY_WITH_ID_1 = TeacherTitle.builder()
@@ -79,20 +79,20 @@ class TeacherTitleServiceImplTest {
 
     @Test
     void register_inputTeacherTitleRequest_expectedTeacherTitleResponseWithId() {
-        when(teacherTitleMapper.toEntity(TEACHER_TITLE_REQUEST_1)).thenReturn(TEACHER_TITLE_ENTITY_1);
+        when(mapper.toEntity(TEACHER_TITLE_REQUEST_1)).thenReturn(TEACHER_TITLE_ENTITY_1);
         when(teacherTitleDao.save(TEACHER_TITLE_ENTITY_1)).thenReturn(TEACHER_TITLE_ENTITY_WITH_ID_1);
-        when(teacherTitleMapper.toResponse(TEACHER_TITLE_ENTITY_WITH_ID_1)).thenReturn(TEACHER_TITLE_WITH_ID_1);
-        doNothing().when(teacherTitleValidator).validateUniqueNameInDB(TEACHER_TITLE_REQUEST_1);
-        doNothing().when(teacherTitleValidator).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_1);
+        when(mapper.toResponse(TEACHER_TITLE_ENTITY_WITH_ID_1)).thenReturn(TEACHER_TITLE_WITH_ID_1);
+        doNothing().when(validator).validateUniqueNameInDB(TEACHER_TITLE_REQUEST_1);
+        doNothing().when(validator).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_1);
 
         TeacherTitleResponse teacherTitleResponse = teacherTitleService.register(TEACHER_TITLE_REQUEST_1);
 
         assertEquals(TEACHER_TITLE_WITH_ID_1, teacherTitleResponse);
-        verify(teacherTitleMapper, times(1)).toEntity(TEACHER_TITLE_REQUEST_1);
+        verify(mapper, times(1)).toEntity(TEACHER_TITLE_REQUEST_1);
         verify(teacherTitleDao, times(1)).save(TEACHER_TITLE_ENTITY_1);
-        verify(teacherTitleMapper, times(1)).toResponse(TEACHER_TITLE_ENTITY_WITH_ID_1);
-        verify(teacherTitleValidator, times(1)).validateUniqueNameInDB(TEACHER_TITLE_REQUEST_1);
-        verify(teacherTitleValidator, times(1)).validateUniqueNameInDB(TEACHER_TITLE_REQUEST_1);
+        verify(mapper, times(1)).toResponse(TEACHER_TITLE_ENTITY_WITH_ID_1);
+        verify(validator, times(1)).validateUniqueNameInDB(TEACHER_TITLE_REQUEST_1);
+        verify(validator, times(1)).validateUniqueNameInDB(TEACHER_TITLE_REQUEST_1);
     }
 
     @Test
@@ -102,40 +102,54 @@ class TeacherTitleServiceImplTest {
         listForRegister.add(TEACHER_TITLE_REQUEST_1);
         listForRegister.add(TEACHER_TITLE_REQUEST_2);
 
-        when(teacherTitleMapper.toEntity(TEACHER_TITLE_REQUEST_1)).thenReturn(TEACHER_TITLE_ENTITY_1);
-        when(teacherTitleMapper.toEntity(TEACHER_TITLE_REQUEST_2)).thenReturn(TEACHER_TITLE_ENTITY_2);
+        when(mapper.toEntity(TEACHER_TITLE_REQUEST_1)).thenReturn(TEACHER_TITLE_ENTITY_1);
+        when(mapper.toEntity(TEACHER_TITLE_REQUEST_2)).thenReturn(TEACHER_TITLE_ENTITY_2);
         doNothing().when(teacherTitleDao).saveAll(teacherTitleEntities);
-        doNothing().doThrow(new IncorrectRequestData()).when(teacherTitleValidator)
+        doNothing().doThrow(new IncorrectRequestDataException()).when(validator)
                 .validateUniqueNameInDB(TEACHER_TITLE_REQUEST_1);
-        doNothing().when(teacherTitleValidator).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_1);
-        doNothing().when(teacherTitleValidator).validateUniqueNameInDB(TEACHER_TITLE_REQUEST_2);
-        doNothing().when(teacherTitleValidator).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_2);
+        doNothing().when(validator).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_1);
+        doNothing().when(validator).validateUniqueNameInDB(TEACHER_TITLE_REQUEST_2);
+        doNothing().when(validator).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_2);
 
         teacherTitleService.registerAll(listForRegister);
 
-        verify(teacherTitleMapper, times(1)).toEntity(TEACHER_TITLE_REQUEST_1);
-        verify(teacherTitleMapper, times(1)).toEntity(TEACHER_TITLE_REQUEST_2);
+        verify(mapper, times(1)).toEntity(TEACHER_TITLE_REQUEST_1);
+        verify(mapper, times(1)).toEntity(TEACHER_TITLE_REQUEST_2);
         verify(teacherTitleDao, times(1)).saveAll(teacherTitleEntities);
-        verify(teacherTitleValidator, times(2))
+        verify(validator, times(2))
                 .validateUniqueNameInDB(TEACHER_TITLE_REQUEST_1);
-        verify(teacherTitleValidator, times(1))
+        verify(validator, times(1))
                 .validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_1);
-        verify(teacherTitleValidator, times(1))
+        verify(validator, times(1))
                 .validateUniqueNameInDB(TEACHER_TITLE_REQUEST_2);
-        verify(teacherTitleValidator, times(1))
+        verify(validator, times(1))
                 .validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_2);
     }
 
     @Test
     void findById_inputIntId_expectedFoundTeacherTitle() {
         when(teacherTitleDao.findById(1)).thenReturn(Optional.of(TEACHER_TITLE_ENTITY_WITH_ID_1));
-        when(teacherTitleMapper.toResponse(TEACHER_TITLE_ENTITY_WITH_ID_1)).thenReturn(TEACHER_TITLE_WITH_ID_1);
+        when(mapper.toResponse(TEACHER_TITLE_ENTITY_WITH_ID_1)).thenReturn(TEACHER_TITLE_WITH_ID_1);
 
-        Optional<TeacherTitleResponse> teacherTitleResponse = teacherTitleService.findById(1);
+        TeacherTitleResponse teacherTitleResponse = teacherTitleService.findById(1);
 
-        assertEquals(Optional.of(TEACHER_TITLE_WITH_ID_1), teacherTitleResponse);
-        verify(teacherTitleMapper, times(1)).toResponse(TEACHER_TITLE_ENTITY_WITH_ID_1);
+        assertEquals(TEACHER_TITLE_WITH_ID_1, teacherTitleResponse);
+        verify(mapper, times(1)).toResponse(TEACHER_TITLE_ENTITY_WITH_ID_1);
         verify(teacherTitleDao, times(1)).findById(1);
+    }
+
+    @Test
+    void findAll_inputNothing_expectedFoundAllTeacherTitles() {
+        when(teacherTitleDao.findAll()).thenReturn(teacherTitleEntitiesWithId);
+        when(mapper.toResponse(TEACHER_TITLE_ENTITY_WITH_ID_1)).thenReturn(TEACHER_TITLE_WITH_ID_1);
+        when(mapper.toResponse(TEACHER_TITLE_ENTITY_WITH_ID_2)).thenReturn(TEACHER_TITLE_WITH_ID_2);
+
+        List<TeacherTitleResponse> foundTeacherTitles = teacherTitleService.findAll();
+
+        assertEquals(teacherTitleResponses, foundTeacherTitles);
+        verify(teacherTitleDao, times(1)).findAll();
+        verify(mapper, times(1)).toResponse(TEACHER_TITLE_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(TEACHER_TITLE_ENTITY_WITH_ID_2);
     }
 
     @Test
@@ -143,8 +157,8 @@ class TeacherTitleServiceImplTest {
         when(teacherTitleDao.findAll(1, AbstractPageableService.ITEMS_PER_PAGE))
                 .thenReturn(teacherTitleEntitiesWithId);
         when(teacherTitleDao.count()).thenReturn(2L);
-        when(teacherTitleMapper.toResponse(TEACHER_TITLE_ENTITY_WITH_ID_1)).thenReturn(TEACHER_TITLE_WITH_ID_1);
-        when(teacherTitleMapper.toResponse(TEACHER_TITLE_ENTITY_WITH_ID_2)).thenReturn(TEACHER_TITLE_WITH_ID_2);
+        when(mapper.toResponse(TEACHER_TITLE_ENTITY_WITH_ID_1)).thenReturn(TEACHER_TITLE_WITH_ID_1);
+        when(mapper.toResponse(TEACHER_TITLE_ENTITY_WITH_ID_2)).thenReturn(TEACHER_TITLE_WITH_ID_2);
 
         List<TeacherTitleResponse> foundTeacherTitles = teacherTitleService.findAll("1");
 
@@ -152,8 +166,8 @@ class TeacherTitleServiceImplTest {
         verify(teacherTitleDao, times(1))
                 .findAll(1, AbstractPageableService.ITEMS_PER_PAGE);
         verify(teacherTitleDao, times(1)).count();
-        verify(teacherTitleMapper, times(1)).toResponse(TEACHER_TITLE_ENTITY_WITH_ID_1);
-        verify(teacherTitleMapper, times(1)).toResponse(TEACHER_TITLE_ENTITY_WITH_ID_2);
+        verify(mapper, times(1)).toResponse(TEACHER_TITLE_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(TEACHER_TITLE_ENTITY_WITH_ID_2);
     }
 
     @Test
@@ -167,12 +181,12 @@ class TeacherTitleServiceImplTest {
         TEACHER_TITLE_REQUEST_FOR_UPDATE_1.setName("update1");
 
         doNothing().when(teacherTitleDao).update(TEACHER_TITLE_ENTITY_FOR_UPDATE_1);
-        when(teacherTitleMapper.toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_1))
+        when(mapper.toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_1))
                 .thenReturn(TEACHER_TITLE_ENTITY_FOR_UPDATE_1);
 
         teacherTitleService.edit(TEACHER_TITLE_REQUEST_FOR_UPDATE_1);
 
-        verify(teacherTitleMapper, times(1)).toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_1);
+        verify(mapper, times(1)).toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_1);
         verify(teacherTitleDao, times(1)).update(TEACHER_TITLE_ENTITY_FOR_UPDATE_1);
     }
 
@@ -207,28 +221,28 @@ class TeacherTitleServiceImplTest {
         listForUpdate.add(TEACHER_TITLE_ENTITY_FOR_UPDATE_1);
         listForUpdate.add(TEACHER_TITLE_ENTITY_FOR_UPDATE_2);
 
-        doNothing().when(teacherTitleValidator).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_FOR_UPDATE_1);
-        doNothing().when(teacherTitleValidator).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_FOR_UPDATE_2);
-        doThrow(new IncorrectRequestData()).when(teacherTitleValidator)
+        doNothing().when(validator).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_FOR_UPDATE_1);
+        doNothing().when(validator).validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_FOR_UPDATE_2);
+        doThrow(new IncorrectRequestDataException()).when(validator)
                 .validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_FOR_UPDATE_INCORRECT);
 
-        when(teacherTitleMapper.toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_1))
+        when(mapper.toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_1))
                 .thenReturn(TEACHER_TITLE_ENTITY_FOR_UPDATE_1);
-        when(teacherTitleMapper.toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_2))
+        when(mapper.toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_2))
                 .thenReturn(TEACHER_TITLE_ENTITY_FOR_UPDATE_2);
 
         doNothing().when(teacherTitleDao).updateAll(listForUpdate);
 
         teacherTitleService.editAll(inputList);
 
-        verify(teacherTitleMapper, times(1)).toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_1);
-        verify(teacherTitleMapper, times(1)).toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_2);
+        verify(mapper, times(1)).toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_1);
+        verify(mapper, times(1)).toEntity(TEACHER_TITLE_REQUEST_FOR_UPDATE_2);
         verify(teacherTitleDao, times(1)).updateAll(listForUpdate);
-        verify(teacherTitleValidator, times(1))
+        verify(validator, times(1))
                 .validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_FOR_UPDATE_1);
-        verify(teacherTitleValidator, times(1))
+        verify(validator, times(1))
                 .validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_FOR_UPDATE_2);
-        verify(teacherTitleValidator, times(1))
+        verify(validator, times(1))
                 .validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST_FOR_UPDATE_INCORRECT);
     }
 

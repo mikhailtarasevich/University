@@ -8,7 +8,8 @@ import com.mikhail.tarasevich.university.dto.TeacherRequest;
 import com.mikhail.tarasevich.university.dto.TeacherResponse;
 import com.mikhail.tarasevich.university.entity.Teacher;
 import com.mikhail.tarasevich.university.exception.EmailAlreadyExistsException;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
+import com.mikhail.tarasevich.university.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.TeacherMapper;
 import com.mikhail.tarasevich.university.validator.UserValidator;
 import org.junit.jupiter.api.Test;
@@ -166,7 +167,7 @@ class TeacherServiceImplTest {
         doNothing().when(teacherDao).saveAll(teacherEntities);
         doNothing().when(validator).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_1);
         doNothing().when(validator).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_2);
-        doThrow(IncorrectRequestData.class).when(validator).validateUserNameNotNullOrEmpty(TeacherWithInvalidLastName);
+        doThrow(IncorrectRequestDataException.class).when(validator).validateUserNameNotNullOrEmpty(TeacherWithInvalidLastName);
 
         teacherService.registerAll(listForRegister);
 
@@ -184,11 +185,35 @@ class TeacherServiceImplTest {
         when(teacherDao.findById(1)).thenReturn(Optional.of(TEACHER_ENTITY_WITH_ID_1));
         when(mapper.toResponse(TEACHER_ENTITY_WITH_ID_1)).thenReturn(TEACHER_RESPONSE_WITH_ID_1);
 
-        Optional<TeacherResponse> TeacherResponse = teacherService.findById(1);
+        TeacherResponse TeacherResponse = teacherService.findById(1);
 
-        assertEquals(Optional.of(TEACHER_RESPONSE_WITH_ID_1), TeacherResponse);
+        assertEquals(TEACHER_RESPONSE_WITH_ID_1, TeacherResponse);
         verify(mapper, times(1)).toResponse(TEACHER_ENTITY_WITH_ID_1);
         verify(teacherDao, times(1)).findById(1);
+    }
+
+    @Test
+    void findById_inputNonExistentId_expectedException() {
+        when(teacherDao.findById(100)).thenReturn(Optional.empty());
+
+        assertThrows(ObjectWithSpecifiedIdNotFoundException.class, () -> teacherService.findById(100));
+
+        verify(teacherDao, times(1)).findById(100);
+        verifyNoInteractions(mapper);
+    }
+
+    @Test
+    void findAll_inputNothing_expectedFoundAllStudents() {
+        when(teacherDao.findAll()).thenReturn(teacherEntitiesWithId);
+        when(mapper.toResponse(TEACHER_ENTITY_WITH_ID_1)).thenReturn(TEACHER_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(TEACHER_ENTITY_WITH_ID_2)).thenReturn(TEACHER_RESPONSE_WITH_ID_2);
+
+        List<TeacherResponse> foundTeachers = teacherService.findAll();
+
+        assertEquals(teacherResponses, foundTeachers);
+        verify(teacherDao, times(1)).findAll();
+        verify(mapper, times(1)).toResponse(TEACHER_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(TEACHER_ENTITY_WITH_ID_2);
     }
 
     @Test
@@ -229,12 +254,57 @@ class TeacherServiceImplTest {
         teacherService.edit(TEACHER_REQUEST_FOR_UPDATE_1);
 
         verify(mapper, times(1)).toEntity(TEACHER_REQUEST_FOR_UPDATE_1);
+        verify(validator, times(1)).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_FOR_UPDATE_1);
+        verify(validator, times(1)).validateEmail(TEACHER_REQUEST_FOR_UPDATE_1);
+        verify(validator, times(1)).validatePassword(TEACHER_REQUEST_FOR_UPDATE_1);
         verify(teacherDao, times(1)).update(TEACHER_ENTITY_FOR_UPDATE_1);
     }
 
     @Test
-    void editAll_inputTeacherRequestListWhereOneTeacherHasIncorrectName_expectedNothing() {
+    void editGeneralUserInfo_inputTeacherRequest_expectedNothing() {
+        final Teacher TEACHER_ENTITY_FOR_UPDATE_1 =
+                Teacher.builder()
+                        .withId(1)
+                        .withFirstName("update1")
+                        .withLastName("update1")
+                        .withEmail("update1@email.com")
+                        .build();
+        final TeacherRequest TEACHER_REQUEST_FOR_UPDATE_1 = new TeacherRequest();
+        TEACHER_REQUEST_FOR_UPDATE_1.setId(1);
+        TEACHER_REQUEST_FOR_UPDATE_1.setFirstName("update1");
+        TEACHER_REQUEST_FOR_UPDATE_1.setLastName("update1");
+        TEACHER_REQUEST_FOR_UPDATE_1.setEmail("update1@email.com");
+        TEACHER_REQUEST_FOR_UPDATE_1.setPassword("0000");
 
+        doNothing().when(teacherDao).updateGeneralUserInfo(TEACHER_ENTITY_FOR_UPDATE_1);
+        when(mapper.toEntity(TEACHER_REQUEST_FOR_UPDATE_1)).thenReturn(TEACHER_ENTITY_FOR_UPDATE_1);
+
+        teacherService.editGeneralUserInfo(TEACHER_REQUEST_FOR_UPDATE_1);
+
+        verify(mapper, times(1)).toEntity(TEACHER_REQUEST_FOR_UPDATE_1);
+        verify(validator, times(1)).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_FOR_UPDATE_1);
+        verify(validator, times(1)).validateEmail(TEACHER_REQUEST_FOR_UPDATE_1);
+        verify(teacherDao, times(1)).updateGeneralUserInfo(TEACHER_ENTITY_FOR_UPDATE_1);
+    }
+
+    @Test
+    void editPassword_inputStudentRequest_expectedNothing() {
+        final TeacherRequest TEACHER_REQUEST_FOR_UPDATE_1 = new TeacherRequest();
+        TEACHER_REQUEST_FOR_UPDATE_1.setId(1);
+        TEACHER_REQUEST_FOR_UPDATE_1.setPassword("0000");
+        TEACHER_REQUEST_FOR_UPDATE_1.setConfirmPassword("0000");
+
+        when(passwordEncoder.encode("0000")).thenReturn("asdferergergefsv1234");
+        doNothing().when(teacherDao).updateUserPassword(1, "asdferergergefsv1234");
+
+        teacherService.editPassword(TEACHER_REQUEST_FOR_UPDATE_1);
+
+        verify(teacherDao, times(1)).updateUserPassword(1, "asdferergergefsv1234");
+        verify(passwordEncoder, times(1)).encode("0000");
+    }
+
+    @Test
+    void editAll_inputTeacherRequestListWhereOneTeacherHasIncorrectName_expectedNothing() {
         final Teacher TEACHER_ENTITY_FOR_UPDATE_1 =
                 Teacher.builder()
                         .withId(1)
@@ -281,7 +351,7 @@ class TeacherServiceImplTest {
 
         doNothing().when(validator).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_FOR_UPDATE_1);
         doNothing().when(validator).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_FOR_UPDATE_2);
-        doThrow(new IncorrectRequestData())
+        doThrow(new IncorrectRequestDataException())
                 .when(validator).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_FOR_UPDATE_INCORRECT);
 
         when(mapper.toEntity(TEACHER_REQUEST_FOR_UPDATE_1)).thenReturn(TEACHER_ENTITY_FOR_UPDATE_1);
@@ -472,6 +542,17 @@ class TeacherServiceImplTest {
     }
 
     @Test
+    void lastPageNumber() {
+        when(teacherDao.count()).thenReturn(5L);
+
+        int expected = (int) Math.ceil(5.0 / AbstractPageableService.ITEMS_PER_PAGE);
+
+        assertEquals(expected, teacherService.lastPageNumber());
+
+        verify(teacherDao, times(1)).count();
+    }
+
+    @Test
     void login_inputEmailPassword_expectedTrue() {
         final String email = "email@mail.com";
         final String correctPassword = "1111";
@@ -481,18 +562,37 @@ class TeacherServiceImplTest {
         when(passwordEncoder.matches(correctPassword, teacher.getPassword())).thenReturn(true);
 
         assertTrue(teacherService.login(email, correctPassword));
+
+        verify(passwordEncoder, times(1)).matches(correctPassword, teacher.getPassword());
+        verify(teacherDao, times(1)).findByName(email);
     }
 
     @Test
     void login_inputEmailPassword_expectedFalse() {
         final String email = "email@mail.com";
-        final String correctPassword = "1111";
+        final String nonCorrectPassword = "1111";
         final Teacher teacher = Teacher.builder().withEmail("email@mail.com").withPassword("1234").build();
 
         when(teacherDao.findByName(email)).thenReturn(Optional.of(teacher));
-        when(passwordEncoder.matches(correctPassword, teacher.getPassword())).thenReturn(false);
+        when(passwordEncoder.matches(nonCorrectPassword, teacher.getPassword())).thenReturn(false);
+
+        assertFalse(teacherService.login(email, nonCorrectPassword));
+
+        verify(passwordEncoder, times(1)).matches(nonCorrectPassword, teacher.getPassword());
+        verify(teacherDao, times(1)).findByName(email);
+    }
+
+    @Test
+    void login_inputNonExistentEmail_expectedFalse() {
+        final String email = "email@mail.com";
+        final String correctPassword = "1111";
+
+        when(teacherDao.findByName(email)).thenReturn(Optional.empty());
 
         assertFalse(teacherService.login(email, correctPassword));
+
+        verify(teacherDao, times(1)).findByName(email);
+        verifyNoInteractions(passwordEncoder);
     }
 
 }

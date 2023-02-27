@@ -3,7 +3,7 @@ package com.mikhail.tarasevich.university.validator.impl;
 import com.mikhail.tarasevich.university.dao.DepartmentDao;
 import com.mikhail.tarasevich.university.dto.DepartmentRequest;
 import com.mikhail.tarasevich.university.entity.Department;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,7 +46,7 @@ class DepartmentValidatorImplTest {
         when(departmentDao.findByName(DEPARTMENT_REQUEST.getName()))
                 .thenReturn(Optional.of(Department.builder().build()));
 
-        assertThrows(IncorrectRequestData.class, () -> departmentValidator.validateUniqueNameInDB(DEPARTMENT_REQUEST));
+        assertThrows(IncorrectRequestDataException.class, () -> departmentValidator.validateUniqueNameInDB(DEPARTMENT_REQUEST));
 
         verify(departmentDao, times(1)).findByName(DEPARTMENT_REQUEST.getName());
     }
@@ -63,7 +63,7 @@ class DepartmentValidatorImplTest {
         DEPARTMENT_REQUEST.setName("   ");
         DEPARTMENT_REQUEST.setDescription("description");
 
-        assertThrows(IncorrectRequestData.class,
+        assertThrows(IncorrectRequestDataException.class,
                 () -> departmentValidator.validateNameNotNullOrEmpty(DEPARTMENT_REQUEST));
     }
 
@@ -74,7 +74,7 @@ class DepartmentValidatorImplTest {
         DEPARTMENT_REQUEST.setName(null);
         DEPARTMENT_REQUEST.setDescription("description");
 
-        assertThrows(IncorrectRequestData.class,
+        assertThrows(IncorrectRequestDataException.class,
                 () -> departmentValidator.validateNameNotNullOrEmpty(DEPARTMENT_REQUEST));
     }
 

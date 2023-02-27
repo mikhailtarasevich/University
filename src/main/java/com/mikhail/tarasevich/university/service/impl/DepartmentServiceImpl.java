@@ -6,7 +6,8 @@ import com.mikhail.tarasevich.university.dao.TeacherDao;
 import com.mikhail.tarasevich.university.dto.DepartmentRequest;
 import com.mikhail.tarasevich.university.dto.DepartmentResponse;
 import com.mikhail.tarasevich.university.entity.Department;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
+import com.mikhail.tarasevich.university.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.DepartmentMapper;
 import com.mikhail.tarasevich.university.service.DepartmentService;
 import com.mikhail.tarasevich.university.validator.DepartmentValidator;
@@ -50,7 +51,7 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
                 validator.validateUniqueNameInDB(r);
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
-            } catch (IncorrectRequestData e) {
+            } catch (IncorrectRequestDataException e) {
                 log.info("The departments were deleted from the save list. Request: {} .", r);
             }
         });
@@ -62,8 +63,14 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
     }
 
     @Override
-    public Optional<DepartmentResponse> findById(int id) {
-        return departmentDao.findById(id).map(mapper::toResponse);
+    public DepartmentResponse findById(int id) {
+        Optional<DepartmentResponse> foundDepartment = departmentDao.findById(id).map(mapper::toResponse);
+
+        if (foundDepartment.isPresent()) {
+            return foundDepartment.get();
+        } else {
+            throw new ObjectWithSpecifiedIdNotFoundException("The department with specified id doesn't exist in the database.");
+        }
     }
 
     @Override
@@ -72,6 +79,13 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
         int pageNumber = parsePageNumber(page, itemsCount, 1);
 
         return departmentDao.findAll(pageNumber, ITEMS_PER_PAGE).stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<DepartmentResponse> findAll() {
+        return departmentDao.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -90,7 +104,7 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
             try {
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
-            } catch (IncorrectRequestData e) {
+            } catch (IncorrectRequestDataException e) {
                 log.info("The department was deleted from the update list. The department: {} .", r);
             }
         });

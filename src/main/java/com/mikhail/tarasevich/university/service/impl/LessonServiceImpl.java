@@ -4,7 +4,8 @@ import com.mikhail.tarasevich.university.dao.LessonDao;
 import com.mikhail.tarasevich.university.dto.LessonRequest;
 import com.mikhail.tarasevich.university.dto.LessonResponse;
 import com.mikhail.tarasevich.university.entity.Lesson;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
+import com.mikhail.tarasevich.university.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.LessonMapper;
 import com.mikhail.tarasevich.university.service.LessonService;
 import com.mikhail.tarasevich.university.validator.LessonValidator;
@@ -46,7 +47,7 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
                 validator.validateUniqueNameInDB(r);
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
-            } catch (IncorrectRequestData e) {
+            } catch (IncorrectRequestDataException e) {
                 log.info("The lesson were deleted from the save list. The lesson: {} .", r);
             }
         });
@@ -58,8 +59,14 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
     }
 
     @Override
-    public Optional<LessonResponse> findById(int id) {
-        return lessonDao.findById(id).map(mapper::toResponse);
+    public LessonResponse findById(int id) {
+        Optional<LessonResponse> foundLesson = lessonDao.findById(id).map(mapper::toResponse);
+
+        if (foundLesson.isPresent()) {
+            return foundLesson.get();
+        } else {
+            throw new ObjectWithSpecifiedIdNotFoundException("The lesson with specified id doesn't exist in the database.");
+        }
     }
 
     @Override
@@ -68,6 +75,13 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
         int pageNumber = parsePageNumber(page, itemsCount, 1);
 
         return lessonDao.findAll(pageNumber, ITEMS_PER_PAGE).stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LessonResponse> findAll() {
+        return lessonDao.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -86,7 +100,7 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
             try {
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
-            } catch (IncorrectRequestData e) {
+            } catch (IncorrectRequestDataException e) {
                 log.info("The lesson was deleted from the update list. The lesson: {} .", r);
             }
         });

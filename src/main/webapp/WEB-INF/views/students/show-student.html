@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}"
+>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Student's info</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-50 p-3 mx-auto">
+    <h1>Student information</h1>
+    <br>
+    <div class="mb-2 row">
+        <label for="firstName" class="col col-form-label">First name:</label>
+        <div class="col">
+            <input type="text" readonly class="form-control-plaintext text-center" id="firstName"
+                   th:value="${student.getFirstName()}"/>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="lastName" class="col col-form-label">Last name:</label>
+        <div class="col">
+            <input type="text" readonly class="form-control-plaintext text-center" id="lastName"
+                   th:value="${student.getLastName()}"/>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="email" class="col col-form-label">Email:</label>
+        <div class="col">
+            <input type="text" readonly class="form-control-plaintext text-center" id="email"
+                   th:value="${student.getEmail()}"/>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="gender" class="col col-form-label">Gender:</label>
+        <div class="col">
+            <input type="text" readonly class="form-control-plaintext text-center" id="gender"
+                   th:value="${student.getGender()}"/>
+        </div>
+    </div>
+    <div class="mb-4 row">
+        <label for="groupName" class="col col-form-label">Group name:</label>
+        <div class="col">
+            <a th:href="@{/groups/{id}(id=${student.getGroup().getId()})}">
+                <input type="text" readonly class="form-control-plaintext text-center" id="groupName"
+                       th:value="${student.getGroup() == NULL} ? 'group not selected' : ${student.getGroup().getName()}"/>
+            </a>
+        </div>
+    </div>
+    <br><br>
+    <div class="mb-4 row">
+        <a href="/students">
+            <button class="btn btn-primary">Back to all students page</button>
+        </a>
+    </div>
+    <div class="mb-4 row">
+        <a th:href="@{/students/{id}/edit(id=${student.getId()})}">
+            <button class="btn btn-primary">Edit student information</button>
+        </a>
+    </div>
+    <div class="mb-4 row">
+        <form th:method="DELETE" th:action="@{/students/{id}(id=${student.getId()})}" th:object="${student}">
+            <input class="btn btn-primary" type="submit" value="Delete student"/>
+        </form>
+    </div>
+</div>
+</body>
+</html>

@@ -1,8 +1,10 @@
 package com.mikhail.tarasevich.university.service.impl;
 
-public abstract class AbstractPageableService {
+import com.mikhail.tarasevich.university.dao.impl.AbstractPageableCrudDaoImpl;
 
-    protected static final int ITEMS_PER_PAGE = 10;
+public abstract class AbstractPageableService<E extends AbstractPageableCrudDaoImpl> {
+
+    public static final int ITEMS_PER_PAGE = 10;
 
     protected int parsePageNumber(String page, long itemsCount, int defaultValue) {
         int pageNumber = defaultValue;

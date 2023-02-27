@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8"/>
+    <title>All students</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <h3 class="mb-3">Students table</h3>
+    <table class="table table-bordered table-hover">
+        <thead class="table-primary">
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">First name</th>
+            <th scope="col">Last name</th>
+            <th scope="col">Email</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="student : ${students}">
+            <td th:text="${student.getId()}">VALUE</td>
+            <td th:text="${student.getFirstName()}">VALUE</td>
+            <td th:text="${student.getLastName()}">VALUE</td>
+            <td>
+                <a th:href="@{/students/{id}(id=${student.getId()})}" th:text="${student.getEmail()}">VALUE</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            <li th:class="${currentPage <= 1} ? 'page-item disabled' : 'page-item'">
+                <a class="page-link" th:href="@{/students(page=${currentPage - 1})}">Previous</a>
+            </li>
+            <li th:class="${currentPage >= lastPage} ? 'page-item disabled' : 'page-item'">
+                <a class="page-link" th:href="@{/students(page=${currentPage + 1})}">Next</a>
+            </li>
+        </ul>
+    </nav>
+    <a href="/students/new" class="btn btn-primary mt-3">
+        Add new student
+    </a>
+</div>
+</body>
+</html>

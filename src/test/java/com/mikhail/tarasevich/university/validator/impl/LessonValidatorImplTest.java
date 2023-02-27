@@ -3,7 +3,7 @@ package com.mikhail.tarasevich.university.validator.impl;
 import com.mikhail.tarasevich.university.dao.LessonDao;
 import com.mikhail.tarasevich.university.dto.LessonRequest;
 import com.mikhail.tarasevich.university.entity.Lesson;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,7 +44,7 @@ class LessonValidatorImplTest {
     void validateUniqueNameInDB_inputWithNotUniqueName_expectedException() {
         when(lessonDao.findByName(LESSON_REQUEST.getName())).thenReturn(Optional.of(Lesson.builder().build()));
 
-        assertThrows(IncorrectRequestData.class, () -> lessonValidator.validateUniqueNameInDB(LESSON_REQUEST));
+        assertThrows(IncorrectRequestDataException.class, () -> lessonValidator.validateUniqueNameInDB(LESSON_REQUEST));
 
         verify(lessonDao, times(1)).findByName(LESSON_REQUEST.getName());
     }
@@ -60,7 +60,7 @@ class LessonValidatorImplTest {
         LESSON_REQUEST.setId(1);
         LESSON_REQUEST.setName("  ");
 
-        assertThrows(IncorrectRequestData.class, () -> lessonValidator.validateNameNotNullOrEmpty(LESSON_REQUEST));
+        assertThrows(IncorrectRequestDataException.class, () -> lessonValidator.validateNameNotNullOrEmpty(LESSON_REQUEST));
     }
 
     @Test
@@ -69,7 +69,7 @@ class LessonValidatorImplTest {
         LESSON_REQUEST.setId(1);
         LESSON_REQUEST.setName(null);
 
-        assertThrows(IncorrectRequestData.class, () -> lessonValidator.validateNameNotNullOrEmpty(LESSON_REQUEST));
+        assertThrows(IncorrectRequestDataException.class, () -> lessonValidator.validateNameNotNullOrEmpty(LESSON_REQUEST));
     }
 
 }

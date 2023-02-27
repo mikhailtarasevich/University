@@ -7,7 +7,8 @@ import com.mikhail.tarasevich.university.dao.TeacherDao;
 import com.mikhail.tarasevich.university.dto.GroupRequest;
 import com.mikhail.tarasevich.university.dto.GroupResponse;
 import com.mikhail.tarasevich.university.entity.Group;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
+import com.mikhail.tarasevich.university.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.GroupMapper;
 import com.mikhail.tarasevich.university.service.GroupService;
 import com.mikhail.tarasevich.university.validator.GroupValidator;
@@ -52,7 +53,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
                 validator.validateUniqueNameInDB(r);
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
-            } catch (IncorrectRequestData e) {
+            } catch (IncorrectRequestDataException e) {
                 log.info("The group were deleted from the save list. The group: {} .", r);
             }
         });
@@ -64,8 +65,14 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     }
 
     @Override
-    public Optional<GroupResponse> findById(int id) {
-        return groupDao.findById(id).map(mapper::toResponse);
+    public GroupResponse findById(int id) {
+        Optional<GroupResponse> foundGroup = groupDao.findById(id).map(mapper::toResponse);
+
+        if (foundGroup.isPresent()) {
+            return foundGroup.get();
+        } else {
+            throw new ObjectWithSpecifiedIdNotFoundException("The group with specified id doesn't exist in the database.");
+        }
     }
 
     @Override
@@ -74,6 +81,13 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
         int pageNumber = parsePageNumber(page, itemsCount, 1);
 
         return groupDao.findAll(pageNumber, ITEMS_PER_PAGE).stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<GroupResponse> findAll() {
+        return groupDao.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -92,7 +106,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
             try {
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
-            } catch (IncorrectRequestData e) {
+            } catch (IncorrectRequestDataException e) {
                 log.info("The group was deleted from the update list. The group: {} .", r);
             }
         });

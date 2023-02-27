@@ -3,7 +3,7 @@ package com.mikhail.tarasevich.university.validator.impl;
 import com.mikhail.tarasevich.university.dao.GroupDao;
 import com.mikhail.tarasevich.university.dto.GroupRequest;
 import com.mikhail.tarasevich.university.entity.Group;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,7 +44,7 @@ class GroupValidatorImplTest {
     void validateUniqueNameInDB_inputWithNotUniqueName_expectedException() {
         when(groupDao.findByName(GROUP_REQUEST.getName())).thenReturn(Optional.of(Group.builder().build()));
 
-        assertThrows(IncorrectRequestData.class, () -> groupValidator.validateUniqueNameInDB(GROUP_REQUEST));
+        assertThrows(IncorrectRequestDataException.class, () -> groupValidator.validateUniqueNameInDB(GROUP_REQUEST));
 
         verify(groupDao, times(1)).findByName(GROUP_REQUEST.getName());
     }
@@ -60,7 +60,7 @@ class GroupValidatorImplTest {
         GROUP_REQUEST.setId(1);
         GROUP_REQUEST.setName("  ");
 
-        assertThrows(IncorrectRequestData.class, () -> groupValidator.validateNameNotNullOrEmpty(GROUP_REQUEST));
+        assertThrows(IncorrectRequestDataException.class, () -> groupValidator.validateNameNotNullOrEmpty(GROUP_REQUEST));
     }
 
     @Test
@@ -69,7 +69,7 @@ class GroupValidatorImplTest {
         GROUP_REQUEST.setId(1);
         GROUP_REQUEST.setName(null);
 
-        assertThrows(IncorrectRequestData.class, () -> groupValidator.validateNameNotNullOrEmpty(GROUP_REQUEST));
+        assertThrows(IncorrectRequestDataException.class, () -> groupValidator.validateNameNotNullOrEmpty(GROUP_REQUEST));
     }
 
 }

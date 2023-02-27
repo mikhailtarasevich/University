@@ -4,6 +4,8 @@ import com.mikhail.tarasevich.university.entity.User;
 
 public interface UserDao<E extends User> extends CrudPageableDao<E> {
 
-    void addUserToGroup(int userId, Integer groupId);
+    void updateGeneralUserInfo (E entity);
+    void updateUserPassword (int id, String password);
+    void addUserToGroup(int userId, int groupId);
 
 }

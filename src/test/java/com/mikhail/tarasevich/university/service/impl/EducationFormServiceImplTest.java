@@ -5,7 +5,8 @@ import com.mikhail.tarasevich.university.dao.GroupDao;
 import com.mikhail.tarasevich.university.dto.EducationFormRequest;
 import com.mikhail.tarasevich.university.dto.EducationFormResponse;
 import com.mikhail.tarasevich.university.entity.EducationForm;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
+import com.mikhail.tarasevich.university.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.EducationFormMapper;
 import com.mikhail.tarasevich.university.validator.EducationFormValidator;
 import org.junit.jupiter.api.Test;
@@ -30,9 +31,9 @@ class EducationFormServiceImplTest {
     @Mock
     GroupDao groupDao;
     @Mock
-    EducationFormMapper educationFormMapper;
+    EducationFormMapper mapper;
     @Mock
-    EducationFormValidator educationFormValidator;
+    EducationFormValidator validator;
 
     private static final EducationForm EF_ENTITY_1 = EducationForm.builder()
             .withName("name1")
@@ -84,20 +85,20 @@ class EducationFormServiceImplTest {
 
     @Test
     void register_inputEducationFormRequest_expectedEducationFormResponseWithId() {
-        when(educationFormMapper.toEntity(EF_REQUEST_1)).thenReturn(EF_ENTITY_1);
+        when(mapper.toEntity(EF_REQUEST_1)).thenReturn(EF_ENTITY_1);
         when(educationFormDao.save(EF_ENTITY_1)).thenReturn(EF_ENTITY_WITH_ID_1);
-        when(educationFormMapper.toResponse(EF_ENTITY_WITH_ID_1)).thenReturn(EF_RESPONSE_WITH_ID_1);
-        doNothing().when(educationFormValidator).validateUniqueNameInDB(EF_REQUEST_1);
-        doNothing().when(educationFormValidator).validateNameNotNullOrEmpty(EF_REQUEST_1);
+        when(mapper.toResponse(EF_ENTITY_WITH_ID_1)).thenReturn(EF_RESPONSE_WITH_ID_1);
+        doNothing().when(validator).validateUniqueNameInDB(EF_REQUEST_1);
+        doNothing().when(validator).validateNameNotNullOrEmpty(EF_REQUEST_1);
 
         EducationFormResponse educationFormResponse = educationFormService.register(EF_REQUEST_1);
 
         assertEquals(EF_RESPONSE_WITH_ID_1, educationFormResponse);
-        verify(educationFormMapper, times(1)).toEntity(EF_REQUEST_1);
+        verify(mapper, times(1)).toEntity(EF_REQUEST_1);
         verify(educationFormDao, times(1)).save(EF_ENTITY_1);
-        verify(educationFormMapper, times(1)).toResponse(EF_ENTITY_WITH_ID_1);
-        verify(educationFormValidator, times(1)).validateUniqueNameInDB(EF_REQUEST_1);
-        verify(educationFormValidator, times(1)).validateUniqueNameInDB(EF_REQUEST_1);
+        verify(mapper, times(1)).toResponse(EF_ENTITY_WITH_ID_1);
+        verify(validator, times(1)).validateUniqueNameInDB(EF_REQUEST_1);
+        verify(validator, times(1)).validateUniqueNameInDB(EF_REQUEST_1);
     }
 
     @Test
@@ -107,51 +108,75 @@ class EducationFormServiceImplTest {
         listForRegister.add(EF_REQUEST_1);
         listForRegister.add(EF_REQUEST_2);
 
-        when(educationFormMapper.toEntity(EF_REQUEST_1)).thenReturn(EF_ENTITY_1);
-        when(educationFormMapper.toEntity(EF_REQUEST_2)).thenReturn(EF_ENTITY_2);
+        when(mapper.toEntity(EF_REQUEST_1)).thenReturn(EF_ENTITY_1);
+        when(mapper.toEntity(EF_REQUEST_2)).thenReturn(EF_ENTITY_2);
         doNothing().when(educationFormDao).saveAll(educationFormEntities);
-        doNothing().doThrow(new IncorrectRequestData()).when(educationFormValidator).validateUniqueNameInDB(EF_REQUEST_1);
-        doNothing().when(educationFormValidator).validateNameNotNullOrEmpty(EF_REQUEST_1);
-        doNothing().when(educationFormValidator).validateUniqueNameInDB(EF_REQUEST_2);
-        doNothing().when(educationFormValidator).validateNameNotNullOrEmpty(EF_REQUEST_2);
+        doNothing().doThrow(new IncorrectRequestDataException()).when(validator).validateUniqueNameInDB(EF_REQUEST_1);
+        doNothing().when(validator).validateNameNotNullOrEmpty(EF_REQUEST_1);
+        doNothing().when(validator).validateUniqueNameInDB(EF_REQUEST_2);
+        doNothing().when(validator).validateNameNotNullOrEmpty(EF_REQUEST_2);
 
         educationFormService.registerAll(listForRegister);
 
-        verify(educationFormMapper, times(1)).toEntity(EF_REQUEST_2);
-        verify(educationFormMapper, times(1)).toEntity(EF_REQUEST_2);
+        verify(mapper, times(1)).toEntity(EF_REQUEST_2);
+        verify(mapper, times(1)).toEntity(EF_REQUEST_2);
         verify(educationFormDao, times(1)).saveAll(educationFormEntities);
-        verify(educationFormValidator, times(2)).validateUniqueNameInDB(EF_REQUEST_1);
-        verify(educationFormValidator, times(1)).validateNameNotNullOrEmpty(EF_REQUEST_1);
-        verify(educationFormValidator, times(1)).validateUniqueNameInDB(EF_REQUEST_2);
-        verify(educationFormValidator, times(1)).validateNameNotNullOrEmpty(EF_REQUEST_2);
+        verify(validator, times(2)).validateUniqueNameInDB(EF_REQUEST_1);
+        verify(validator, times(1)).validateNameNotNullOrEmpty(EF_REQUEST_1);
+        verify(validator, times(1)).validateUniqueNameInDB(EF_REQUEST_2);
+        verify(validator, times(1)).validateNameNotNullOrEmpty(EF_REQUEST_2);
     }
 
     @Test
     void findById_inputIntId_expectedFoundEducationForm() {
         when(educationFormDao.findById(1)).thenReturn(Optional.of(EF_ENTITY_WITH_ID_1));
-        when(educationFormMapper.toResponse(EF_ENTITY_WITH_ID_1)).thenReturn(EF_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(EF_ENTITY_WITH_ID_1)).thenReturn(EF_RESPONSE_WITH_ID_1);
 
-        Optional<EducationFormResponse> educationFormResponse = educationFormService.findById(1);
+        EducationFormResponse educationFormResponse = educationFormService.findById(1);
 
-        assertEquals(Optional.of(EF_RESPONSE_WITH_ID_1), educationFormResponse);
-        verify(educationFormMapper, times(1)).toResponse(EF_ENTITY_WITH_ID_1);
+        assertEquals(EF_RESPONSE_WITH_ID_1, educationFormResponse);
+        verify(mapper, times(1)).toResponse(EF_ENTITY_WITH_ID_1);
         verify(educationFormDao, times(1)).findById(1);
+    }
+
+    @Test
+    void findById_inputIncorrectId_expectedException() {
+        when(educationFormDao.findById(100)).thenReturn(Optional.empty());
+
+        assertThrows(ObjectWithSpecifiedIdNotFoundException.class, () -> educationFormService.findById(100));
+
+        verify(educationFormDao, times(1)).findById(100);
+        verifyNoInteractions(mapper);
+    }
+
+    @Test
+    void findAll_inputNothing_expectedFoundAllEducationForms() {
+        when(educationFormDao.findAll()).thenReturn(educationFormEntitiesWithId);
+        when(mapper.toResponse(EF_ENTITY_WITH_ID_1)).thenReturn(EF_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(EF_ENTITY_WITH_ID_2)).thenReturn(EF_RESPONSE_WITH_ID_2);
+
+        List<EducationFormResponse> foundCourses = educationFormService.findAll();
+
+        assertEquals(educationFormResponses, foundCourses);
+        verify(educationFormDao, times(1)).findAll();
+        verify(mapper, times(1)).toResponse(EF_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(EF_ENTITY_WITH_ID_2);
     }
 
     @Test
     void findAll_inputPageOne_expectedFoundEducationFormsFromPageOne() {
         when(educationFormDao.findAll(1, AbstractPageableService.ITEMS_PER_PAGE)).thenReturn(educationFormEntitiesWithId);
         when(educationFormDao.count()).thenReturn(2L);
-        when(educationFormMapper.toResponse(EF_ENTITY_WITH_ID_1)).thenReturn(EF_RESPONSE_WITH_ID_1);
-        when(educationFormMapper.toResponse(EF_ENTITY_WITH_ID_2)).thenReturn(EF_RESPONSE_WITH_ID_2);
+        when(mapper.toResponse(EF_ENTITY_WITH_ID_1)).thenReturn(EF_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(EF_ENTITY_WITH_ID_2)).thenReturn(EF_RESPONSE_WITH_ID_2);
 
         List<EducationFormResponse> foundCourses = educationFormService.findAll("1");
 
         assertEquals(educationFormResponses, foundCourses);
         verify(educationFormDao, times(1)).findAll(1, AbstractPageableService.ITEMS_PER_PAGE);
         verify(educationFormDao, times(1)).count();
-        verify(educationFormMapper, times(1)).toResponse(EF_ENTITY_WITH_ID_1);
-        verify(educationFormMapper, times(1)).toResponse(EF_ENTITY_WITH_ID_2);
+        verify(mapper, times(1)).toResponse(EF_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(EF_ENTITY_WITH_ID_2);
     }
 
     @Test
@@ -166,11 +191,11 @@ class EducationFormServiceImplTest {
         EF_REQUEST_FOR_UPDATE_1.setName("update1");
 
         doNothing().when(educationFormDao).update(EF_ENTITY_FOR_UPDATE_1);
-        when(educationFormMapper.toEntity(EF_REQUEST_FOR_UPDATE_1)).thenReturn(EF_ENTITY_FOR_UPDATE_1);
+        when(mapper.toEntity(EF_REQUEST_FOR_UPDATE_1)).thenReturn(EF_ENTITY_FOR_UPDATE_1);
 
         educationFormService.edit(EF_REQUEST_FOR_UPDATE_1);
 
-        verify(educationFormMapper, times(1)).toEntity(EF_REQUEST_FOR_UPDATE_1);
+        verify(mapper, times(1)).toEntity(EF_REQUEST_FOR_UPDATE_1);
         verify(educationFormDao, times(1)).update(EF_ENTITY_FOR_UPDATE_1);
     }
 
@@ -207,23 +232,23 @@ class EducationFormServiceImplTest {
         listForUpdate.add(EF_ENTITY_FOR_UPDATE_1);
         listForUpdate.add(EF_ENTITY_FOR_UPDATE_2);
 
-        doNothing().when(educationFormValidator).validateNameNotNullOrEmpty(EF_REQUEST_FOR_UPDATE_1);
-        doNothing().when(educationFormValidator).validateNameNotNullOrEmpty(EF_REQUEST_FOR_UPDATE_2);
-        doThrow(new IncorrectRequestData()).when(educationFormValidator)
+        doNothing().when(validator).validateNameNotNullOrEmpty(EF_REQUEST_FOR_UPDATE_1);
+        doNothing().when(validator).validateNameNotNullOrEmpty(EF_REQUEST_FOR_UPDATE_2);
+        doThrow(new IncorrectRequestDataException()).when(validator)
                 .validateNameNotNullOrEmpty(EF_REQUEST_FOR_UPDATE_INCORRECT);
 
-        when(educationFormMapper.toEntity(EF_REQUEST_FOR_UPDATE_1)).thenReturn(EF_ENTITY_FOR_UPDATE_1);
-        when(educationFormMapper.toEntity(EF_REQUEST_FOR_UPDATE_2)).thenReturn(EF_ENTITY_FOR_UPDATE_2);
+        when(mapper.toEntity(EF_REQUEST_FOR_UPDATE_1)).thenReturn(EF_ENTITY_FOR_UPDATE_1);
+        when(mapper.toEntity(EF_REQUEST_FOR_UPDATE_2)).thenReturn(EF_ENTITY_FOR_UPDATE_2);
         doNothing().when(educationFormDao).updateAll(listForUpdate);
 
         educationFormService.editAll(inputList);
 
-        verify(educationFormMapper, times(1)).toEntity(EF_REQUEST_FOR_UPDATE_1);
-        verify(educationFormMapper, times(1)).toEntity(EF_REQUEST_FOR_UPDATE_2);
+        verify(mapper, times(1)).toEntity(EF_REQUEST_FOR_UPDATE_1);
+        verify(mapper, times(1)).toEntity(EF_REQUEST_FOR_UPDATE_2);
         verify(educationFormDao, times(1)).updateAll(listForUpdate);
-        verify(educationFormValidator, times(1)).validateNameNotNullOrEmpty(EF_REQUEST_FOR_UPDATE_1);
-        verify(educationFormValidator, times(1)).validateNameNotNullOrEmpty(EF_REQUEST_FOR_UPDATE_2);
-        verify(educationFormValidator, times(1)).validateNameNotNullOrEmpty(EF_REQUEST_FOR_UPDATE_INCORRECT);
+        verify(validator, times(1)).validateNameNotNullOrEmpty(EF_REQUEST_FOR_UPDATE_1);
+        verify(validator, times(1)).validateNameNotNullOrEmpty(EF_REQUEST_FOR_UPDATE_2);
+        verify(validator, times(1)).validateNameNotNullOrEmpty(EF_REQUEST_FOR_UPDATE_INCORRECT);
     }
 
     @Test

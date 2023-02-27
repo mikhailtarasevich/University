@@ -2,7 +2,7 @@ package com.mikhail.tarasevich.university.validator.impl;
 
 import com.mikhail.tarasevich.university.dao.GroupDao;
 import com.mikhail.tarasevich.university.dto.GroupRequest;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.validator.GroupValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ public class GroupValidatorImpl implements GroupValidator {
     @Override
     public void validateUniqueNameInDB(GroupRequest request) {
         if (dao.findByName(request.getName()).isPresent())
-            throw new IncorrectRequestData("The group with specified name already exists in the database.");
+            throw new IncorrectRequestDataException("The group with specified name already exists in the database.");
     }
 
     @Override
@@ -28,7 +28,7 @@ public class GroupValidatorImpl implements GroupValidator {
         String name = request.getName();
 
         if (name == null || name.replaceAll("\\s", "").equals(""))
-            throw new IncorrectRequestData("The group name can't be null or empty.");
+            throw new IncorrectRequestDataException("The group name can't be null or empty.");
     }
 
 }

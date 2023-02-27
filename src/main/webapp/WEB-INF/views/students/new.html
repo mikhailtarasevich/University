@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}"
+>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Create student</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-50 p-2 mx-auto">
+    <h1>Create new student</h1>
+    <br>
+    <form th:method="POST" th:action="@{/students}" th:object="${student}" class="needs-validation">
+        <div class="form-floating mb-3">
+            <input class="form-control" th:field="*{firstName}" id="firstName"/>
+            <label for="firstName">Enter first name: </label>
+        </div>
+        <div class="form-floating mb-3">
+            <input class="form-control" th:field="*{lastName}" id="lastName"/>
+            <label for="lastName">Enter last name: </label>
+        </div>
+        <div class="form-floating mb-3">
+            <input class="form-control" th:field="*{email}" id="email"/>
+            <label for="email">Enter email: </label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="password" th:field="*{password}" class="form-control" id="password" >
+            <label for="password">Enter password:</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="password" th:field="*{confirmPassword}" class="form-control" id="confirmPassword" >
+            <label for="confirmPassword">Confirm password:</label>
+        </div>
+        <select class="form-select mb-3" th:field="*{groupId}">
+            <th:block th:each="group : ${groups}">
+                <option th:value="${group.getId()}" th:text="${group.Name}">GROUP NAME</option>
+            </th:block>
+        </select>
+        <div class="row row-cols-2 w-75 mx-auto">
+            <th:block th:each="gender : ${T(com.mikhail.tarasevich.university.entity.Gender).values()}">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" th:field="*{gender}" th:value="${gender}"
+                           id="${gender}"/>
+                    <a th:text="${gender}">VALUE</a>
+                </div>
+            </th:block>
+        </div>
+        <br>
+        <input class="btn btn-primary" type="submit" value="Add student"/>
+        <br><br>
+    </form>
+    <a href="/students">
+        <button class="btn btn-primary">Back to all students page</button>
+    </a>
+</div>
+</body>
+</html>

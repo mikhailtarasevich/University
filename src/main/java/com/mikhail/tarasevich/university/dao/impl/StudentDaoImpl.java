@@ -43,6 +43,9 @@ public class StudentDaoImpl extends AbstractUserDaoImpl<Student> implements Stud
                     "JOIN groups ON group_id = groups.id " +
                     "WHERE user_type = 'student' AND group_id = ? " +
                     "ORDER BY user_id";
+    private static final String UPDATE_GENERAL_STUDENT_INFO_QUERY =
+            "UPDATE users SET first_name = ?, last_name = ?, gender = ?, email = ? WHERE id = ?";
+    private static final String UPDATE_PASSWORD_QUERY = "UPDATE users SET password = ? WHERE id = ?";
     private static final String UNBIND_STUDENTS_FROM_GROUP_QUERY =
             "UPDATE users SET group_id = NULL WHERE group_id = ?";
     private static final RowMapper<Student> ROW_MAPPER = (resultSet, rowNum) ->
@@ -71,7 +74,7 @@ public class StudentDaoImpl extends AbstractUserDaoImpl<Student> implements Stud
     public StudentDaoImpl(JdbcOperations jdbcTemplate) {
         super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY, FIND_ALL_PAGEABLE_QUERY,
                 FIND_BY_EMAIL_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY,
-                ADD_STUDENT_TO_GROUP_QUERY);
+                UPDATE_GENERAL_STUDENT_INFO_QUERY, UPDATE_PASSWORD_QUERY, ADD_STUDENT_TO_GROUP_QUERY);
     }
 
     @Override
