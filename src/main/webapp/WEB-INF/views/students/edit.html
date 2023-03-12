@@ -11,7 +11,7 @@
 <div layout:fragment="content" class="w-50 p-2 mx-auto">
     <h1>Edit student information</h1>
     <br>
-    <form th:method="PATCH" th:action="@{/students/{id}(id=${student.getId()})}" th:object="${student}"
+    <form th:method="PATCH" th:action="@{/students/{id}(id=${student.Id})}" th:object="${student}"
           class="border-bottom">
         <div class="form-floating mb-3">
             <input class="form-control" th:field="*{firstName}" id="firstName"/>
@@ -38,7 +38,7 @@
         <input class="btn btn-success" type="submit" value="Update general information"/>
         <br><br>
     </form>
-    <form th:method="PATCH" th:action="@{/students/{id}/edit-password(id=${student.getId()})}" th:object="${student}"
+    <form th:method="PATCH" th:action="@{/students/{id}/edit/password(id=${student.Id})}" th:object="${student}"
           class="border-bottom">
         <br>
         <h5>Change password</h5>
@@ -54,19 +54,19 @@
         <input class="btn btn-success" type="submit" value="Change password"/>
         <br><br>
     </form>
-    <form th:method="PATCH" th:action="@{/students/{id}/edit-group(id=${student.getId()})}" th:object="${student}">
+    <form th:method="PATCH" th:action="@{/students/{id}/edit/group(id=${student.Id})}" th:object="${student}">
         <br>
         <h5>Change group</h5>
         <br>
         <select class="form-select mb-3" th:field="*{groupId}">
             <th:block th:each="group : ${groups}">
-                <option th:value="${group.getId()}" th:text="${group.Name}">GROUP NAME</option>
+                <option th:value="${group.Id}" th:text="${group.Name}">GROUP NAME</option>
             </th:block>
         </select>
         <input class="btn btn-success" type="submit" value="Set new group"/>
     </form>
     <br>
-    <form th:method="PATCH" th:action="@{/students/{id}/leave-group(id=${student.getId()})}" th:object="${student}"
+    <form th:method="PATCH" th:action="@{/students/{id}/leave/group(id=${student.Id})}" th:object="${student}"
           class="border-bottom">
         <input class="btn btn-danger" type="submit" value="Unsubscribe student from group"/>
         <br><br>

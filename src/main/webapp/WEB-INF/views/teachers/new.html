@@ -5,13 +5,13 @@
 >
 <head>
     <meta charset="UTF-8"/>
-    <title>Create student</title>
+    <title>Create teacher</title>
 </head>
 <body>
 <div layout:fragment="content" class="w-50 p-2 mx-auto">
-    <h1>Create new student</h1>
+    <h1>Create new teacher</h1>
     <br>
-    <form th:method="POST" th:action="@{/students}" th:object="${student}" class="needs-validation">
+    <form th:method="POST" th:action="@{/teachers}" th:object="${teacher}" class="needs-validation">
         <div class="form-floating mb-3">
             <input class="form-control" th:field="*{firstName}" id="firstName"/>
             <label for="firstName">Enter first name: </label>
@@ -25,16 +25,25 @@
             <label for="email">Enter email: </label>
         </div>
         <div class="form-floating mb-3">
-            <input type="password" th:field="*{password}" class="form-control" id="password" >
+            <input type="password" th:field="*{password}" class="form-control" id="password">
             <label for="password">Enter password:</label>
         </div>
         <div class="form-floating mb-3">
-            <input type="password" th:field="*{confirmPassword}" class="form-control" id="confirmPassword" >
+            <input type="password" th:field="*{confirmPassword}" class="form-control" id="confirmPassword">
             <label for="confirmPassword">Confirm password:</label>
         </div>
-        <select class="form-select mb-3" th:field="*{groupId}">
-            <th:block th:each="group : ${groups}">
-                <option th:value="${group.Id}" th:text="${group.Name}">GROUP NAME</option>
+        <p class="text-secondary">Choose teacher's title:</p>
+        <select class="form-select mb-3" th:field="*{teacherTitleId}">
+            <th:block th:each="teacherTitle : ${teacherTitles}">
+                <option th:value="${teacherTitle.Id}" th:text="${teacherTitle.Name}">TEACHER TITLE NAME</option>
+            </th:block>
+        </select>
+        <p class="text-secondary">Choose teacher's department:</p>
+        <select class="form-select mb-3" th:field="*{departmentId}">
+            <th:block th:each="department : ${departments}">
+                <option th:value="${department.Id}" th:text="${department.Name}">
+                    DEPARTMENT NAME
+                </option>
             </th:block>
         </select>
         <div class="row row-cols-2 w-75 mx-auto">
@@ -47,11 +56,11 @@
             </th:block>
         </div>
         <br>
-        <input class="btn btn-primary" type="submit" value="Add student"/>
+        <input class="btn btn-primary" type="submit" value="Add teacher"/>
         <br><br>
     </form>
-    <a href="/students">
-        <button class="btn btn-primary">Back to all students page</button>
+    <a href="/teachers">
+        <button class="btn btn-primary">Back to all teachers page</button>
     </a>
 </div>
 </body>

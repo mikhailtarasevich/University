@@ -467,15 +467,6 @@ class TeacherServiceImplTest {
     }
 
     @Test
-    void unsubscribeTeacherFromGroup_inputTeacherIdGroupId_expectedNothing() {
-        doNothing().when(teacherDao).deleteTeacherFromGroup(1, 1);
-
-        teacherService.unsubscribeTeacherFromGroup(1, 1);
-
-        verify(teacherDao, times(1)).deleteTeacherFromGroup(1, 1);
-    }
-
-    @Test
     void subscribeTeacherToCourse_inputTeacherIdCourseId_expectedNothing() {
         doNothing().when(teacherDao).addTeacherToCourse(1, 1);
 
@@ -542,7 +533,7 @@ class TeacherServiceImplTest {
     }
 
     @Test
-    void lastPageNumber() {
+    void lastPageNumber_inputNothing_expectedLastPageNumber() {
         when(teacherDao.count()).thenReturn(5L);
 
         int expected = (int) Math.ceil(5.0 / AbstractPageableService.ITEMS_PER_PAGE);
@@ -593,6 +584,106 @@ class TeacherServiceImplTest {
 
         verify(teacherDao, times(1)).findByName(email);
         verifyNoInteractions(passwordEncoder);
+    }
+
+    @Test
+    void changeTeacherTeacherTitle_inputTeacherIdTeacherTitleId_expectedNothing() {
+        final int teacherId = 1;
+        final int teacherTitleId = 1;
+
+        doNothing().when(teacherDao).changeTeacherTitle(teacherId, teacherTitleId);
+
+        assertDoesNotThrow(() -> teacherService.changeTeacherTeacherTitle(teacherId, teacherTitleId));
+
+        verify(teacherDao, times(1)).changeTeacherTitle(teacherId, teacherTitleId);
+        verifyNoInteractions(lessonDao);
+        verifyNoInteractions(groupDao);
+    }
+
+    @Test
+    void changeTeacherDepartment_inputTeacherIdTeacherTitleId_expectedNothing() {
+        final int teacherId = 1;
+        final int departmentId = 1;
+
+        doNothing().when(teacherDao).changeDepartment(teacherId, departmentId);
+
+        assertDoesNotThrow(() -> teacherService.changeTeacherDepartment(teacherId, departmentId));
+
+        verify(teacherDao, times(1)).changeDepartment(teacherId, departmentId);
+        verifyNoInteractions(lessonDao);
+        verifyNoInteractions(groupDao);
+    }
+
+    @Test
+    void subscribeTeacherToGroups_inputTeacherIdGroupIds_expectedNothing() {
+        final int teacherId = 1;
+        final List <Integer> groupIds = new ArrayList<>();
+        groupIds.add(1);
+        groupIds.add(2);
+
+        doNothing().when(teacherDao).addUserToGroup(teacherId, groupIds.get(0));
+        doNothing().when(teacherDao).addUserToGroup(teacherId, groupIds.get(1));
+
+        assertDoesNotThrow(() -> teacherService.subscribeTeacherToGroups(teacherId, groupIds));
+
+        verify(teacherDao, times(1)).addUserToGroup(teacherId, groupIds.get(0));
+        verify(teacherDao, times(1)).addUserToGroup(teacherId, groupIds.get(1));
+        verifyNoInteractions(lessonDao);
+        verifyNoInteractions(groupDao);
+    }
+
+    @Test
+    void unsubscribeTeacherFromGroups_inputTeacherIdGroupIds_expectedNothing() {
+        final int teacherId = 1;
+        final List <Integer> groupIds = new ArrayList<>();
+        groupIds.add(1);
+        groupIds.add(2);
+
+        doNothing().when(teacherDao).deleteTeacherFromGroup(teacherId, groupIds.get(0));
+        doNothing().when(teacherDao).deleteTeacherFromGroup(teacherId, groupIds.get(1));
+
+        assertDoesNotThrow(() -> teacherService.unsubscribeTeacherFromGroups(teacherId, groupIds));
+
+        verify(teacherDao, times(1)).deleteTeacherFromGroup(teacherId, groupIds.get(0));
+        verify(teacherDao, times(1)).deleteTeacherFromGroup(teacherId, groupIds.get(1));
+        verifyNoInteractions(lessonDao);
+        verifyNoInteractions(groupDao);
+    }
+
+    @Test
+    void subscribeTeacherToCourses_inputTeacherIdCourseIds_expectedNothing() {
+        final int teacherId = 1;
+        final List <Integer> courseIds = new ArrayList<>();
+        courseIds.add(1);
+        courseIds.add(2);
+
+        doNothing().when(teacherDao).addTeacherToCourse(teacherId, courseIds.get(0));
+        doNothing().when(teacherDao).addTeacherToCourse(teacherId, courseIds.get(1));
+
+        assertDoesNotThrow(() -> teacherService.subscribeTeacherToCourses(teacherId, courseIds));
+
+        verify(teacherDao, times(1)).addTeacherToCourse(teacherId, courseIds.get(0));
+        verify(teacherDao, times(1)).addTeacherToCourse(teacherId, courseIds.get(1));
+        verifyNoInteractions(lessonDao);
+        verifyNoInteractions(groupDao);
+    }
+
+    @Test
+    void unsubscribeTeacherToCourses_inputTeacherIdCourseIds_expectedNothing() {
+        final int teacherId = 1;
+        final List <Integer> courseIds = new ArrayList<>();
+        courseIds.add(1);
+        courseIds.add(2);
+
+        doNothing().when(teacherDao).deleteTeacherFromCourse(teacherId, courseIds.get(0));
+        doNothing().when(teacherDao).deleteTeacherFromCourse(teacherId, courseIds.get(1));
+
+        assertDoesNotThrow(() -> teacherService.unsubscribeTeacherFromCourses(teacherId, courseIds));
+
+        verify(teacherDao, times(1)).deleteTeacherFromCourse(teacherId, courseIds.get(0));
+        verify(teacherDao, times(1)).deleteTeacherFromCourse(teacherId, courseIds.get(1));
+        verifyNoInteractions(lessonDao);
+        verifyNoInteractions(groupDao);
     }
 
 }

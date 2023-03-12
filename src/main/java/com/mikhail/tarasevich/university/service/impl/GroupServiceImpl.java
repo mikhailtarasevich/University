@@ -151,6 +151,13 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<GroupResponse> findGroupsNotRelateToTeacher(int teacherId) {
+        return groupDao.findGroupsNotRelateToTeacher(teacherId).stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
     private void unbindDependenciesBeforeDelete(int id) {
         lessonDao.unbindLessonsFromGroup(id);
         studentDao.unbindStudentsFromGroup(id);

@@ -19,10 +19,14 @@ public class TeacherDaoImpl extends AbstractUserDaoImpl<Teacher> implements Teac
                     "teacher_title_id, department_id) VALUES('teacher', ?, ?, ?, ?, ?, ?, ?)";
     private static final String FIND_COMMON_PART_QUERY =
             "SELECT users.id AS user_id, first_name, last_name, gender, email, password, " +
-                    "teacher_title_id, department_id FROM users ";
+                    "teacher_title_id, teacher_titles.name AS teacher_title_name, " +
+                    "department_id, departments.name AS department_name, departments.description AS department_description " +
+                    "FROM users " +
+                    "JOIN teacher_titles ON teacher_title_id = teacher_titles.id " +
+                    "JOIN departments ON department_id = departments.id ";
     private static final String FIND_ALL_QUERY =
             FIND_COMMON_PART_QUERY + "WHERE user_type = 'teacher' ORDER BY users.id";
-    private static final String FIND_BY_ID_QUERY = FIND_COMMON_PART_QUERY + "WHERE user_type = 'teacher' AND id = ?";
+    private static final String FIND_BY_ID_QUERY = FIND_COMMON_PART_QUERY + "WHERE user_type = 'teacher' AND users.id = ?";
     private static final String FIND_BY_EMAIL_QUERY =
             FIND_COMMON_PART_QUERY + "WHERE user_type = 'teacher' AND email = ? ORDER BY users.id";
     private static final String FIND_ALL_PAGEABLE_QUERY =
@@ -48,24 +52,30 @@ public class TeacherDaoImpl extends AbstractUserDaoImpl<Teacher> implements Teac
             "UPDATE users SET department_id = ? WHERE user_type = 'teacher' AND id = ?";
     private static final String FIND_TEACHERS_RELATE_TO_GROUP_QUERY =
             "SELECT users.id AS user_id, first_name, last_name, gender, email, password, " +
-                    "teacher_title_id, department_id, user_groups.group_id " +
+                    "teacher_title_id, teacher_titles.name AS teacher_title_name, " +
+                    "department_id, departments.name AS department_name, departments.description AS department_description, " +
+                    "user_groups.group_id " +
                     "FROM users " +
+                    "JOIN teacher_titles ON teacher_title_id = teacher_titles.id " +
+                    "JOIN departments ON department_id = departments.id " +
                     "JOIN user_groups ON users.id = user_groups.user_id " +
                     "JOIN groups ON user_groups.group_id = groups.id " +
                     "WHERE user_type = 'teacher' AND groups.id = ? " +
                     "ORDER BY users.id";
     private static final String FIND_TEACHERS_RELATE_TO_COURSE_QUERY =
             "SELECT users.id AS user_id, first_name, last_name, gender, email, password, " +
-                    "teacher_title_id, department_id, user_courses.course_id " +
+                    "teacher_title_id, teacher_titles.name AS teacher_title_name, " +
+                    "department_id, departments.name AS department_name, departments.description AS department_description, " +
+                    "user_courses.course_id " +
                     "FROM users " +
+                    "JOIN teacher_titles ON teacher_title_id = teacher_titles.id " +
+                    "JOIN departments ON department_id = departments.id " +
                     "JOIN user_courses ON users.id = user_courses.user_id " +
                     "JOIN courses ON user_courses.course_id = courses.id " +
                     "WHERE user_type = 'teacher' AND courses.id = ? " +
                     "ORDER BY users.id";
     private static final String FIND_TEACHERS_RELATE_TO_DEPARTMENT_QUERY =
-            "SELECT users.id AS user_id, first_name, last_name, gender, email, password, " +
-                    "teacher_title_id, department_id " +
-                    "FROM users WHERE user_type = 'teacher' AND department_id = ? ORDER BY id";
+            FIND_COMMON_PART_QUERY + "WHERE user_type = 'teacher' AND department_id = ? ORDER BY users.id";
     private static final String UNBIND_TEACHERS_FROM_COURSE_QUERY =
             "DELETE FROM user_courses WHERE course_id = ?";
     private static final String UNBIND_TEACHERS_FROM_DEPARTMENT_QUERY =
@@ -74,6 +84,7 @@ public class TeacherDaoImpl extends AbstractUserDaoImpl<Teacher> implements Teac
             "DELETE FROM user_groups WHERE group_id = ?";
     private static final String UNBIND_TEACHERS_FROM_TEACHER_TITLE_QUERY =
             "UPDATE users SET teacher_title_id = NULL WHERE user_type = 'teacher' AND teacher_title_id = ?";
+
     private static final RowMapper<Teacher> ROW_MAPPER = (resultSet, rowNum) ->
             Teacher.builder()
                     .withId(resultSet.getInt("user_id"))
@@ -83,16 +94,23 @@ public class TeacherDaoImpl extends AbstractUserDaoImpl<Teacher> implements Teac
                     .withEmail(resultSet.getString("email"))
                     .withPassword(resultSet.getString("password"))
                     .withTeacherTitle(
-                            TeacherTitle.builder().withId(resultSet.getInt("teacher_title_id")).build()
+                            TeacherTitle.builder()
+                                    .withId(resultSet.getInt("teacher_title_id"))
+                                    .withName(resultSet.getString("teacher_title_name"))
+                                    .build()
                     )
-                    .withDepartment(Department.builder().withId(resultSet.getInt("department_id")).build())
+                    .withDepartment(Department.builder()
+                            .withId(resultSet.getInt("department_id"))
+                            .withName(resultSet.getString("department_name"))
+                            .withDescription(resultSet.getString("department_description"))
+                            .build())
                     .build();
 
     @Autowired
     public TeacherDaoImpl(JdbcOperations jdbcTemplate) {
         super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY, FIND_ALL_PAGEABLE_QUERY,
                 FIND_BY_EMAIL_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY,
-                UPDATE_GENERAL_TEACHER_INFO_QUERY, UPDATE_PASSWORD_QUERY,ADD_TEACHER_TO_GROUP_QUERY);
+                UPDATE_GENERAL_TEACHER_INFO_QUERY, UPDATE_PASSWORD_QUERY, ADD_TEACHER_TO_GROUP_QUERY);
     }
 
     @Override
