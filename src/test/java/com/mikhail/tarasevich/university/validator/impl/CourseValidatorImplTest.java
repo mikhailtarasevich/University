@@ -3,7 +3,7 @@ package com.mikhail.tarasevich.university.validator.impl;
 import com.mikhail.tarasevich.university.dao.CourseDao;
 import com.mikhail.tarasevich.university.dto.CourseRequest;
 import com.mikhail.tarasevich.university.entity.Course;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,7 +46,7 @@ class CourseValidatorImplTest {
     void validateUniqueNameInDB_inputWithNotUniqueName_expectedException() {
         when(courseDao.findByName(COURSE_REQUEST.getName())).thenReturn(Optional.of(Course.builder().build()));
 
-        assertThrows(IncorrectRequestData.class, () -> courseValidator.validateUniqueNameInDB(COURSE_REQUEST));
+        assertThrows(IncorrectRequestDataException.class, () -> courseValidator.validateUniqueNameInDB(COURSE_REQUEST));
 
         verify(courseDao, times(1)).findByName(COURSE_REQUEST.getName());
     }
@@ -63,7 +63,7 @@ class CourseValidatorImplTest {
         COURSE_REQUEST.setName("  ");
         COURSE_REQUEST.setDescription("description");
 
-        assertThrows(IncorrectRequestData.class, () -> courseValidator.validateNameNotNullOrEmpty(COURSE_REQUEST));
+        assertThrows(IncorrectRequestDataException.class, () -> courseValidator.validateNameNotNullOrEmpty(COURSE_REQUEST));
     }
 
     @Test
@@ -73,7 +73,7 @@ class CourseValidatorImplTest {
         COURSE_REQUEST.setName(null);
         COURSE_REQUEST.setDescription("description");
 
-        assertThrows(IncorrectRequestData.class, () -> courseValidator.validateNameNotNullOrEmpty(COURSE_REQUEST));
+        assertThrows(IncorrectRequestDataException.class, () -> courseValidator.validateNameNotNullOrEmpty(COURSE_REQUEST));
     }
 
 }

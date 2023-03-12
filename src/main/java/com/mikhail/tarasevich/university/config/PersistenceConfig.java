@@ -3,7 +3,6 @@ package com.mikhail.tarasevich.university.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -15,7 +14,6 @@ import java.util.ResourceBundle;
 
 @Configuration
 @ComponentScan("com.mikhail.tarasevich.university")
-@Import(SecurityConfig.class)
 @EnableTransactionManagement
 public class PersistenceConfig {
 
@@ -30,6 +28,7 @@ public class PersistenceConfig {
     public DataSource dataSource(){
         ResourceBundle resource = ResourceBundle.getBundle(DB_PROPERTIES_FILE_PATH);
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName(resource.getString("db.driverClass"));
         dataSource.setUrl(resource.getString("db.url"));
         dataSource.setUsername(resource.getString("db.user"));
         dataSource.setPassword(resource.getString("db.password"));

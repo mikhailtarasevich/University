@@ -6,7 +6,8 @@ import com.mikhail.tarasevich.university.dto.StudentRequest;
 import com.mikhail.tarasevich.university.dto.StudentResponse;
 import com.mikhail.tarasevich.university.entity.Student;
 import com.mikhail.tarasevich.university.exception.EmailAlreadyExistsException;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
+import com.mikhail.tarasevich.university.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.StudentMapper;
 import com.mikhail.tarasevich.university.validator.UserValidator;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,7 @@ class StudentServiceImplTest {
     @Mock
     PasswordEncoder passwordEncoder;
     @Mock
-    StudentMapper studentMapper;
+    StudentMapper mapper;
     @Mock
     UserValidator<StudentRequest> validator;
 
@@ -108,17 +109,17 @@ class StudentServiceImplTest {
 
     @Test
     void register_inputStudentRequest_expectedStudentResponseWithId() {
-        when(studentMapper.toEntity(STUDENT_REQUEST_1)).thenReturn(STUDENT_ENTITY_1);
+        when(mapper.toEntity(STUDENT_REQUEST_1)).thenReturn(STUDENT_ENTITY_1);
         when(studentDao.save(STUDENT_ENTITY_1)).thenReturn(STUDENT_ENTITY_WITH_ID_1);
-        when(studentMapper.toResponse(STUDENT_ENTITY_WITH_ID_1)).thenReturn(STUDENT_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(STUDENT_ENTITY_WITH_ID_1)).thenReturn(STUDENT_RESPONSE_WITH_ID_1);
         doNothing().when(validator).validateUserNameNotNullOrEmpty(STUDENT_REQUEST_1);
 
         StudentResponse StudentResponse = studentService.register(STUDENT_REQUEST_1);
 
         assertEquals(STUDENT_RESPONSE_WITH_ID_1, StudentResponse);
-        verify(studentMapper, times(1)).toEntity(STUDENT_REQUEST_1);
+        verify(mapper, times(1)).toEntity(STUDENT_REQUEST_1);
         verify(studentDao, times(1)).save(STUDENT_ENTITY_1);
-        verify(studentMapper, times(1)).toResponse(STUDENT_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(STUDENT_ENTITY_WITH_ID_1);
         verify(validator, times(1)).validateUserNameNotNullOrEmpty(STUDENT_REQUEST_1);
     }
 
@@ -128,9 +129,9 @@ class StudentServiceImplTest {
 
         assertThrows(EmailAlreadyExistsException.class, () -> studentService.register(STUDENT_REQUEST_1));
 
-        verify(studentMapper, times(0)).toEntity(STUDENT_REQUEST_1);
+        verify(mapper, times(0)).toEntity(STUDENT_REQUEST_1);
         verify(studentDao, times(0)).save(STUDENT_ENTITY_1);
-        verify(studentMapper, times(0)).toResponse(STUDENT_ENTITY_WITH_ID_1);
+        verify(mapper, times(0)).toResponse(STUDENT_ENTITY_WITH_ID_1);
         verify(validator, times(0)).validateUserNameNotNullOrEmpty(STUDENT_REQUEST_1);
     }
 
@@ -155,17 +156,17 @@ class StudentServiceImplTest {
         when(studentDao.findByName(studentWithInvalidLastName.getEmail())).thenReturn(Optional.empty());
         when(studentDao.findByName(studentWithExistingEmail.getEmail()))
                 .thenReturn(Optional.of(Student.builder().build()));
-        when(studentMapper.toEntity(STUDENT_REQUEST_1)).thenReturn(STUDENT_ENTITY_1);
-        when(studentMapper.toEntity(STUDENT_REQUEST_2)).thenReturn(STUDENT_ENTITY_2);
+        when(mapper.toEntity(STUDENT_REQUEST_1)).thenReturn(STUDENT_ENTITY_1);
+        when(mapper.toEntity(STUDENT_REQUEST_2)).thenReturn(STUDENT_ENTITY_2);
         doNothing().when(studentDao).saveAll(studentEntities);
         doNothing().when(validator).validateUserNameNotNullOrEmpty(STUDENT_REQUEST_1);
         doNothing().when(validator).validateUserNameNotNullOrEmpty(STUDENT_REQUEST_2);
-        doThrow(IncorrectRequestData.class).when(validator).validateUserNameNotNullOrEmpty(studentWithInvalidLastName);
+        doThrow(IncorrectRequestDataException.class).when(validator).validateUserNameNotNullOrEmpty(studentWithInvalidLastName);
 
         studentService.registerAll(listForRegister);
 
-        verify(studentMapper, times(1)).toEntity(STUDENT_REQUEST_1);
-        verify(studentMapper, times(1)).toEntity(STUDENT_REQUEST_2);
+        verify(mapper, times(1)).toEntity(STUDENT_REQUEST_1);
+        verify(mapper, times(1)).toEntity(STUDENT_REQUEST_2);
         verify(studentDao, times(1)).saveAll(studentEntities);
         verify(validator, times(1)).validateUserNameNotNullOrEmpty(STUDENT_REQUEST_1);
         verify(validator, times(1)).validateUserNameNotNullOrEmpty(STUDENT_REQUEST_2);
@@ -176,29 +177,53 @@ class StudentServiceImplTest {
     @Test
     void findById_inputIntId_expectedFoundStudent() {
         when(studentDao.findById(1)).thenReturn(Optional.of(STUDENT_ENTITY_WITH_ID_1));
-        when(studentMapper.toResponse(STUDENT_ENTITY_WITH_ID_1)).thenReturn(STUDENT_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(STUDENT_ENTITY_WITH_ID_1)).thenReturn(STUDENT_RESPONSE_WITH_ID_1);
 
-        Optional<StudentResponse> studentResponse = studentService.findById(1);
+        StudentResponse studentResponse = studentService.findById(1);
 
-        assertEquals(Optional.of(STUDENT_RESPONSE_WITH_ID_1), studentResponse);
-        verify(studentMapper, times(1)).toResponse(STUDENT_ENTITY_WITH_ID_1);
+        assertEquals(STUDENT_RESPONSE_WITH_ID_1, studentResponse);
+        verify(mapper, times(1)).toResponse(STUDENT_ENTITY_WITH_ID_1);
         verify(studentDao, times(1)).findById(1);
+    }
+
+    @Test
+    void findById_inputNonExistentId_expectedException() {
+        when(studentDao.findById(100)).thenReturn(Optional.empty());
+
+        assertThrows(ObjectWithSpecifiedIdNotFoundException.class, () -> studentService.findById(100));
+
+        verify(studentDao, times(1)).findById(100);
+        verifyNoInteractions(mapper);
+    }
+
+    @Test
+    void findAll_inputNothing_expectedFoundAllStudents() {
+        when(studentDao.findAll()).thenReturn(studentEntitiesWithId);
+        when(mapper.toResponse(STUDENT_ENTITY_WITH_ID_1)).thenReturn(STUDENT_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(STUDENT_ENTITY_WITH_ID_2)).thenReturn(STUDENT_RESPONSE_WITH_ID_2);
+
+        List<StudentResponse> foundStudents = studentService.findAll();
+
+        assertEquals(studentResponses, foundStudents);
+        verify(studentDao, times(1)).findAll();
+        verify(mapper, times(1)).toResponse(STUDENT_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(STUDENT_ENTITY_WITH_ID_2);
     }
 
     @Test
     void findAll_inputPageOne_expectedFoundStudentsFromPageOne() {
         when(studentDao.findAll(1, AbstractPageableService.ITEMS_PER_PAGE)).thenReturn(studentEntitiesWithId);
         when(studentDao.count()).thenReturn(2L);
-        when(studentMapper.toResponse(STUDENT_ENTITY_WITH_ID_1)).thenReturn(STUDENT_RESPONSE_WITH_ID_1);
-        when(studentMapper.toResponse(STUDENT_ENTITY_WITH_ID_2)).thenReturn(STUDENT_RESPONSE_WITH_ID_2);
+        when(mapper.toResponse(STUDENT_ENTITY_WITH_ID_1)).thenReturn(STUDENT_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(STUDENT_ENTITY_WITH_ID_2)).thenReturn(STUDENT_RESPONSE_WITH_ID_2);
 
         List<StudentResponse> foundStudents = studentService.findAll("1");
 
         assertEquals(studentResponses, foundStudents);
         verify(studentDao, times(1)).findAll(1, AbstractPageableService.ITEMS_PER_PAGE);
         verify(studentDao, times(1)).count();
-        verify(studentMapper, times(1)).toResponse(STUDENT_ENTITY_WITH_ID_1);
-        verify(studentMapper, times(1)).toResponse(STUDENT_ENTITY_WITH_ID_2);
+        verify(mapper, times(1)).toResponse(STUDENT_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(STUDENT_ENTITY_WITH_ID_2);
     }
 
     @Test
@@ -219,12 +244,59 @@ class StudentServiceImplTest {
 
 
         doNothing().when(studentDao).update(STUDENT_ENTITY_FOR_UPDATE_1);
-        when(studentMapper.toEntity(STUDENT_REQUEST_FOR_UPDATE_1)).thenReturn(STUDENT_ENTITY_FOR_UPDATE_1);
+        when(mapper.toEntity(STUDENT_REQUEST_FOR_UPDATE_1)).thenReturn(STUDENT_ENTITY_FOR_UPDATE_1);
 
         studentService.edit(STUDENT_REQUEST_FOR_UPDATE_1);
 
-        verify(studentMapper, times(1)).toEntity(STUDENT_REQUEST_FOR_UPDATE_1);
+        verify(mapper, times(1)).toEntity(STUDENT_REQUEST_FOR_UPDATE_1);
+        verify(validator, times(1)).validateUserNameNotNullOrEmpty(STUDENT_REQUEST_FOR_UPDATE_1);
+        verify(validator, times(1)).validateEmail(STUDENT_REQUEST_FOR_UPDATE_1);
+        verify(validator, times(1)).validatePassword(STUDENT_REQUEST_FOR_UPDATE_1);
         verify(studentDao, times(1)).update(STUDENT_ENTITY_FOR_UPDATE_1);
+    }
+
+    @Test
+    void editGeneralUserInfo_inputStudentRequest_expectedNothing() {
+        final Student STUDENT_ENTITY_FOR_UPDATE_1 =
+                Student.builder()
+                        .withId(1)
+                        .withFirstName("update1")
+                        .withLastName("update1")
+                        .withEmail("update1@email.com")
+                        .build();
+        final StudentRequest STUDENT_REQUEST_FOR_UPDATE_1 = new StudentRequest();
+        STUDENT_REQUEST_FOR_UPDATE_1.setId(1);
+        STUDENT_REQUEST_FOR_UPDATE_1.setFirstName("update1");
+        STUDENT_REQUEST_FOR_UPDATE_1.setLastName("update1");
+        STUDENT_REQUEST_FOR_UPDATE_1.setEmail("update1@email.com");
+        STUDENT_REQUEST_FOR_UPDATE_1.setPassword("0000");
+
+
+        doNothing().when(studentDao).updateGeneralUserInfo(STUDENT_ENTITY_FOR_UPDATE_1);
+        when(mapper.toEntity(STUDENT_REQUEST_FOR_UPDATE_1)).thenReturn(STUDENT_ENTITY_FOR_UPDATE_1);
+
+        studentService.editGeneralUserInfo(STUDENT_REQUEST_FOR_UPDATE_1);
+
+        verify(mapper, times(1)).toEntity(STUDENT_REQUEST_FOR_UPDATE_1);
+        verify(validator, times(1)).validateUserNameNotNullOrEmpty(STUDENT_REQUEST_FOR_UPDATE_1);
+        verify(validator, times(1)).validateEmail(STUDENT_REQUEST_FOR_UPDATE_1);
+        verify(studentDao, times(1)).updateGeneralUserInfo(STUDENT_ENTITY_FOR_UPDATE_1);
+    }
+
+    @Test
+    void editPassword_inputStudentRequest_expectedNothing() {
+        final StudentRequest STUDENT_REQUEST_FOR_UPDATE_1 = new StudentRequest();
+        STUDENT_REQUEST_FOR_UPDATE_1.setId(1);
+        STUDENT_REQUEST_FOR_UPDATE_1.setPassword("0000");
+        STUDENT_REQUEST_FOR_UPDATE_1.setConfirmPassword("0000");
+
+        when(passwordEncoder.encode("0000")).thenReturn("asdferergergefsv1234");
+        doNothing().when(studentDao).updateUserPassword(1, "asdferergergefsv1234");
+
+        studentService.editPassword(STUDENT_REQUEST_FOR_UPDATE_1);
+
+        verify(studentDao, times(1)).updateUserPassword(1, "asdferergergefsv1234");
+        verify(passwordEncoder, times(1)).encode("0000");
     }
 
     @Test
@@ -275,18 +347,18 @@ class StudentServiceImplTest {
 
         doNothing().when(validator).validateUserNameNotNullOrEmpty(STUDENT_REQUEST_FOR_UPDATE_1);
         doNothing().when(validator).validateUserNameNotNullOrEmpty(STUDENT_REQUEST_FOR_UPDATE_2);
-        doThrow(new IncorrectRequestData())
+        doThrow(new IncorrectRequestDataException())
                 .when(validator).validateUserNameNotNullOrEmpty(STUDENT_REQUEST_FOR_UPDATE_INCORRECT);
 
-        when(studentMapper.toEntity(STUDENT_REQUEST_FOR_UPDATE_1)).thenReturn(STUDENT_ENTITY_FOR_UPDATE_1);
-        when(studentMapper.toEntity(STUDENT_REQUEST_FOR_UPDATE_2)).thenReturn(STUDENT_ENTITY_FOR_UPDATE_2);
+        when(mapper.toEntity(STUDENT_REQUEST_FOR_UPDATE_1)).thenReturn(STUDENT_ENTITY_FOR_UPDATE_1);
+        when(mapper.toEntity(STUDENT_REQUEST_FOR_UPDATE_2)).thenReturn(STUDENT_ENTITY_FOR_UPDATE_2);
 
         doNothing().when(studentDao).updateAll(listForUpdate);
 
         studentService.editAll(inputList);
 
-        verify(studentMapper, times(1)).toEntity(STUDENT_REQUEST_FOR_UPDATE_1);
-        verify(studentMapper, times(1)).toEntity(STUDENT_REQUEST_FOR_UPDATE_2);
+        verify(mapper, times(1)).toEntity(STUDENT_REQUEST_FOR_UPDATE_1);
+        verify(mapper, times(1)).toEntity(STUDENT_REQUEST_FOR_UPDATE_2);
         verify(studentDao, times(1)).updateAll(listForUpdate);
         verify(validator, times(1)).validateUserNameNotNullOrEmpty(STUDENT_REQUEST_FOR_UPDATE_1);
         verify(validator, times(1)).validateUserNameNotNullOrEmpty(STUDENT_REQUEST_FOR_UPDATE_2);
@@ -383,15 +455,25 @@ class StudentServiceImplTest {
         int teacherId = 1;
 
         when(studentDao.findStudentsRelateToGroup(teacherId)).thenReturn(studentEntitiesWithId);
-        when(studentMapper.toResponse(STUDENT_ENTITY_WITH_ID_1)).thenReturn(STUDENT_RESPONSE_WITH_ID_1);
-        when(studentMapper.toResponse(STUDENT_ENTITY_WITH_ID_2)).thenReturn(STUDENT_RESPONSE_WITH_ID_2);
+        when(mapper.toResponse(STUDENT_ENTITY_WITH_ID_1)).thenReturn(STUDENT_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(STUDENT_ENTITY_WITH_ID_2)).thenReturn(STUDENT_RESPONSE_WITH_ID_2);
 
         List<StudentResponse> foundStudents = studentService.findStudentsRelateToGroup(teacherId);
 
         assertEquals(studentResponses, foundStudents);
         verify(studentDao, times(1)).findStudentsRelateToGroup(teacherId);
-        verify(studentMapper, times(1)).toResponse(STUDENT_ENTITY_WITH_ID_1);
-        verify(studentMapper, times(1)).toResponse(STUDENT_ENTITY_WITH_ID_2);
+        verify(mapper, times(1)).toResponse(STUDENT_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(STUDENT_ENTITY_WITH_ID_2);
+    }
+
+    @Test
+    void lastPageNumber() {
+        when(studentDao.count()).thenReturn(5L);
+
+        int expected = (int) Math.ceil(5.0 / AbstractPageableService.ITEMS_PER_PAGE);
+
+        assertEquals(expected, studentService.lastPageNumber());
+        verify(studentDao, times(1)).count();
     }
 
     @Test
@@ -404,18 +486,37 @@ class StudentServiceImplTest {
         when(passwordEncoder.matches(correctPassword, student.getPassword())).thenReturn(true);
 
         assertTrue(studentService.login(email, correctPassword));
+
+        verify(passwordEncoder, times(1)).matches(correctPassword, student.getPassword());
+        verify(studentDao, times(1)).findByName(email);
     }
 
     @Test
     void login_inputEmailPassword_expectedFalse() {
         final String email = "email@mail.com";
-        final String correctPassword = "1111";
+        final String nonCorrectPassword = "1111";
         final Student student = Student.builder().withEmail("email@mail.com").withPassword("1234").build();
 
         when(studentDao.findByName(email)).thenReturn(Optional.of(student));
-        when(passwordEncoder.matches(correctPassword, student.getPassword())).thenReturn(false);
+        when(passwordEncoder.matches(nonCorrectPassword, student.getPassword())).thenReturn(false);
+
+        assertFalse(studentService.login(email, nonCorrectPassword));
+
+        verify(passwordEncoder, times(1)).matches(nonCorrectPassword, student.getPassword());
+        verify(studentDao, times(1)).findByName(email);
+    }
+
+    @Test
+    void login_inputNonExistentEmail_expectedFalse() {
+        final String email = "email@mail.com";
+        final String correctPassword = "1111";
+
+        when(studentDao.findByName(email)).thenReturn(Optional.empty());
 
         assertFalse(studentService.login(email, correctPassword));
+
+        verify(studentDao, times(1)).findByName(email);
+        verifyNoInteractions(passwordEncoder);
     }
 
 }

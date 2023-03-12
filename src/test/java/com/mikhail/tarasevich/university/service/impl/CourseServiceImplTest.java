@@ -7,7 +7,8 @@ import com.mikhail.tarasevich.university.dao.TeacherDao;
 import com.mikhail.tarasevich.university.dto.CourseRequest;
 import com.mikhail.tarasevich.university.dto.CourseResponse;
 import com.mikhail.tarasevich.university.entity.Course;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
+import com.mikhail.tarasevich.university.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.CourseMapper;
 import com.mikhail.tarasevich.university.validator.CourseValidator;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ class CourseServiceImplTest {
     @Mock
     TeacherDao teacherDao;
     @Mock
-    CourseMapper courseMapper;
+    CourseMapper mapper;
     @Mock
     CourseValidator validator;
 
@@ -97,18 +98,18 @@ class CourseServiceImplTest {
 
     @Test
     void register_inputCourseRequest_expectedCourseResponseWithId() {
-        when(courseMapper.toEntity(COURSE_REQUEST_1)).thenReturn(COURSE_ENTITY_1);
+        when(mapper.toEntity(COURSE_REQUEST_1)).thenReturn(COURSE_ENTITY_1);
         when(courseDao.save(COURSE_ENTITY_1)).thenReturn(COURSE_ENTITY_WITH_ID_1);
-        when(courseMapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
         doNothing().when(validator).validateUniqueNameInDB(COURSE_REQUEST_1);
         doNothing().when(validator).validateNameNotNullOrEmpty(COURSE_REQUEST_1);
 
         CourseResponse courseResponse = courseService.register(COURSE_REQUEST_1);
 
         assertEquals(COURSE_RESPONSE_WITH_ID_1, courseResponse);
-        verify(courseMapper, times(1)).toEntity(COURSE_REQUEST_1);
+        verify(mapper, times(1)).toEntity(COURSE_REQUEST_1);
         verify(courseDao, times(1)).save(COURSE_ENTITY_1);
-        verify(courseMapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
         verify(validator, times(1)).validateUniqueNameInDB(COURSE_REQUEST_1);
         verify(validator, times(1)).validateUniqueNameInDB(COURSE_REQUEST_1);
     }
@@ -120,18 +121,18 @@ class CourseServiceImplTest {
         listForRegister.add(COURSE_REQUEST_1);
         listForRegister.add(COURSE_REQUEST_2);
 
-        when(courseMapper.toEntity(COURSE_REQUEST_1)).thenReturn(COURSE_ENTITY_1);
-        when(courseMapper.toEntity(COURSE_REQUEST_2)).thenReturn(COURSE_ENTITY_2);
+        when(mapper.toEntity(COURSE_REQUEST_1)).thenReturn(COURSE_ENTITY_1);
+        when(mapper.toEntity(COURSE_REQUEST_2)).thenReturn(COURSE_ENTITY_2);
         doNothing().when(courseDao).saveAll(courseEntities);
-        doNothing().doThrow(new IncorrectRequestData()).when(validator).validateUniqueNameInDB(COURSE_REQUEST_1);
+        doNothing().doThrow(new IncorrectRequestDataException()).when(validator).validateUniqueNameInDB(COURSE_REQUEST_1);
         doNothing().when(validator).validateNameNotNullOrEmpty(COURSE_REQUEST_1);
         doNothing().when(validator).validateUniqueNameInDB(COURSE_REQUEST_2);
         doNothing().when(validator).validateNameNotNullOrEmpty(COURSE_REQUEST_2);
 
         courseService.registerAll(listForRegister);
 
-        verify(courseMapper, times(1)).toEntity(COURSE_REQUEST_1);
-        verify(courseMapper, times(1)).toEntity(COURSE_REQUEST_2);
+        verify(mapper, times(1)).toEntity(COURSE_REQUEST_1);
+        verify(mapper, times(1)).toEntity(COURSE_REQUEST_2);
         verify(courseDao, times(1)).saveAll(courseEntities);
         verify(validator, times(2)).validateUniqueNameInDB(COURSE_REQUEST_1);
         verify(validator, times(1)).validateNameNotNullOrEmpty(COURSE_REQUEST_1);
@@ -142,77 +143,101 @@ class CourseServiceImplTest {
     @Test
     void findById_inputIntId_expectedFoundCourse() {
         when(courseDao.findById(1)).thenReturn(Optional.of(COURSE_ENTITY_WITH_ID_1));
-        when(courseMapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
 
-        Optional<CourseResponse> courseResponse = courseService.findById(1);
+        CourseResponse courseResponse = courseService.findById(1);
 
-        assertEquals(Optional.of(COURSE_RESPONSE_WITH_ID_1), courseResponse);
-        verify(courseMapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
+        assertEquals(COURSE_RESPONSE_WITH_ID_1, courseResponse);
+        verify(mapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
         verify(courseDao, times(1)).findById(1);
+    }
+
+    @Test
+    void findById_inputIncorrectId_expectedException() {
+        when(courseDao.findById(100)).thenReturn(Optional.empty());
+
+        assertThrows(ObjectWithSpecifiedIdNotFoundException.class, () -> courseService.findById(100));
+
+        verify(courseDao, times(1)).findById(100);
+        verifyNoInteractions(mapper);
+    }
+
+    @Test
+    void findAll_inputNothing_expectedFoundAllCourses() {
+        when(courseDao.findAll()).thenReturn(courseEntitiesWithId);
+        when(mapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(COURSE_ENTITY_WITH_ID_2)).thenReturn(COURSE_RESPONSE_WITH_ID_2);
+
+        List<CourseResponse> foundCourses = courseService.findAll();
+
+        assertEquals(courseResponses, foundCourses);
+        verify(courseDao, times(1)).findAll();
+        verify(mapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_2);
     }
 
     @Test
     void findAll_inputPageOne_expectedFoundCoursesFromPageOne() {
         when(courseDao.findAll(1, AbstractPageableService.ITEMS_PER_PAGE)).thenReturn(courseEntitiesWithId);
         when(courseDao.count()).thenReturn(2L);
-        when(courseMapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
-        when(courseMapper.toResponse(COURSE_ENTITY_WITH_ID_2)).thenReturn(COURSE_RESPONSE_WITH_ID_2);
+        when(mapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(COURSE_ENTITY_WITH_ID_2)).thenReturn(COURSE_RESPONSE_WITH_ID_2);
 
         List<CourseResponse> foundCourses = courseService.findAll("1");
 
         assertEquals(courseResponses, foundCourses);
         verify(courseDao, times(1)).findAll(1, AbstractPageableService.ITEMS_PER_PAGE);
         verify(courseDao, times(1)).count();
-        verify(courseMapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
-        verify(courseMapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_2);
+        verify(mapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_2);
     }
 
     @Test
     void findAll_inputPageMinusOne_expectedFoundCoursesFromDefaultPage() {
         when(courseDao.findAll(1, AbstractPageableService.ITEMS_PER_PAGE)).thenReturn(courseEntitiesWithId);
         when(courseDao.count()).thenReturn(2L);
-        when(courseMapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
-        when(courseMapper.toResponse(COURSE_ENTITY_WITH_ID_2)).thenReturn(COURSE_RESPONSE_WITH_ID_2);
+        when(mapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(COURSE_ENTITY_WITH_ID_2)).thenReturn(COURSE_RESPONSE_WITH_ID_2);
 
         List<CourseResponse> foundCourses = courseService.findAll("-1");
 
         assertEquals(courseResponses, foundCourses);
         verify(courseDao, times(1)).findAll(1, AbstractPageableService.ITEMS_PER_PAGE);
         verify(courseDao, times(1)).count();
-        verify(courseMapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
-        verify(courseMapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_2);
+        verify(mapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_2);
     }
 
     @Test
     void findAll_inputPageTen_expectedFoundCoursesFromLastPage() {
         when(courseDao.findAll(1, AbstractPageableService.ITEMS_PER_PAGE)).thenReturn(courseEntitiesWithId);
         when(courseDao.count()).thenReturn(2L);
-        when(courseMapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
-        when(courseMapper.toResponse(COURSE_ENTITY_WITH_ID_2)).thenReturn(COURSE_RESPONSE_WITH_ID_2);
+        when(mapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(COURSE_ENTITY_WITH_ID_2)).thenReturn(COURSE_RESPONSE_WITH_ID_2);
 
         List<CourseResponse> foundCourses = courseService.findAll("10");
 
         assertEquals(courseResponses, foundCourses);
         verify(courseDao, times(1)).findAll(1, AbstractPageableService.ITEMS_PER_PAGE);
         verify(courseDao, times(1)).count();
-        verify(courseMapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
-        verify(courseMapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_2);
+        verify(mapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_2);
     }
 
     @Test
     void findAll_inputIncorrectPage_expectedFoundCoursesFromDefaultPage() {
         when(courseDao.findAll(1, AbstractPageableService.ITEMS_PER_PAGE)).thenReturn(courseEntitiesWithId);
         when(courseDao.count()).thenReturn(2L);
-        when(courseMapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
-        when(courseMapper.toResponse(COURSE_ENTITY_WITH_ID_2)).thenReturn(COURSE_RESPONSE_WITH_ID_2);
+        when(mapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(COURSE_ENTITY_WITH_ID_2)).thenReturn(COURSE_RESPONSE_WITH_ID_2);
 
         List<CourseResponse> foundCourses = courseService.findAll("hello");
 
         assertEquals(courseResponses, foundCourses);
         verify(courseDao, times(1)).findAll(1, AbstractPageableService.ITEMS_PER_PAGE);
         verify(courseDao, times(1)).count();
-        verify(courseMapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
-        verify(courseMapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_2);
+        verify(mapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_2);
     }
 
     @Test
@@ -228,11 +253,11 @@ class CourseServiceImplTest {
         COURSE_REQUEST_FOR_UPDATE_1.setDescription("update1");
 
         doNothing().when(courseDao).update(COURSE_ENTITY_FOR_UPDATE_1);
-        when(courseMapper.toEntity(COURSE_REQUEST_FOR_UPDATE_1)).thenReturn(COURSE_ENTITY_FOR_UPDATE_1);
+        when(mapper.toEntity(COURSE_REQUEST_FOR_UPDATE_1)).thenReturn(COURSE_ENTITY_FOR_UPDATE_1);
 
         courseService.edit(COURSE_REQUEST_FOR_UPDATE_1);
 
-        verify(courseMapper, times(1)).toEntity(COURSE_REQUEST_FOR_UPDATE_1);
+        verify(mapper, times(1)).toEntity(COURSE_REQUEST_FOR_UPDATE_1);
         verify(courseDao, times(1)).update(COURSE_ENTITY_FOR_UPDATE_1);
     }
 
@@ -274,17 +299,17 @@ class CourseServiceImplTest {
 
         doNothing().when(validator).validateNameNotNullOrEmpty(COURSE_REQUEST_FOR_UPDATE_1);
         doNothing().when(validator).validateNameNotNullOrEmpty(COURSE_REQUEST_FOR_UPDATE_2);
-        doThrow(new IncorrectRequestData()).when(validator).validateNameNotNullOrEmpty(COURSE_REQUEST_FOR_UPDATE_INCORRECT);
+        doThrow(new IncorrectRequestDataException()).when(validator).validateNameNotNullOrEmpty(COURSE_REQUEST_FOR_UPDATE_INCORRECT);
 
-        when(courseMapper.toEntity(COURSE_REQUEST_FOR_UPDATE_1)).thenReturn(COURSE_ENTITY_FOR_UPDATE_1);
-        when(courseMapper.toEntity(COURSE_REQUEST_FOR_UPDATE_2)).thenReturn(COURSE_ENTITY_FOR_UPDATE_2);
+        when(mapper.toEntity(COURSE_REQUEST_FOR_UPDATE_1)).thenReturn(COURSE_ENTITY_FOR_UPDATE_1);
+        when(mapper.toEntity(COURSE_REQUEST_FOR_UPDATE_2)).thenReturn(COURSE_ENTITY_FOR_UPDATE_2);
 
         doNothing().when(courseDao).updateAll(listForUpdate);
 
         courseService.editAll(inputList);
 
-        verify(courseMapper, times(1)).toEntity(COURSE_REQUEST_FOR_UPDATE_1);
-        verify(courseMapper, times(1)).toEntity(COURSE_REQUEST_FOR_UPDATE_2);
+        verify(mapper, times(1)).toEntity(COURSE_REQUEST_FOR_UPDATE_1);
+        verify(mapper, times(1)).toEntity(COURSE_REQUEST_FOR_UPDATE_2);
         verify(courseDao, times(1)).updateAll(listForUpdate);
         verify(validator, times(1)).validateNameNotNullOrEmpty(COURSE_REQUEST_FOR_UPDATE_1);
         verify(validator, times(1)).validateNameNotNullOrEmpty(COURSE_REQUEST_FOR_UPDATE_2);
@@ -358,15 +383,15 @@ class CourseServiceImplTest {
         int departmentId = 1;
 
         when(courseDao.findCoursesRelateToDepartment(departmentId)).thenReturn(courseEntitiesWithId);
-        when(courseMapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
-        when(courseMapper.toResponse(COURSE_ENTITY_WITH_ID_2)).thenReturn(COURSE_RESPONSE_WITH_ID_2);
+        when(mapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(COURSE_ENTITY_WITH_ID_2)).thenReturn(COURSE_RESPONSE_WITH_ID_2);
 
         List<CourseResponse> courses = courseService.findCoursesRelateToDepartment(departmentId);
 
         assertEquals(courseResponses, courses);
         verify(courseDao, times(1)).findCoursesRelateToDepartment(departmentId);
-        verify(courseMapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
-        verify(courseMapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_2);
+        verify(mapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_2);
     }
 
     @Test
@@ -374,15 +399,15 @@ class CourseServiceImplTest {
         int teacherId = 1;
 
         when(courseDao.findCoursesRelateToTeacher(teacherId)).thenReturn(courseEntitiesWithId);
-        when(courseMapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
-        when(courseMapper.toResponse(COURSE_ENTITY_WITH_ID_2)).thenReturn(COURSE_RESPONSE_WITH_ID_2);
+        when(mapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(COURSE_ENTITY_WITH_ID_2)).thenReturn(COURSE_RESPONSE_WITH_ID_2);
 
         List<CourseResponse> courses = courseService.findCoursesRelateToTeacher(teacherId);
 
         assertEquals(courseResponses, courses);
         verify(courseDao, times(1)).findCoursesRelateToTeacher(teacherId);
-        verify(courseMapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
-        verify(courseMapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_2);
+        verify(mapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_2);
     }
 
     @Test

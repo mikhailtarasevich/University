@@ -2,7 +2,7 @@ package com.mikhail.tarasevich.university.validator.impl;
 
 import com.mikhail.tarasevich.university.dao.LessonDao;
 import com.mikhail.tarasevich.university.dto.LessonRequest;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.validator.LessonValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ public class LessonValidatorImpl implements LessonValidator {
     @Override
     public void validateUniqueNameInDB(LessonRequest request) {
         if (dao.findByName(request.getName()).isPresent())
-            throw new IncorrectRequestData("The lesson with specified name already exists in the database.");
+            throw new IncorrectRequestDataException("The lesson with specified name already exists in the database.");
     }
 
     @Override
@@ -28,7 +28,7 @@ public class LessonValidatorImpl implements LessonValidator {
         String name = request.getName();
 
         if (name == null || name.replaceAll("\\s", "").equals(""))
-            throw new IncorrectRequestData("The lesson name can't be null or empty.");
+            throw new IncorrectRequestDataException("The lesson name can't be null or empty.");
     }
 
 }

@@ -32,6 +32,9 @@ public class TeacherDaoImpl extends AbstractUserDaoImpl<Teacher> implements Teac
                     "teacher_title_id = ?, department_id = ? WHERE user_type = 'teacher' AND users.id = ?";
     private static final String DELETE_BY_ID_QUERY = "DELETE FROM users WHERE user_type = 'teacher' AND id = ?";
     private static final String COUNT_TABLE_ROWS_QUERY = "SELECT COUNT(*) FROM users WHERE user_type = 'teacher'";
+    private static final String UPDATE_GENERAL_TEACHER_INFO_QUERY =
+            "UPDATE users SET first_name = ?, last_name = ?, gender = ?, email = ? WHERE id = ?";
+    private static final String UPDATE_PASSWORD_QUERY = "UPDATE users SET password = ? WHERE id = ?";
     private static final String ADD_TEACHER_TO_GROUP_QUERY = "INSERT INTO user_groups (group_id, user_id) VALUES(?, ?)";
     private static final String DELETE_TEACHER_FROM_GROUP =
             "DELETE FROM user_groups WHERE user_id = ? AND group_id = ?";
@@ -89,7 +92,7 @@ public class TeacherDaoImpl extends AbstractUserDaoImpl<Teacher> implements Teac
     public TeacherDaoImpl(JdbcOperations jdbcTemplate) {
         super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY, FIND_ALL_PAGEABLE_QUERY,
                 FIND_BY_EMAIL_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY,
-                ADD_TEACHER_TO_GROUP_QUERY);
+                UPDATE_GENERAL_TEACHER_INFO_QUERY, UPDATE_PASSWORD_QUERY,ADD_TEACHER_TO_GROUP_QUERY);
     }
 
     @Override

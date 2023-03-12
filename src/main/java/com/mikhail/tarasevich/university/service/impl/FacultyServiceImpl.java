@@ -4,7 +4,8 @@ import com.mikhail.tarasevich.university.dao.*;
 import com.mikhail.tarasevich.university.dto.FacultyRequest;
 import com.mikhail.tarasevich.university.dto.FacultyResponse;
 import com.mikhail.tarasevich.university.entity.Faculty;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
+import com.mikhail.tarasevich.university.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.FacultyMapper;
 import com.mikhail.tarasevich.university.service.FacultyService;
 import com.mikhail.tarasevich.university.validator.FacultyValidator;
@@ -47,7 +48,7 @@ public class FacultyServiceImpl extends AbstractPageableService implements Facul
                 validator.validateUniqueNameInDB(r);
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
-            } catch (IncorrectRequestData e) {
+            } catch (IncorrectRequestDataException e) {
                 log.info("The faculty were deleted from the save list. Request: {} .", r);
             }
         });
@@ -59,8 +60,14 @@ public class FacultyServiceImpl extends AbstractPageableService implements Facul
     }
 
     @Override
-    public Optional<FacultyResponse> findById(int id) {
-        return facultyDao.findById(id).map(mapper::toResponse);
+    public FacultyResponse findById(int id) {
+        Optional<FacultyResponse> foundFaculty = facultyDao.findById(id).map(mapper::toResponse);
+
+        if (foundFaculty.isPresent()) {
+            return foundFaculty.get();
+        } else {
+            throw new ObjectWithSpecifiedIdNotFoundException("The faculty with specified id doesn't exist in the database.");
+        }
     }
 
     @Override
@@ -69,6 +76,13 @@ public class FacultyServiceImpl extends AbstractPageableService implements Facul
         int pageNumber = parsePageNumber(page, itemsCount, 1);
 
         return facultyDao.findAll(pageNumber, ITEMS_PER_PAGE).stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<FacultyResponse> findAll() {
+        return facultyDao.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -87,7 +101,7 @@ public class FacultyServiceImpl extends AbstractPageableService implements Facul
             try {
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
-            } catch (IncorrectRequestData e) {
+            } catch (IncorrectRequestDataException e) {
                 log.info("The faculty was deleted from the update list. Request: {} .", r);
             }
         });

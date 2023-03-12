@@ -2,7 +2,7 @@ package com.mikhail.tarasevich.university.validator.impl;
 
 import com.mikhail.tarasevich.university.dao.TeacherTitleDao;
 import com.mikhail.tarasevich.university.dto.TeacherTitleRequest;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.validator.TeacherTitleValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ public class TeacherTitleValidatorImpl implements TeacherTitleValidator {
     @Override
     public void validateUniqueNameInDB(TeacherTitleRequest request) {
         if (dao.findByName(request.getName()).isPresent())
-            throw new IncorrectRequestData("The teacher title with specified name already exists in the database.");
+            throw new IncorrectRequestDataException("The teacher title with specified name already exists in the database.");
     }
 
     @Override
@@ -28,7 +28,7 @@ public class TeacherTitleValidatorImpl implements TeacherTitleValidator {
         String name = request.getName();
 
         if (name == null || name.replaceAll("\\s", "").equals(""))
-            throw new IncorrectRequestData("The teacher title name can't be null or empty.");
+            throw new IncorrectRequestDataException("The teacher title name can't be null or empty.");
     }
 
 }

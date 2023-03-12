@@ -3,7 +3,7 @@ package com.mikhail.tarasevich.university.validator.impl;
 import com.mikhail.tarasevich.university.dao.LessonTypeDao;
 import com.mikhail.tarasevich.university.dto.LessonTypeRequest;
 import com.mikhail.tarasevich.university.entity.LessonType;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,7 +45,7 @@ class LessonTypeValidatorImplTest {
         when(lessonTypeDao.findByName(LESSON_TYPE_REQUEST.getName()))
                 .thenReturn(Optional.of(LessonType.builder().build()));
 
-        assertThrows(IncorrectRequestData.class, () -> lessonTypeValidator.validateUniqueNameInDB(LESSON_TYPE_REQUEST));
+        assertThrows(IncorrectRequestDataException.class, () -> lessonTypeValidator.validateUniqueNameInDB(LESSON_TYPE_REQUEST));
 
         verify(lessonTypeDao, times(1)).findByName(LESSON_TYPE_REQUEST.getName());
     }
@@ -61,7 +61,7 @@ class LessonTypeValidatorImplTest {
         LESSON_TYPE_REQUEST.setId(1);
         LESSON_TYPE_REQUEST.setName("   ");
 
-        assertThrows(IncorrectRequestData.class,
+        assertThrows(IncorrectRequestDataException.class,
                 () -> lessonTypeValidator.validateNameNotNullOrEmpty(LESSON_TYPE_REQUEST));
     }
 
@@ -71,7 +71,7 @@ class LessonTypeValidatorImplTest {
         LESSON_TYPE_REQUEST.setId(1);
         LESSON_TYPE_REQUEST.setName(null);
 
-        assertThrows(IncorrectRequestData.class,
+        assertThrows(IncorrectRequestDataException.class,
                 () -> lessonTypeValidator.validateNameNotNullOrEmpty(LESSON_TYPE_REQUEST));
     }
 

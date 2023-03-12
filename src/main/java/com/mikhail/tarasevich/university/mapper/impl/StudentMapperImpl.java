@@ -18,7 +18,9 @@ public class StudentMapperImpl implements StudentMapper {
                 .withGender(s.getGender())
                 .withEmail(s.getEmail())
                 .withPassword(s.getPassword())
-                .withGroup(s.getGroup())
+                .withGroup(Group.builder()
+                        .withId(s.getGroupId())
+                        .build())
                 .build();
     }
 

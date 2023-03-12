@@ -3,7 +3,7 @@ package com.mikhail.tarasevich.university.validator.impl;
 import com.mikhail.tarasevich.university.dao.TeacherTitleDao;
 import com.mikhail.tarasevich.university.dto.TeacherTitleRequest;
 import com.mikhail.tarasevich.university.entity.TeacherTitle;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,7 +45,7 @@ class TeacherTitleValidatorImplTest {
         when(teacherTitleDao.findByName(TEACHER_TITLE_REQUEST.getName()))
                 .thenReturn(Optional.of(TeacherTitle.builder().build()));
 
-        assertThrows(IncorrectRequestData.class,
+        assertThrows(IncorrectRequestDataException.class,
                 () -> teacherTitleValidator.validateUniqueNameInDB(TEACHER_TITLE_REQUEST));
 
         verify(teacherTitleDao, times(1)).findByName(TEACHER_TITLE_REQUEST.getName());
@@ -62,7 +62,7 @@ class TeacherTitleValidatorImplTest {
         TEACHER_TITLE_REQUEST.setId(1);
         TEACHER_TITLE_REQUEST.setName("  ");
 
-        assertThrows(IncorrectRequestData.class,
+        assertThrows(IncorrectRequestDataException.class,
                 () -> teacherTitleValidator.validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST));
     }
 
@@ -72,7 +72,7 @@ class TeacherTitleValidatorImplTest {
         TEACHER_TITLE_REQUEST.setId(1);
         TEACHER_TITLE_REQUEST.setName(null);
 
-        assertThrows(IncorrectRequestData.class,
+        assertThrows(IncorrectRequestDataException.class,
                 () -> teacherTitleValidator.validateNameNotNullOrEmpty(TEACHER_TITLE_REQUEST));
     }
 

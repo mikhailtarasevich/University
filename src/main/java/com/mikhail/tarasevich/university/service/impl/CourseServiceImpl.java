@@ -4,7 +4,8 @@ import com.mikhail.tarasevich.university.dao.*;
 import com.mikhail.tarasevich.university.dto.CourseRequest;
 import com.mikhail.tarasevich.university.dto.CourseResponse;
 import com.mikhail.tarasevich.university.entity.Course;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
+import com.mikhail.tarasevich.university.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.CourseMapper;
 import com.mikhail.tarasevich.university.service.CourseService;
 import com.mikhail.tarasevich.university.validator.CourseValidator;
@@ -24,7 +25,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Log4j2
 public class CourseServiceImpl extends AbstractPageableService implements CourseService {
-
 
     private final CourseDao courseDao;
     private final DepartmentDao departmentDao;
@@ -51,7 +51,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
                 validator.validateUniqueNameInDB(r);
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
-            } catch (IncorrectRequestData e) {
+            } catch (IncorrectRequestDataException e) {
                 log.info("The request were deleted from the save list. Request: {} .", r);
             }
         });
@@ -63,8 +63,14 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     }
 
     @Override
-    public Optional<CourseResponse> findById(int id) {
-        return courseDao.findById(id).map(mapper::toResponse);
+    public CourseResponse findById(int id) {
+        Optional<CourseResponse> foundCourse = courseDao.findById(id).map(mapper::toResponse);
+
+        if (foundCourse.isPresent()) {
+            return foundCourse.get();
+        } else {
+            throw new ObjectWithSpecifiedIdNotFoundException("The course with specified id doesn't exist in the database.");
+        }
     }
 
     @Override
@@ -73,6 +79,13 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
         int pageNumber = parsePageNumber(page, itemsCount, 1);
 
         return courseDao.findAll(pageNumber, ITEMS_PER_PAGE).stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CourseResponse> findAll() {
+        return courseDao.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -91,7 +104,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
             try {
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
-            } catch (IncorrectRequestData e) {
+            } catch (IncorrectRequestDataException e) {
                 log.info("The course was deleted from the update list. The course: {} .", r);
             }
         });

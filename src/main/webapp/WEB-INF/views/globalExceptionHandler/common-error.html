@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}"
+>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Unknown exception page</title>
+</head>
+<body>
+<br><br>
+<h1>Oops, it is unknown problem!</h1>
+<br><br>
+<p th:if="${url}">
+    <b>This happened here: </b> <span th:text="${url}">URL</span>
+</p>
+<br><br>
+<p th:if="${url}">
+    <b>It could help you solve the problem: </b> <span th:text="${exception}">EXCEPTION</span>
+</p>
+<br><br>
+<a th:href="${previousUrl}">
+    <button class="btn btn-primary">Back</button>
+</a>
+</body>
+</html>

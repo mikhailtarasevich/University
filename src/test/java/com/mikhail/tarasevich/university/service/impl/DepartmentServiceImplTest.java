@@ -6,7 +6,8 @@ import com.mikhail.tarasevich.university.dao.TeacherDao;
 import com.mikhail.tarasevich.university.dto.DepartmentRequest;
 import com.mikhail.tarasevich.university.dto.DepartmentResponse;
 import com.mikhail.tarasevich.university.entity.Department;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
+import com.mikhail.tarasevich.university.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.DepartmentMapper;
 import com.mikhail.tarasevich.university.validator.DepartmentValidator;
 import org.junit.jupiter.api.Test;
@@ -33,9 +34,9 @@ class DepartmentServiceImplTest {
     @Mock
     TeacherDao teacherDao;
     @Mock
-    DepartmentMapper departmentMapper;
+    DepartmentMapper mapper;
     @Mock
-    DepartmentValidator departmentValidator;
+    DepartmentValidator validator;
 
     private static final Department DEPARTMENT_ENTITY_1 = Department.builder()
             .withName("name1")
@@ -96,20 +97,20 @@ class DepartmentServiceImplTest {
 
     @Test
     void register_inputDepartmentRequest_expectedDepartmentResponseWithId() {
-        when(departmentMapper.toEntity(DEPARTMENT_REQUEST_1)).thenReturn(DEPARTMENT_ENTITY_1);
+        when(mapper.toEntity(DEPARTMENT_REQUEST_1)).thenReturn(DEPARTMENT_ENTITY_1);
         when(departmentDao.save(DEPARTMENT_ENTITY_1)).thenReturn(DEPARTMENT_ENTITY_WITH_ID_1);
-        when(departmentMapper.toResponse(DEPARTMENT_ENTITY_WITH_ID_1)).thenReturn(DEPARTMENT_RESPONSE_WITH_ID_1);
-        doNothing().when(departmentValidator).validateUniqueNameInDB(DEPARTMENT_REQUEST_1);
-        doNothing().when(departmentValidator).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_1);
+        when(mapper.toResponse(DEPARTMENT_ENTITY_WITH_ID_1)).thenReturn(DEPARTMENT_RESPONSE_WITH_ID_1);
+        doNothing().when(validator).validateUniqueNameInDB(DEPARTMENT_REQUEST_1);
+        doNothing().when(validator).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_1);
 
         DepartmentResponse departmentResponse = departmentService.register(DEPARTMENT_REQUEST_1);
 
         assertEquals(DEPARTMENT_RESPONSE_WITH_ID_1, departmentResponse);
-        verify(departmentMapper, times(1)).toEntity(DEPARTMENT_REQUEST_1);
+        verify(mapper, times(1)).toEntity(DEPARTMENT_REQUEST_1);
         verify(departmentDao, times(1)).save(DEPARTMENT_ENTITY_1);
-        verify(departmentMapper, times(1)).toResponse(DEPARTMENT_ENTITY_WITH_ID_1);
-        verify(departmentValidator, times(1)).validateUniqueNameInDB(DEPARTMENT_REQUEST_1);
-        verify(departmentValidator, times(1)).validateUniqueNameInDB(DEPARTMENT_REQUEST_1);
+        verify(mapper, times(1)).toResponse(DEPARTMENT_ENTITY_WITH_ID_1);
+        verify(validator, times(1)).validateUniqueNameInDB(DEPARTMENT_REQUEST_1);
+        verify(validator, times(1)).validateUniqueNameInDB(DEPARTMENT_REQUEST_1);
     }
 
     @Test
@@ -119,36 +120,60 @@ class DepartmentServiceImplTest {
         listForRegister.add(DEPARTMENT_REQUEST_2);
         listForRegister.add(DEPARTMENT_REQUEST_1);
 
-        when(departmentMapper.toEntity(DEPARTMENT_REQUEST_1)).thenReturn(DEPARTMENT_ENTITY_1);
-        when(departmentMapper.toEntity(DEPARTMENT_REQUEST_2)).thenReturn(DEPARTMENT_ENTITY_2);
+        when(mapper.toEntity(DEPARTMENT_REQUEST_1)).thenReturn(DEPARTMENT_ENTITY_1);
+        when(mapper.toEntity(DEPARTMENT_REQUEST_2)).thenReturn(DEPARTMENT_ENTITY_2);
         doNothing().when(departmentDao).saveAll(departmentEntities);
-        doNothing().doThrow(new IncorrectRequestData()).when(departmentValidator)
+        doNothing().doThrow(new IncorrectRequestDataException()).when(validator)
                 .validateUniqueNameInDB(DEPARTMENT_REQUEST_1);
-        doNothing().when(departmentValidator).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_1);
-        doNothing().when(departmentValidator).validateUniqueNameInDB(DEPARTMENT_REQUEST_2);
-        doNothing().when(departmentValidator).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_2);
+        doNothing().when(validator).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_1);
+        doNothing().when(validator).validateUniqueNameInDB(DEPARTMENT_REQUEST_2);
+        doNothing().when(validator).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_2);
 
         departmentService.registerAll(listForRegister);
 
-        verify(departmentMapper, times(1)).toEntity(DEPARTMENT_REQUEST_1);
-        verify(departmentMapper, times(1)).toEntity(DEPARTMENT_REQUEST_2);
+        verify(mapper, times(1)).toEntity(DEPARTMENT_REQUEST_1);
+        verify(mapper, times(1)).toEntity(DEPARTMENT_REQUEST_2);
         verify(departmentDao, times(1)).saveAll(departmentEntities);
-        verify(departmentValidator, times(2)).validateUniqueNameInDB(DEPARTMENT_REQUEST_1);
-        verify(departmentValidator, times(1)).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_1);
-        verify(departmentValidator, times(1)).validateUniqueNameInDB(DEPARTMENT_REQUEST_2);
-        verify(departmentValidator, times(1)).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_2);
+        verify(validator, times(2)).validateUniqueNameInDB(DEPARTMENT_REQUEST_1);
+        verify(validator, times(1)).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_1);
+        verify(validator, times(1)).validateUniqueNameInDB(DEPARTMENT_REQUEST_2);
+        verify(validator, times(1)).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_2);
     }
 
     @Test
     void findById_inputIntId_expectedFoundCourse() {
         when(departmentDao.findById(1)).thenReturn(Optional.of(DEPARTMENT_ENTITY_WITH_ID_1));
-        when(departmentMapper.toResponse(DEPARTMENT_ENTITY_WITH_ID_1)).thenReturn(DEPARTMENT_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(DEPARTMENT_ENTITY_WITH_ID_1)).thenReturn(DEPARTMENT_RESPONSE_WITH_ID_1);
 
-        Optional<DepartmentResponse> departmentResponse = departmentService.findById(1);
+        DepartmentResponse departmentResponse = departmentService.findById(1);
 
-        assertEquals(Optional.of(DEPARTMENT_RESPONSE_WITH_ID_1), departmentResponse);
-        verify(departmentMapper, times(1)).toResponse(DEPARTMENT_ENTITY_WITH_ID_1);
+        assertEquals(DEPARTMENT_RESPONSE_WITH_ID_1, departmentResponse);
+        verify(mapper, times(1)).toResponse(DEPARTMENT_ENTITY_WITH_ID_1);
         verify(departmentDao, times(1)).findById(1);
+    }
+
+    @Test
+    void findById_inputIncorrectId_expectedException() {
+        when(departmentDao.findById(100)).thenReturn(Optional.empty());
+
+        assertThrows(ObjectWithSpecifiedIdNotFoundException.class, () -> departmentService.findById(100));
+
+        verify(departmentDao, times(1)).findById(100);
+        verifyNoInteractions(mapper);
+    }
+
+    @Test
+    void findAll_inputNothing_expectedFoundAllDepartments() {
+        when(departmentDao.findAll()).thenReturn(departmentEntitiesWithId);
+        when(mapper.toResponse(DEPARTMENT_ENTITY_WITH_ID_1)).thenReturn(DEPARTMENT_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(DEPARTMENT_ENTITY_WITH_ID_2)).thenReturn(DEPARTMENT_RESPONSE_WITH_ID_2);
+
+        List<DepartmentResponse> foundDepartments = departmentService.findAll();
+
+        assertEquals(departmentResponses, foundDepartments);
+        verify(departmentDao, times(1)).findAll();
+        verify(mapper, times(1)).toResponse(DEPARTMENT_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(DEPARTMENT_ENTITY_WITH_ID_2);
     }
 
     @Test
@@ -156,16 +181,16 @@ class DepartmentServiceImplTest {
         when(departmentDao.findAll(1, AbstractPageableService.ITEMS_PER_PAGE))
                 .thenReturn(departmentEntitiesWithId);
         when(departmentDao.count()).thenReturn(2L);
-        when(departmentMapper.toResponse(DEPARTMENT_ENTITY_WITH_ID_1)).thenReturn(DEPARTMENT_RESPONSE_WITH_ID_1);
-        when(departmentMapper.toResponse(DEPARTMENT_ENTITY_WITH_ID_2)).thenReturn(DEPARTMENT_RESPONSE_WITH_ID_2);
+        when(mapper.toResponse(DEPARTMENT_ENTITY_WITH_ID_1)).thenReturn(DEPARTMENT_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(DEPARTMENT_ENTITY_WITH_ID_2)).thenReturn(DEPARTMENT_RESPONSE_WITH_ID_2);
 
         List<DepartmentResponse> foundDepartments = departmentService.findAll("1");
 
         assertEquals(departmentResponses, foundDepartments);
         verify(departmentDao, times(1)).findAll(1, AbstractPageableService.ITEMS_PER_PAGE);
         verify(departmentDao, times(1)).count();
-        verify(departmentMapper, times(1)).toResponse(DEPARTMENT_ENTITY_WITH_ID_1);
-        verify(departmentMapper, times(1)).toResponse(DEPARTMENT_ENTITY_WITH_ID_2);
+        verify(mapper, times(1)).toResponse(DEPARTMENT_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(DEPARTMENT_ENTITY_WITH_ID_2);
     }
 
     @Test
@@ -182,11 +207,11 @@ class DepartmentServiceImplTest {
         DEPARTMENT_REQUEST_FOR_UPDATE_1.setDescription("update1");
 
         doNothing().when(departmentDao).update(DEPARTMENT_ENTITY_FOR_UPDATE_1);
-        when(departmentMapper.toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_1)).thenReturn(DEPARTMENT_ENTITY_FOR_UPDATE_1);
+        when(mapper.toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_1)).thenReturn(DEPARTMENT_ENTITY_FOR_UPDATE_1);
 
         departmentService.edit(DEPARTMENT_REQUEST_FOR_UPDATE_1);
 
-        verify(departmentMapper, times(1)).toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_1);
+        verify(mapper, times(1)).toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_1);
         verify(departmentDao, times(1)).update(DEPARTMENT_ENTITY_FOR_UPDATE_1);
     }
 
@@ -227,26 +252,26 @@ class DepartmentServiceImplTest {
         listForUpdate.add(DEPARTMENT_ENTITY_FOR_UPDATE_1);
         listForUpdate.add(DEPARTMENT_ENTITY_FOR_UPDATE_2);
 
-        doNothing().when(departmentValidator).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_1);
-        doNothing().when(departmentValidator).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_2);
-        doThrow(new IncorrectRequestData()).when(departmentValidator)
+        doNothing().when(validator).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_1);
+        doNothing().when(validator).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_2);
+        doThrow(new IncorrectRequestDataException()).when(validator)
                 .validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_INCORRECT);
 
-        when(departmentMapper.toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_1)).thenReturn(DEPARTMENT_ENTITY_FOR_UPDATE_1);
-        when(departmentMapper.toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_2)).thenReturn(DEPARTMENT_ENTITY_FOR_UPDATE_2);
+        when(mapper.toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_1)).thenReturn(DEPARTMENT_ENTITY_FOR_UPDATE_1);
+        when(mapper.toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_2)).thenReturn(DEPARTMENT_ENTITY_FOR_UPDATE_2);
 
         doNothing().when(departmentDao).updateAll(listForUpdate);
 
         departmentService.editAll(inputList);
 
-        verify(departmentMapper, times(1)).toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_1);
-        verify(departmentMapper, times(1)).toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_2);
+        verify(mapper, times(1)).toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_1);
+        verify(mapper, times(1)).toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_2);
         verify(departmentDao, times(1)).updateAll(listForUpdate);
-        verify(departmentValidator, times(1))
+        verify(validator, times(1))
                 .validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_1);
-        verify(departmentValidator, times(1))
+        verify(validator, times(1))
                 .validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_2);
-        verify(departmentValidator, times(1))
+        verify(validator, times(1))
                 .validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_INCORRECT);
     }
 

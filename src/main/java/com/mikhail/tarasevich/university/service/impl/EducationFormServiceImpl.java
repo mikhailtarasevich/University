@@ -5,7 +5,8 @@ import com.mikhail.tarasevich.university.dao.GroupDao;
 import com.mikhail.tarasevich.university.dto.EducationFormRequest;
 import com.mikhail.tarasevich.university.dto.EducationFormResponse;
 import com.mikhail.tarasevich.university.entity.EducationForm;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
+import com.mikhail.tarasevich.university.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.EducationFormMapper;
 import com.mikhail.tarasevich.university.service.EducationFormService;
 import com.mikhail.tarasevich.university.validator.EducationFormValidator;
@@ -48,7 +49,7 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
                 validator.validateUniqueNameInDB(r);
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
-            } catch (IncorrectRequestData e) {
+            } catch (IncorrectRequestDataException e) {
                 log.info("The education forms were deleted from the save list. Request: {} .", r);
             }
         });
@@ -61,8 +62,14 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
     }
 
     @Override
-    public Optional<EducationFormResponse> findById(int id) {
-        return educationFormDao.findById(id).map(mapper::toResponse);
+    public EducationFormResponse findById(int id) {
+        Optional<EducationFormResponse> foundEducationForm = educationFormDao.findById(id).map(mapper::toResponse);
+
+        if (foundEducationForm.isPresent()) {
+            return foundEducationForm.get();
+        } else {
+            throw new ObjectWithSpecifiedIdNotFoundException("The education form with specified id doesn't exist in the database.");
+        }
     }
 
     @Override
@@ -71,6 +78,13 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
         int pageNumber = parsePageNumber(page, itemsCount, 1);
 
         return educationFormDao.findAll(pageNumber, ITEMS_PER_PAGE).stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<EducationFormResponse> findAll() {
+        return educationFormDao.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -89,7 +103,7 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
             try {
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
-            } catch (IncorrectRequestData e) {
+            } catch (IncorrectRequestDataException e) {
                 log.info("The education form was deleted from the update list. Education form: {} .", r);
             }
         });

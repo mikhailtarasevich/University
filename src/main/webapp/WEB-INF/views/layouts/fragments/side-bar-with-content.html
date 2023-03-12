@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <meta charset="UTF-8">
+    <title>SIDE BAR WITH CONTENT AREA</title>
+</head>
+<body>
+<div th:fragment="side-bar-with-content" class="container-fluid">
+  <div class="row">
+    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light border-end">
+      <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+          <li class="nav-item border-bottom">
+            <br />
+            <h5 class="nav-item text-center" aria-current="page">
+              University structure
+            </h5>
+            <a class="nav-link active" aria-current="page" href="#">
+              Departments
+            </a>
+            <a class="nav-link active" aria-current="page" href="#">
+              Courses
+            </a>
+            <a class="nav-link active" aria-current="page" href="#">
+              Faculties
+            </a>
+            <a class="nav-link active" aria-current="page" href="#">
+              Groups
+            </a>
+            <br />
+          </li>
+          <li class="nav-item border-bottom">
+            <br />
+            <h5 class="nav-item text-center" aria-current="page">Users</h5>
+            <a class="nav-link active" aria-current="page" href="#">
+              Teachers
+            </a>
+            <a class="nav-link active" aria-current="page" href="/students">
+              Students
+            </a>
+            <br />
+          </li>
+          <li class="nav-item border-bottom">
+            <br />
+            <h5 class="nav-item text-center" aria-current="page">
+              Attributes
+            </h5>
+            <a class="nav-link active" aria-current="page" href="#">
+              Teacher titles
+            </a>
+            <a class="nav-link active" aria-current="page" href="#">
+              Education forms
+            </a>
+            <a class="nav-link active" aria-current="page" href="#">
+              Lesson types
+            </a>
+            <br />
+          </li>
+          <li class="nav-item">
+            <br />
+            <h5 class="nav-item text-center" aria-current="page">
+              Time table
+            </h5>
+            <a class="nav-link active" aria-current="page" href="#">
+              Lessons
+            </a>
+            <br />
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <main class="col-md-9 ms-sm-auto col-lg-10">
+        <div class="container text-center my-3">
+          <div class="row">
+            <div layout:fragment="content">
+              SOME CONTENT
+            </div>
+          </div>
+        </div>
+    </main>
+  </div>
+</div>
+</body>
+</html>

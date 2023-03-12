@@ -9,8 +9,9 @@ public interface CrudService <REQUEST, RESPONSE>{
     RESPONSE register(REQUEST requestDTO);
     void registerAll(List<REQUEST> requestDTOs);
 
-    Optional<RESPONSE> findById(int id);
+    RESPONSE findById(int id);
     List<RESPONSE> findAll(String page);
+    List<RESPONSE> findAll();
 
     void edit(REQUEST requestDTO);
     void editAll(List<REQUEST> request);

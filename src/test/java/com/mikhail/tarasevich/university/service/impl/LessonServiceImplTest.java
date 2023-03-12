@@ -3,7 +3,8 @@ package com.mikhail.tarasevich.university.service.impl;
 import com.mikhail.tarasevich.university.dao.LessonDao;
 import com.mikhail.tarasevich.university.dto.*;
 import com.mikhail.tarasevich.university.entity.Lesson;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
+import com.mikhail.tarasevich.university.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.LessonMapper;
 import com.mikhail.tarasevich.university.validator.LessonValidator;
 import org.junit.jupiter.api.Test;
@@ -25,9 +26,9 @@ class LessonServiceImplTest {
     @Mock
     LessonDao lessonDao;
     @Mock
-    LessonMapper lessonMapper;
+    LessonMapper mapper;
     @Mock
-    LessonValidator lessonValidator;
+    LessonValidator validator;
 
     private static final Lesson LESSON_ENTITY_1 =
             Lesson.builder().withName("name1").build();
@@ -71,95 +72,119 @@ class LessonServiceImplTest {
     }
 
     @Test
-    void register_inputCourseRequest_expectedCourseResponseWithId() {
-        when(lessonMapper.toEntity(LESSON_REQUEST_1)).thenReturn(LESSON_ENTITY_1);
+    void register_inputLessonRequest_expectedLessonResponseWithId() {
+        when(mapper.toEntity(LESSON_REQUEST_1)).thenReturn(LESSON_ENTITY_1);
         when(lessonDao.save(LESSON_ENTITY_1)).thenReturn(LESSON_ENTITY_WITH_ID_1);
-        when(lessonMapper.toResponse(LESSON_ENTITY_WITH_ID_1)).thenReturn(LESSON_RESPONSE_WITH_ID_1);
-        doNothing().when(lessonValidator).validateUniqueNameInDB(LESSON_REQUEST_1);
-        doNothing().when(lessonValidator).validateNameNotNullOrEmpty(LESSON_REQUEST_1);
+        when(mapper.toResponse(LESSON_ENTITY_WITH_ID_1)).thenReturn(LESSON_RESPONSE_WITH_ID_1);
+        doNothing().when(validator).validateUniqueNameInDB(LESSON_REQUEST_1);
+        doNothing().when(validator).validateNameNotNullOrEmpty(LESSON_REQUEST_1);
 
         LessonResponse lessonResponse = lessonService.register(LESSON_REQUEST_1);
 
         assertEquals(LESSON_RESPONSE_WITH_ID_1, lessonResponse);
-        verify(lessonMapper, times(1)).toEntity(LESSON_REQUEST_1);
+        verify(mapper, times(1)).toEntity(LESSON_REQUEST_1);
         verify(lessonDao, times(1)).save(LESSON_ENTITY_1);
-        verify(lessonMapper, times(1)).toResponse(LESSON_ENTITY_WITH_ID_1);
-        verify(lessonValidator, times(1)).validateUniqueNameInDB(LESSON_REQUEST_1);
-        verify(lessonValidator, times(1)).validateUniqueNameInDB(LESSON_REQUEST_1);
+        verify(mapper, times(1)).toResponse(LESSON_ENTITY_WITH_ID_1);
+        verify(validator, times(1)).validateUniqueNameInDB(LESSON_REQUEST_1);
+        verify(validator, times(1)).validateUniqueNameInDB(LESSON_REQUEST_1);
     }
 
     @Test
-    void registerAllCourses_inputCourseRequestListWithRepeatableCourse_expectedNothing() {
+    void registerAllLessons_inputLessonRequestListWithRepeatableLesson_expectedNothing() {
         final List<LessonRequest> listForRegister = new ArrayList<>();
         listForRegister.add(LESSON_REQUEST_1);
         listForRegister.add(LESSON_REQUEST_1);
         listForRegister.add(LESSON_REQUEST_2);
 
-        when(lessonMapper.toEntity(LESSON_REQUEST_1)).thenReturn(LESSON_ENTITY_1);
-        when(lessonMapper.toEntity(LESSON_REQUEST_2)).thenReturn(LESSON_ENTITY_2);
+        when(mapper.toEntity(LESSON_REQUEST_1)).thenReturn(LESSON_ENTITY_1);
+        when(mapper.toEntity(LESSON_REQUEST_2)).thenReturn(LESSON_ENTITY_2);
         doNothing().when(lessonDao).saveAll(lessonEntities);
-        doNothing().doThrow(new IncorrectRequestData()).when(lessonValidator).validateUniqueNameInDB(LESSON_REQUEST_1);
-        doNothing().when(lessonValidator).validateNameNotNullOrEmpty(LESSON_REQUEST_1);
-        doNothing().when(lessonValidator).validateUniqueNameInDB(LESSON_REQUEST_2);
-        doNothing().when(lessonValidator).validateNameNotNullOrEmpty(LESSON_REQUEST_2);
+        doNothing().doThrow(new IncorrectRequestDataException()).when(validator).validateUniqueNameInDB(LESSON_REQUEST_1);
+        doNothing().when(validator).validateNameNotNullOrEmpty(LESSON_REQUEST_1);
+        doNothing().when(validator).validateUniqueNameInDB(LESSON_REQUEST_2);
+        doNothing().when(validator).validateNameNotNullOrEmpty(LESSON_REQUEST_2);
 
         lessonService.registerAll(listForRegister);
 
-        verify(lessonMapper, times(1)).toEntity(LESSON_REQUEST_1);
-        verify(lessonMapper, times(1)).toEntity(LESSON_REQUEST_2);
+        verify(mapper, times(1)).toEntity(LESSON_REQUEST_1);
+        verify(mapper, times(1)).toEntity(LESSON_REQUEST_2);
         verify(lessonDao, times(1)).saveAll(lessonEntities);
-        verify(lessonValidator, times(2)).validateUniqueNameInDB(LESSON_REQUEST_1);
-        verify(lessonValidator, times(1)).validateNameNotNullOrEmpty(LESSON_REQUEST_1);
-        verify(lessonValidator, times(1)).validateUniqueNameInDB(LESSON_REQUEST_2);
-        verify(lessonValidator, times(1)).validateNameNotNullOrEmpty(LESSON_REQUEST_2);
+        verify(validator, times(2)).validateUniqueNameInDB(LESSON_REQUEST_1);
+        verify(validator, times(1)).validateNameNotNullOrEmpty(LESSON_REQUEST_1);
+        verify(validator, times(1)).validateUniqueNameInDB(LESSON_REQUEST_2);
+        verify(validator, times(1)).validateNameNotNullOrEmpty(LESSON_REQUEST_2);
     }
 
     @Test
-    void findById_inputIntId_expectedFoundCourse() {
+    void findById_inputIntId_expectedFoundLesson() {
         when(lessonDao.findById(1)).thenReturn(Optional.of(LESSON_ENTITY_WITH_ID_1));
-        when(lessonMapper.toResponse(LESSON_ENTITY_WITH_ID_1)).thenReturn(LESSON_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(LESSON_ENTITY_WITH_ID_1)).thenReturn(LESSON_RESPONSE_WITH_ID_1);
 
-        Optional<LessonResponse> lessonResponse = lessonService.findById(1);
+        LessonResponse lessonResponse = lessonService.findById(1);
 
-        assertEquals(Optional.of(LESSON_RESPONSE_WITH_ID_1), lessonResponse);
-        verify(lessonMapper, times(1)).toResponse(LESSON_ENTITY_WITH_ID_1);
+        assertEquals(LESSON_RESPONSE_WITH_ID_1, lessonResponse);
+        verify(mapper, times(1)).toResponse(LESSON_ENTITY_WITH_ID_1);
         verify(lessonDao, times(1)).findById(1);
     }
 
     @Test
-    void findAll_inputPageOne_expectedFoundCoursesFromPageOne() {
+    void findById_inputIncorrectId_expectedException() {
+        when(lessonDao.findById(100)).thenReturn(Optional.empty());
+
+        assertThrows(ObjectWithSpecifiedIdNotFoundException.class, () -> lessonService.findById(100));
+
+        verify(lessonDao, times(1)).findById(100);
+        verifyNoInteractions(mapper);
+    }
+
+    @Test
+    void findAll_inputNothing_expectedFoundAllLessons() {
+        when(lessonDao.findAll()).thenReturn(lessonEntitiesWithId);
+        when(mapper.toResponse(LESSON_ENTITY_WITH_ID_1)).thenReturn(LESSON_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(LESSON_ENTITY_WITH_ID_2)).thenReturn(LESSON_RESPONSE_WITH_ID_2);
+
+        List<LessonResponse> foundCourses = lessonService.findAll();
+
+        assertEquals(lessonResponses, foundCourses);
+        verify(lessonDao, times(1)).findAll();
+        verify(mapper, times(1)).toResponse(LESSON_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(LESSON_ENTITY_WITH_ID_2);
+    }
+
+    @Test
+    void findAll_inputPageOne_expectedFoundLessonsFromPageOne() {
         when(lessonDao.findAll(1, AbstractPageableService.ITEMS_PER_PAGE)).thenReturn(lessonEntitiesWithId);
         when(lessonDao.count()).thenReturn(2L);
-        when(lessonMapper.toResponse(LESSON_ENTITY_WITH_ID_1)).thenReturn(LESSON_RESPONSE_WITH_ID_1);
-        when(lessonMapper.toResponse(LESSON_ENTITY_WITH_ID_2)).thenReturn(LESSON_RESPONSE_WITH_ID_2);
+        when(mapper.toResponse(LESSON_ENTITY_WITH_ID_1)).thenReturn(LESSON_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(LESSON_ENTITY_WITH_ID_2)).thenReturn(LESSON_RESPONSE_WITH_ID_2);
 
         List<LessonResponse> foundCourses = lessonService.findAll("1");
 
         assertEquals(lessonResponses, foundCourses);
         verify(lessonDao, times(1)).findAll(1, AbstractPageableService.ITEMS_PER_PAGE);
         verify(lessonDao, times(1)).count();
-        verify(lessonMapper, times(1)).toResponse(LESSON_ENTITY_WITH_ID_1);
-        verify(lessonMapper, times(1)).toResponse(LESSON_ENTITY_WITH_ID_2);
+        verify(mapper, times(1)).toResponse(LESSON_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(LESSON_ENTITY_WITH_ID_2);
     }
 
     @Test
-    void edit_inputCourseRequest_expectedNothing() {
+    void edit_inputLessonRequest_expectedNothing() {
         final Lesson LESSON_ENTITY_FOR_UPDATE_1 = Lesson.builder().withId(1).withName("update1").build();
         final LessonRequest LESSON_REQUEST_FOR_UPDATE_1 = new LessonRequest();
         LESSON_REQUEST_FOR_UPDATE_1.setId(0);
         LESSON_REQUEST_FOR_UPDATE_1.setName("update1");
 
         doNothing().when(lessonDao).update(LESSON_ENTITY_FOR_UPDATE_1);
-        when(lessonMapper.toEntity(LESSON_REQUEST_FOR_UPDATE_1)).thenReturn(LESSON_ENTITY_FOR_UPDATE_1);
+        when(mapper.toEntity(LESSON_REQUEST_FOR_UPDATE_1)).thenReturn(LESSON_ENTITY_FOR_UPDATE_1);
 
         lessonService.edit(LESSON_REQUEST_FOR_UPDATE_1);
 
-        verify(lessonMapper, times(1)).toEntity(LESSON_REQUEST_FOR_UPDATE_1);
+        verify(mapper, times(1)).toEntity(LESSON_REQUEST_FOR_UPDATE_1);
         verify(lessonDao, times(1)).update(LESSON_ENTITY_FOR_UPDATE_1);
     }
 
     @Test
-    void editAll_inputCourseRequestListWhereOneCourseHasIncorrectName_expectedNothing() {
+    void editAll_inputLessonRequestListWhereOneCourseHasIncorrectName_expectedNothing() {
         final Lesson LESSON_ENTITY_FOR_UPDATE_1 = Lesson.builder().withId(1).withName("update1").build();
         final LessonRequest LESSON_REQUEST_FOR_UPDATE_1 = new LessonRequest();
         LESSON_REQUEST_FOR_UPDATE_1.setId(1);
@@ -183,31 +208,31 @@ class LessonServiceImplTest {
         listForUpdate.add(LESSON_ENTITY_FOR_UPDATE_1);
         listForUpdate.add(LESSON_ENTITY_FOR_UPDATE_2);
 
-        doNothing().when(lessonValidator).validateNameNotNullOrEmpty(LESSON_REQUEST_FOR_UPDATE_1);
-        doNothing().when(lessonValidator).validateNameNotNullOrEmpty(LESSON_REQUEST_FOR_UPDATE_2);
-        doThrow(new IncorrectRequestData()).when(lessonValidator)
+        doNothing().when(validator).validateNameNotNullOrEmpty(LESSON_REQUEST_FOR_UPDATE_1);
+        doNothing().when(validator).validateNameNotNullOrEmpty(LESSON_REQUEST_FOR_UPDATE_2);
+        doThrow(new IncorrectRequestDataException()).when(validator)
                 .validateNameNotNullOrEmpty(LESSON_REQUEST_FOR_UPDATE_INCORRECT);
 
-        when(lessonMapper.toEntity(LESSON_REQUEST_FOR_UPDATE_1)).thenReturn(LESSON_ENTITY_FOR_UPDATE_1);
-        when(lessonMapper.toEntity(LESSON_REQUEST_FOR_UPDATE_2)).thenReturn(LESSON_ENTITY_FOR_UPDATE_2);
+        when(mapper.toEntity(LESSON_REQUEST_FOR_UPDATE_1)).thenReturn(LESSON_ENTITY_FOR_UPDATE_1);
+        when(mapper.toEntity(LESSON_REQUEST_FOR_UPDATE_2)).thenReturn(LESSON_ENTITY_FOR_UPDATE_2);
 
         doNothing().when(lessonDao).updateAll(listForUpdate);
 
         lessonService.editAll(inputList);
 
-        verify(lessonMapper, times(1)).toEntity(LESSON_REQUEST_FOR_UPDATE_1);
-        verify(lessonMapper, times(1)).toEntity(LESSON_REQUEST_FOR_UPDATE_2);
+        verify(mapper, times(1)).toEntity(LESSON_REQUEST_FOR_UPDATE_1);
+        verify(mapper, times(1)).toEntity(LESSON_REQUEST_FOR_UPDATE_2);
         verify(lessonDao, times(1)).updateAll(listForUpdate);
-        verify(lessonValidator, times(1))
+        verify(validator, times(1))
                 .validateNameNotNullOrEmpty(LESSON_REQUEST_FOR_UPDATE_1);
-        verify(lessonValidator, times(1))
+        verify(validator, times(1))
                 .validateNameNotNullOrEmpty(LESSON_REQUEST_FOR_UPDATE_2);
-        verify(lessonValidator, times(1))
+        verify(validator, times(1))
                 .validateNameNotNullOrEmpty(LESSON_REQUEST_FOR_UPDATE_INCORRECT);
     }
 
     @Test
-    void deleteById_inputCourseId_expectedSuccessDelete() {
+    void deleteById_inputLessonId_expectedSuccessDelete() {
         int id = 1;
 
         when(lessonDao.findById(id)).thenReturn(Optional.of(LESSON_ENTITY_1));
@@ -221,7 +246,7 @@ class LessonServiceImplTest {
     }
 
     @Test
-    void deleteById_inputCourseId_expectedFalseUnsuccessfulDelete() {
+    void deleteById_inputLessonId_expectedFalseUnsuccessfulDelete() {
         int id = 1;
 
         when(lessonDao.findById(id)).thenReturn(Optional.empty());
@@ -234,7 +259,7 @@ class LessonServiceImplTest {
     }
 
     @Test
-    void deleteByIds_inputCoursesIds_expectedSuccessDeletes() {
+    void deleteByIds_inputLessonsIds_expectedSuccessDeletes() {
         Set<Integer> ids = new HashSet<>();
         ids.add(1);
         ids.add(2);
@@ -250,14 +275,14 @@ class LessonServiceImplTest {
     @Test
     void findLessonsRelateToGroup() {
         when(lessonDao.findLessonsRelateToGroup(1)).thenReturn(lessonEntitiesWithId);
-        when(lessonMapper.toResponse(LESSON_ENTITY_WITH_ID_1)).thenReturn(LESSON_RESPONSE_WITH_ID_1);
-        when(lessonMapper.toResponse(LESSON_ENTITY_WITH_ID_2)).thenReturn(LESSON_RESPONSE_WITH_ID_2);
+        when(mapper.toResponse(LESSON_ENTITY_WITH_ID_1)).thenReturn(LESSON_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(LESSON_ENTITY_WITH_ID_2)).thenReturn(LESSON_RESPONSE_WITH_ID_2);
 
         List<LessonResponse> foundLessons = lessonService.findLessonsRelateToGroup(1);
 
         assertEquals(lessonResponses, foundLessons);
-        verify(lessonMapper, times(1)).toResponse(LESSON_ENTITY_WITH_ID_1);
-        verify(lessonMapper, times(1)).toResponse(LESSON_ENTITY_WITH_ID_2);
+        verify(mapper, times(1)).toResponse(LESSON_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(LESSON_ENTITY_WITH_ID_2);
         verify(lessonDao, times(1)).findLessonsRelateToGroup(1);
     }
 

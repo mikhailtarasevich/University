@@ -5,7 +5,8 @@ import com.mikhail.tarasevich.university.dao.TeacherTitleDao;
 import com.mikhail.tarasevich.university.dto.TeacherTitleRequest;
 import com.mikhail.tarasevich.university.dto.TeacherTitleResponse;
 import com.mikhail.tarasevich.university.entity.TeacherTitle;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
+import com.mikhail.tarasevich.university.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.TeacherTitleMapper;
 import com.mikhail.tarasevich.university.service.TeacherTitleService;
 import com.mikhail.tarasevich.university.validator.TeacherTitleValidator;
@@ -48,7 +49,7 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
                 validator.validateUniqueNameInDB(r);
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
-            } catch (IncorrectRequestData e) {
+            } catch (IncorrectRequestDataException e) {
                 log.info("The teacher title were deleted from the save list. The teacher title: {} .", r);
             }
         });
@@ -61,8 +62,14 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
     }
 
     @Override
-    public Optional<TeacherTitleResponse> findById(int id) {
-        return teacherTitleDao.findById(id).map(mapper::toResponse);
+    public TeacherTitleResponse findById(int id) {
+        Optional<TeacherTitleResponse> foundTeacherTitle = teacherTitleDao.findById(id).map(mapper::toResponse);
+
+        if (foundTeacherTitle.isPresent()) {
+            return foundTeacherTitle.get();
+        } else {
+            throw new ObjectWithSpecifiedIdNotFoundException("The teacher title with specified id doesn't exist in the database.");
+        }
     }
 
     @Override
@@ -71,6 +78,13 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
         int pageNumber = parsePageNumber(page, itemsCount, 1);
 
         return teacherTitleDao.findAll(pageNumber, ITEMS_PER_PAGE).stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TeacherTitleResponse> findAll() {
+        return teacherTitleDao.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -89,7 +103,7 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
             try {
                 validator.validateNameNotNullOrEmpty(r);
                 acceptableRequests.add(r);
-            } catch (IncorrectRequestData e) {
+            } catch (IncorrectRequestDataException e) {
                 log.info("The teacher title was deleted from the update list. The teacher title: {} .", r);
             }
         });

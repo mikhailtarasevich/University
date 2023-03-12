@@ -3,7 +3,7 @@ package com.mikhail.tarasevich.university.validator.impl;
 import com.mikhail.tarasevich.university.dao.EducationFormDao;
 import com.mikhail.tarasevich.university.dto.EducationFormRequest;
 import com.mikhail.tarasevich.university.entity.EducationForm;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,7 +45,7 @@ class EducationFormValidatorImplTest {
         when(educationFormDao.findByName(EDUCATION_FORM_REQUEST.getName()))
                 .thenReturn(Optional.of(EducationForm.builder().build()));
 
-        assertThrows(IncorrectRequestData.class,
+        assertThrows(IncorrectRequestDataException.class,
                 () -> educationFormValidator.validateUniqueNameInDB(EDUCATION_FORM_REQUEST));
 
         verify(educationFormDao, times(1)).findByName(EDUCATION_FORM_REQUEST.getName());
@@ -62,7 +62,7 @@ class EducationFormValidatorImplTest {
         EDUCATION_FORM_REQUEST.setId(1);
         EDUCATION_FORM_REQUEST.setName("   ");
 
-        assertThrows(IncorrectRequestData.class,
+        assertThrows(IncorrectRequestDataException.class,
                 () -> educationFormValidator.validateNameNotNullOrEmpty(EDUCATION_FORM_REQUEST));
     }
 
@@ -72,7 +72,7 @@ class EducationFormValidatorImplTest {
         EDUCATION_FORM_REQUEST.setId(1);
         EDUCATION_FORM_REQUEST.setName(null);
 
-        assertThrows(IncorrectRequestData.class,
+        assertThrows(IncorrectRequestDataException.class,
                 () -> educationFormValidator.validateNameNotNullOrEmpty(EDUCATION_FORM_REQUEST));
     }
 

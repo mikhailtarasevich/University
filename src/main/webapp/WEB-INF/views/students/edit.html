@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}"
+>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Edit student</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-50 p-2 mx-auto">
+    <h1>Edit student information</h1>
+    <br>
+    <form th:method="PATCH" th:action="@{/students/{id}(id=${student.getId()})}" th:object="${student}"
+          class="border-bottom">
+        <div class="form-floating mb-3">
+            <input class="form-control" th:field="*{firstName}" id="firstName"/>
+            <label for="firstName">Edit first name: </label>
+        </div>
+        <div class="form-floating mb-3">
+            <input class="form-control" th:field="*{lastName}" id="lastName"/>
+            <label for="lastName">Edit last name: </label>
+        </div>
+        <div class="form-floating mb-3">
+            <input class="form-control" th:field="*{email}" id="email"/>
+            <label for="email">Edit email: </label>
+        </div>
+        <div class="row row-cols-2 w-75 mx-auto">
+            <th:block th:each="gender : ${T(com.mikhail.tarasevich.university.entity.Gender).values()}">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" th:field="*{gender}" th:value="${gender}"
+                           id="${gender}"/>
+                    <a th:text="${gender}">VALUE</a>
+                </div>
+            </th:block>
+        </div>
+        <br>
+        <input class="btn btn-success" type="submit" value="Update general information"/>
+        <br><br>
+    </form>
+    <form th:method="PATCH" th:action="@{/students/{id}/edit-password(id=${student.getId()})}" th:object="${student}"
+          class="border-bottom">
+        <br>
+        <h5>Change password</h5>
+        <br>
+        <div class="form-floating mb-3">
+            <input type="password" th:field="*{password}" class="form-control" id="password">
+            <label for="password">Enter new password:</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="password" th:field="*{confirmPassword}" class="form-control" id="confirmPassword">
+            <label for="confirmPassword">Confirm new password:</label>
+        </div>
+        <input class="btn btn-success" type="submit" value="Change password"/>
+        <br><br>
+    </form>
+    <form th:method="PATCH" th:action="@{/students/{id}/edit-group(id=${student.getId()})}" th:object="${student}">
+        <br>
+        <h5>Change group</h5>
+        <br>
+        <select class="form-select mb-3" th:field="*{groupId}">
+            <th:block th:each="group : ${groups}">
+                <option th:value="${group.getId()}" th:text="${group.Name}">GROUP NAME</option>
+            </th:block>
+        </select>
+        <input class="btn btn-success" type="submit" value="Set new group"/>
+    </form>
+    <br>
+    <form th:method="PATCH" th:action="@{/students/{id}/leave-group(id=${student.getId()})}" th:object="${student}"
+          class="border-bottom">
+        <input class="btn btn-danger" type="submit" value="Unsubscribe student from group"/>
+        <br><br>
+    </form>
+    <br>
+    <a href="/students">
+        <button class="btn btn-primary">Back to all students page</button>
+    </a>
+    <br>
+</div>
+</body>
+</html>

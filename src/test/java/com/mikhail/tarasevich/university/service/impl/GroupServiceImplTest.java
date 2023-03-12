@@ -7,7 +7,8 @@ import com.mikhail.tarasevich.university.dao.TeacherDao;
 import com.mikhail.tarasevich.university.dto.GroupRequest;
 import com.mikhail.tarasevich.university.dto.GroupResponse;
 import com.mikhail.tarasevich.university.entity.Group;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
+import com.mikhail.tarasevich.university.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.GroupMapper;
 import com.mikhail.tarasevich.university.validator.GroupValidator;
 import org.junit.jupiter.api.Test;
@@ -37,9 +38,9 @@ class GroupServiceImplTest {
     @Mock
     TeacherDao teacherDao;
     @Mock
-    GroupMapper groupMapper;
+    GroupMapper mapper;
     @Mock
-    GroupValidator groupValidator;
+    GroupValidator validator;
 
     private static final Group GROUP_ENTITY_1 = Group.builder().withName("name1").build();
     private static final Group GROUP_ENTITY_WITH_ID_1 = Group.builder().withId(1).withName("name1").build();
@@ -80,20 +81,20 @@ class GroupServiceImplTest {
 
     @Test
     void register_inputGroupRequest_expectedGroupResponseWithId() {
-        when(groupMapper.toEntity(GROUP_REQUEST_1)).thenReturn(GROUP_ENTITY_1);
+        when(mapper.toEntity(GROUP_REQUEST_1)).thenReturn(GROUP_ENTITY_1);
         when(groupDao.save(GROUP_ENTITY_1)).thenReturn(GROUP_ENTITY_WITH_ID_1);
-        when(groupMapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
-        doNothing().when(groupValidator).validateUniqueNameInDB(GROUP_REQUEST_1);
-        doNothing().when(groupValidator).validateNameNotNullOrEmpty(GROUP_REQUEST_1);
+        when(mapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
+        doNothing().when(validator).validateUniqueNameInDB(GROUP_REQUEST_1);
+        doNothing().when(validator).validateNameNotNullOrEmpty(GROUP_REQUEST_1);
 
         GroupResponse groupResponse = groupService.register(GROUP_REQUEST_1);
 
         assertEquals(GROUP_RESPONSE_WITH_ID_1, groupResponse);
-        verify(groupMapper, times(1)).toEntity(GROUP_REQUEST_1);
+        verify(mapper, times(1)).toEntity(GROUP_REQUEST_1);
         verify(groupDao, times(1)).save(GROUP_ENTITY_1);
-        verify(groupMapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
-        verify(groupValidator, times(1)).validateUniqueNameInDB(GROUP_REQUEST_1);
-        verify(groupValidator, times(1)).validateUniqueNameInDB(GROUP_REQUEST_1);
+        verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
+        verify(validator, times(1)).validateUniqueNameInDB(GROUP_REQUEST_1);
+        verify(validator, times(1)).validateUniqueNameInDB(GROUP_REQUEST_1);
     }
 
     @Test
@@ -103,51 +104,75 @@ class GroupServiceImplTest {
         listForRegister.add(GROUP_REQUEST_1);
         listForRegister.add(GROUP_REQUEST_2);
 
-        when(groupMapper.toEntity(GROUP_REQUEST_1)).thenReturn(GROUP_ENTITY_1);
-        when(groupMapper.toEntity(GROUP_REQUEST_2)).thenReturn(GROUP_ENTITY_2);
+        when(mapper.toEntity(GROUP_REQUEST_1)).thenReturn(GROUP_ENTITY_1);
+        when(mapper.toEntity(GROUP_REQUEST_2)).thenReturn(GROUP_ENTITY_2);
         doNothing().when(groupDao).saveAll(groupEntities);
-        doNothing().doThrow(new IncorrectRequestData()).when(groupValidator).validateUniqueNameInDB(GROUP_REQUEST_1);
-        doNothing().when(groupValidator).validateNameNotNullOrEmpty(GROUP_REQUEST_1);
-        doNothing().when(groupValidator).validateUniqueNameInDB(GROUP_REQUEST_2);
-        doNothing().when(groupValidator).validateNameNotNullOrEmpty(GROUP_REQUEST_2);
+        doNothing().doThrow(new IncorrectRequestDataException()).when(validator).validateUniqueNameInDB(GROUP_REQUEST_1);
+        doNothing().when(validator).validateNameNotNullOrEmpty(GROUP_REQUEST_1);
+        doNothing().when(validator).validateUniqueNameInDB(GROUP_REQUEST_2);
+        doNothing().when(validator).validateNameNotNullOrEmpty(GROUP_REQUEST_2);
 
         groupService.registerAll(listForRegister);
 
-        verify(groupMapper, times(1)).toEntity(GROUP_REQUEST_1);
-        verify(groupMapper, times(1)).toEntity(GROUP_REQUEST_2);
+        verify(mapper, times(1)).toEntity(GROUP_REQUEST_1);
+        verify(mapper, times(1)).toEntity(GROUP_REQUEST_2);
         verify(groupDao, times(1)).saveAll(groupEntities);
-        verify(groupValidator, times(2)).validateUniqueNameInDB(GROUP_REQUEST_1);
-        verify(groupValidator, times(1)).validateNameNotNullOrEmpty(GROUP_REQUEST_1);
-        verify(groupValidator, times(1)).validateUniqueNameInDB(GROUP_REQUEST_2);
-        verify(groupValidator, times(1)).validateNameNotNullOrEmpty(GROUP_REQUEST_2);
+        verify(validator, times(2)).validateUniqueNameInDB(GROUP_REQUEST_1);
+        verify(validator, times(1)).validateNameNotNullOrEmpty(GROUP_REQUEST_1);
+        verify(validator, times(1)).validateUniqueNameInDB(GROUP_REQUEST_2);
+        verify(validator, times(1)).validateNameNotNullOrEmpty(GROUP_REQUEST_2);
     }
 
     @Test
     void findById_inputIntId_expectedFoundGroup() {
         when(groupDao.findById(1)).thenReturn(Optional.of(GROUP_ENTITY_WITH_ID_1));
-        when(groupMapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
 
-        Optional<GroupResponse> groupResponse = groupService.findById(1);
+        GroupResponse groupResponse = groupService.findById(1);
 
-        assertEquals(Optional.of(GROUP_RESPONSE_WITH_ID_1), groupResponse);
-        verify(groupMapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
+        assertEquals(GROUP_RESPONSE_WITH_ID_1, groupResponse);
+        verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
         verify(groupDao, times(1)).findById(1);
+    }
+
+    @Test
+    void findById_inputIncorrectId_expectedException() {
+        when(groupDao.findById(100)).thenReturn(Optional.empty());
+
+        assertThrows(ObjectWithSpecifiedIdNotFoundException.class, () -> groupService.findById(100));
+
+        verify(groupDao, times(1)).findById(100);
+        verifyNoInteractions(mapper);
+    }
+
+    @Test
+    void findAll_inputNothing_expectedFoundAllGroups() {
+        when(groupDao.findAll()).thenReturn(groupEntitiesWithId);
+        when(mapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(GROUP_ENTITY_WITH_ID_2)).thenReturn(GROUP_RESPONSE_WITH_ID_2);
+
+        List<GroupResponse> foundGroups = groupService.findAll();
+
+        assertEquals(groupResponses, foundGroups);
+        verify(groupDao, times(1)).findAll();
+        verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_2);
     }
 
     @Test
     void findAll_inputPageOne_expectedFoundGroupsFromPageOne() {
         when(groupDao.findAll(1, AbstractPageableService.ITEMS_PER_PAGE)).thenReturn(groupEntitiesWithId);
         when(groupDao.count()).thenReturn(2L);
-        when(groupMapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
-        when(groupMapper.toResponse(GROUP_ENTITY_WITH_ID_2)).thenReturn(GROUP_RESPONSE_WITH_ID_2);
+        when(mapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(GROUP_ENTITY_WITH_ID_2)).thenReturn(GROUP_RESPONSE_WITH_ID_2);
 
         List<GroupResponse> foundGroups = groupService.findAll("1");
 
         assertEquals(groupResponses, foundGroups);
         verify(groupDao, times(1)).findAll(1, AbstractPageableService.ITEMS_PER_PAGE);
         verify(groupDao, times(1)).count();
-        verify(groupMapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
-        verify(groupMapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_2);
+        verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_2);
     }
 
     @Test
@@ -159,11 +184,11 @@ class GroupServiceImplTest {
 
 
         doNothing().when(groupDao).update(GROUP_ENTITY_FOR_UPDATE_1);
-        when(groupMapper.toEntity(GROUP_REQUEST_FOR_UPDATE_1)).thenReturn(GROUP_ENTITY_FOR_UPDATE_1);
+        when(mapper.toEntity(GROUP_REQUEST_FOR_UPDATE_1)).thenReturn(GROUP_ENTITY_FOR_UPDATE_1);
 
         groupService.edit(GROUP_REQUEST_FOR_UPDATE_1);
 
-        verify(groupMapper, times(1)).toEntity(GROUP_REQUEST_FOR_UPDATE_1);
+        verify(mapper, times(1)).toEntity(GROUP_REQUEST_FOR_UPDATE_1);
         verify(groupDao, times(1)).update(GROUP_ENTITY_FOR_UPDATE_1);
     }
 
@@ -192,24 +217,24 @@ class GroupServiceImplTest {
         listForUpdate.add(GROUP_ENTITY_FOR_UPDATE_1);
         listForUpdate.add(GROUP_ENTITY_FOR_UPDATE_2);
 
-        doNothing().when(groupValidator).validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_1);
-        doNothing().when(groupValidator).validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_2);
-        doThrow(new IncorrectRequestData()).when(groupValidator)
+        doNothing().when(validator).validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_1);
+        doNothing().when(validator).validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_2);
+        doThrow(new IncorrectRequestDataException()).when(validator)
                 .validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_INCORRECT);
 
-        when(groupMapper.toEntity(GROUP_REQUEST_FOR_UPDATE_1)).thenReturn(GROUP_ENTITY_FOR_UPDATE_1);
-        when(groupMapper.toEntity(GROUP_REQUEST_FOR_UPDATE_2)).thenReturn(GROUP_ENTITY_FOR_UPDATE_2);
+        when(mapper.toEntity(GROUP_REQUEST_FOR_UPDATE_1)).thenReturn(GROUP_ENTITY_FOR_UPDATE_1);
+        when(mapper.toEntity(GROUP_REQUEST_FOR_UPDATE_2)).thenReturn(GROUP_ENTITY_FOR_UPDATE_2);
 
         doNothing().when(groupDao).updateAll(listForUpdate);
 
         groupService.editAll(inputList);
 
-        verify(groupMapper, times(1)).toEntity(GROUP_REQUEST_FOR_UPDATE_1);
-        verify(groupMapper, times(1)).toEntity(GROUP_REQUEST_FOR_UPDATE_2);
+        verify(mapper, times(1)).toEntity(GROUP_REQUEST_FOR_UPDATE_1);
+        verify(mapper, times(1)).toEntity(GROUP_REQUEST_FOR_UPDATE_2);
         verify(groupDao, times(1)).updateAll(listForUpdate);
-        verify(groupValidator, times(1)).validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_1);
-        verify(groupValidator, times(1)).validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_2);
-        verify(groupValidator, times(1))
+        verify(validator, times(1)).validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_1);
+        verify(validator, times(1)).validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_2);
+        verify(validator, times(1))
                 .validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_INCORRECT);
     }
 
@@ -278,14 +303,14 @@ class GroupServiceImplTest {
     @Test
     void findGroupsRelateToTeacher_inputTeacherId_expectedGroupList() {
         when(groupDao.findGroupsRelateToTeacher(1)).thenReturn(groupEntitiesWithId);
-        when(groupMapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
-        when(groupMapper.toResponse(GROUP_ENTITY_WITH_ID_2)).thenReturn(GROUP_RESPONSE_WITH_ID_2);
+        when(mapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(GROUP_ENTITY_WITH_ID_2)).thenReturn(GROUP_RESPONSE_WITH_ID_2);
 
         List<GroupResponse> foundGroups = groupService.findGroupsRelateToTeacher(1);
 
         assertEquals(groupResponses, foundGroups);
-        verify(groupMapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
-        verify(groupMapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_2);
+        verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_2);
         verify(groupDao, times(1)).findGroupsRelateToTeacher(1);
     }
 

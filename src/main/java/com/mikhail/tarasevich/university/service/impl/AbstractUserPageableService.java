@@ -5,7 +5,8 @@ import com.mikhail.tarasevich.university.dto.UserRequest;
 import com.mikhail.tarasevich.university.dto.UserResponse;
 import com.mikhail.tarasevich.university.entity.User;
 import com.mikhail.tarasevich.university.exception.EmailAlreadyExistsException;
-import com.mikhail.tarasevich.university.exception.IncorrectRequestData;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
+import com.mikhail.tarasevich.university.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.UserMapper;
 import com.mikhail.tarasevich.university.service.UserService;
 import com.mikhail.tarasevich.university.validator.UserValidator;
@@ -40,6 +41,8 @@ public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST 
     public RESPONSE register(REQUEST request) {
         if (checkEmail(request)) {
             validator.validateUserNameNotNullOrEmpty(request);
+            validator.validateEmail(request);
+            validator.validatePassword(request);
             request.setPassword(passwordEncoder.encode(request.getPassword()));
             U userEntity = userDao.save(userMapper.toEntity(request));
             return userMapper.toResponse(userEntity);
@@ -56,9 +59,11 @@ public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST 
             if (checkEmail(u)) {
                 try {
                     validator.validateUserNameNotNullOrEmpty(u);
+                    validator.validateEmail(u);
+                    validator.validatePassword(u);
                     u.setPassword(passwordEncoder.encode(u.getPassword()));
                     acceptableRequests.add(u);
-                } catch (IncorrectRequestData e) {
+                } catch (IncorrectRequestDataException e) {
                     log.info("The users were deleted from the save list. User: {} .", u);
                 }
             }
@@ -72,8 +77,14 @@ public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST 
     }
 
     @Override
-    public Optional<RESPONSE> findById(int id) {
-        return userDao.findById(id).map(userMapper::toResponse);
+    public RESPONSE findById(int id) {
+        Optional<RESPONSE> foundUser = userDao.findById(id).map(userMapper::toResponse);
+
+        if (foundUser.isPresent()) {
+            return foundUser.get();
+        } else {
+            throw new ObjectWithSpecifiedIdNotFoundException("The user with specified id doesn't exist in the database.");
+        }
     }
 
     @Override
@@ -87,9 +98,19 @@ public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST 
     }
 
     @Override
+    public List<RESPONSE> findAll() {
+        return userDao.findAll().stream()
+                .map(userMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void edit(REQUEST request) {
         validator.validateUserNameNotNullOrEmpty(request);
+        validator.validateEmail(request);
+        validator.validatePassword(request);
         request.setPassword(passwordEncoder.encode(request.getPassword()));
+
         userDao.update(userMapper.toEntity(request));
     }
 
@@ -100,9 +121,11 @@ public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST 
         requests.forEach(u -> {
             try {
                 validator.validateUserNameNotNullOrEmpty(u);
+                validator.validateEmail(u);
+                validator.validatePassword(u);
                 u.setPassword(passwordEncoder.encode(u.getPassword()));
                 acceptableRequests.add(u);
-            } catch (IncorrectRequestData e) {
+            } catch (IncorrectRequestDataException e) {
                 log.info("The users were deleted from the update list. User: {} .", u);
             }
         });
@@ -115,9 +138,28 @@ public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST 
     }
 
     @Override
+    public void editGeneralUserInfo(REQUEST request) {
+        validator.validateUserNameNotNullOrEmpty(request);
+        validator.validateEmail(request);
+        userDao.updateGeneralUserInfo(userMapper.toEntity(request));
+    }
+
+    @Override
+    public void editPassword(REQUEST request) {
+        validator.validatePassword(request);
+
+        userDao.updateUserPassword(request.getId(), passwordEncoder.encode(request.getPassword()));
+    }
+
+    @Override
     public boolean login(String email, String password) {
         Optional<U> user = userDao.findByName(email);
         return user.isPresent() && passwordEncoder.matches(password, user.get().getPassword());
+    }
+
+    @Override
+    public int lastPageNumber(){
+        return (int) Math.ceil((double)userDao.count() / ITEMS_PER_PAGE);
     }
 
     protected boolean checkEmail(REQUEST request) {
