@@ -43,8 +43,8 @@
         <label for="teacherTitle" class="col col-form-label">Teacher title:</label>
         <div class="col">
             <a th:href="@{/teacherTitles/{id}(id=${teacher.getTeacherTitle().getId()})}">
-            <input type="text" readonly class="form-control-plaintext text-center" id="teacherTitle"
-                   th:value="${teacher.getTeacherTitle().getName()}"/>
+                <input type="text" readonly class="form-control-plaintext text-center" id="teacherTitle"
+                       th:value="${teacher.getTeacherTitle().getName()}"/>
             </a>
         </div>
     </div>
@@ -52,9 +52,29 @@
         <label for="department" class="col col-form-label">Department:</label>
         <div class="col">
             <a th:href="@{/departments/{id}(id=${teacher.getDepartment().getId()})}">
-            <input type="text" readonly class="form-control-plaintext text-center" id="department"
-                   th:value="${teacher.getDepartment().getName()}"/>
+                <input type="text" readonly class="form-control-plaintext text-center" id="department"
+                       th:value="${teacher.getDepartment().getName()}"/>
             </a>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="groups" class="col col-form-label">Groups relate to teacher:</label>
+        <div class="col">
+            <ul th:each="group : ${groups}">
+                <a th:href="@{/groups/{id}(id=${group.getId()})}">
+                    <li th:text="${group.getName()}" id="groups"/>
+                </a>
+            </ul>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="courses" class="col col-form-label">Courses relate to teacher:</label>
+        <div class="col">
+            <ul th:each="course : ${courses}">
+                <a th:href="@{/courses/{id}(id=${course.getId()})}">
+                    <li th:text="${course.getName()}" id="courses"/>
+                </a>
+            </ul>
         </div>
     </div>
     <br><br>

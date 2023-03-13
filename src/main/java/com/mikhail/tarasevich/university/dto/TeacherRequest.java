@@ -12,7 +12,7 @@ public class TeacherRequest extends UserRequest {
 
     private List<Group> groups;
     private List<Course> courses;
-    private TeacherTitle teacherTitle;
-    private Department department;
+    private int teacherTitleId;
+    private int departmentId;
 
 }
