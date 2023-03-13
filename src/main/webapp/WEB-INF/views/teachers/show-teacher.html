@@ -8,7 +8,7 @@
     <title>Teacher's info</title>
 </head>
 <body>
-<div layout:fragment="content" class="w-50 p-3 mx-auto">
+<div layout:fragment="content" class="w-75 p-3 mx-auto">
     <h1>Teacher information</h1>
     <br>
     <div class="mb-2 row">
@@ -42,15 +42,19 @@
     <div class="mb-2 row">
         <label for="teacherTitle" class="col col-form-label">Teacher title:</label>
         <div class="col">
+            <a th:href="@{/teacherTitles/{id}(id=${teacher.getTeacherTitle().getId()})}">
             <input type="text" readonly class="form-control-plaintext text-center" id="teacherTitle"
-                   th:value="${teacher.getTeacherTitle()}"/>
+                   th:value="${teacher.getTeacherTitle().getName()}"/>
+            </a>
         </div>
     </div>
     <div class="mb-2 row">
         <label for="department" class="col col-form-label">Department:</label>
         <div class="col">
+            <a th:href="@{/departments/{id}(id=${teacher.getDepartment().getId()})}">
             <input type="text" readonly class="form-control-plaintext text-center" id="department"
-                   th:value="${teacher.getDepartment()}"/>
+                   th:value="${teacher.getDepartment().getName()}"/>
+            </a>
         </div>
     </div>
     <br><br>
