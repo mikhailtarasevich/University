@@ -35,13 +35,13 @@
         <p class="text-secondary">Choose teacher's title:</p>
         <select class="form-select mb-3" th:field="*{teacherTitleId}">
             <th:block th:each="teacherTitle : ${teacherTitles}">
-                <option th:value="${teacherTitle.getId()}" th:text="${teacherTitle.Name}">TEACHER TITLE NAME</option>
+                <option th:value="${teacherTitle.Id}" th:text="${teacherTitle.Name}">TEACHER TITLE NAME</option>
             </th:block>
         </select>
         <p class="text-secondary">Choose teacher's department:</p>
         <select class="form-select mb-3" th:field="*{departmentId}">
             <th:block th:each="department : ${departments}">
-                <option th:value="${department.getId()}" th:text="${department.Name}">
+                <option th:value="${department.Id}" th:text="${department.Name}">
                     DEPARTMENT NAME
                 </option>
             </th:block>

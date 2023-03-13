@@ -34,7 +34,7 @@
         </div>
         <select class="form-select mb-3" th:field="*{groupId}">
             <th:block th:each="group : ${groups}">
-                <option th:value="${group.getId()}" th:text="${group.Name}">GROUP NAME</option>
+                <option th:value="${group.Id}" th:text="${group.Name}">GROUP NAME</option>
             </th:block>
         </select>
         <div class="row row-cols-2 w-75 mx-auto">

@@ -55,7 +55,7 @@ public class StudentsController {
     }
 
     @GetMapping("/{id}/edit")
-    public String edit(Model model, @PathVariable("id") int id) {
+    public String edit(@PathVariable("id") int id, Model model) {
         StudentResponse studentResponse = studentService.findById(id);
 
         StudentRequest studentForUpdate = new StudentRequest();

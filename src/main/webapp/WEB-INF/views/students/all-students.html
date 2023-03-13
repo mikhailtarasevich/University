@@ -19,11 +19,11 @@
         </thead>
         <tbody>
         <tr th:each="student : ${students}">
-            <td th:text="${student.getId()}">VALUE</td>
-            <td th:text="${student.getFirstName()}">VALUE</td>
-            <td th:text="${student.getLastName()}">VALUE</td>
+            <td th:text="${student.Id}">VALUE</td>
+            <td th:text="${student.FirstName}">VALUE</td>
+            <td th:text="${student.LastName}">VALUE</td>
             <td>
-                <a th:href="@{/students/{id}(id=${student.getId()})}" th:text="${student.getEmail()}">VALUE</a>
+                <a th:href="@{/students/{id}(id=${student.Id})}" th:text="${student.Email}">VALUE</a>
             </td>
         </tr>
         </tbody>
