@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}"
+>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Teacher's info</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-50 p-3 mx-auto">
+    <h1>Teacher information</h1>
+    <br>
+    <div class="mb-2 row">
+        <label for="firstName" class="col col-form-label">First name:</label>
+        <div class="col">
+            <input type="text" readonly class="form-control-plaintext text-center" id="firstName"
+                   th:value="${teacher.getFirstName()}"/>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="lastName" class="col col-form-label">Last name:</label>
+        <div class="col">
+            <input type="text" readonly class="form-control-plaintext text-center" id="lastName"
+                   th:value="${teacher.getLastName()}"/>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="email" class="col col-form-label">Email:</label>
+        <div class="col">
+            <input type="text" readonly class="form-control-plaintext text-center" id="email"
+                   th:value="${teacher.getEmail()}"/>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="gender" class="col col-form-label">Gender:</label>
+        <div class="col">
+            <input type="text" readonly class="form-control-plaintext text-center" id="gender"
+                   th:value="${teacher.getGender()}"/>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="teacherTitle" class="col col-form-label">Teacher title:</label>
+        <div class="col">
+            <input type="text" readonly class="form-control-plaintext text-center" id="teacherTitle"
+                   th:value="${teacher.getTeacherTitle()}"/>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="department" class="col col-form-label">Department:</label>
+        <div class="col">
+            <input type="text" readonly class="form-control-plaintext text-center" id="department"
+                   th:value="${teacher.getDepartment()}"/>
+        </div>
+    </div>
+    <br><br>
+    <div class="mb-4 row">
+        <a href="/teachers">
+            <button class="btn btn-primary">Back to all teachers page</button>
+        </a>
+    </div>
+    <div class="mb-4 row">
+        <a th:href="@{/teachers/{id}/edit(id=${teacher.getId()})}">
+            <button class="btn btn-primary">Edit teacher information</button>
+        </a>
+    </div>
+    <div class="mb-4 row">
+        <form th:method="DELETE" th:action="@{/teachers/{id}(id=${teacher.getId()})}" th:object="${teacher}">
+            <input class="btn btn-primary" type="submit" value="Delete teacher"/>
+        </form>
+    </div>
+</div>
+</body>
+</html>
