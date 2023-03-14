@@ -114,9 +114,9 @@ public class TeachersController {
 
     @PatchMapping("/{id}/edit/teacher-title")
     public String updateTeacherTitle(@PathVariable(value = "id") int id,
-                                     @ModelAttribute("teacher") TeacherRequest teacherRequest,
+                                     @ModelAttribute("teacherTitleId") int teacherTitleId,
                                      Model model) {
-        teacherService.changeTeacherTeacherTitle(id, teacherRequest.getTeacherTitleId());
+        teacherService.changeTeacherTeacherTitle(id, teacherTitleId);
 
         model.addAttribute("teacher", teacherService.findById(id));
         model.addAttribute("groups", groupService.findGroupsRelateToTeacher(id));
@@ -127,9 +127,9 @@ public class TeachersController {
 
     @PatchMapping("/{id}/edit/department")
     public String updateDepartment(@PathVariable(value = "id") int id,
-                                   @ModelAttribute("teacher") TeacherRequest teacherRequest,
+                                   @ModelAttribute("departmentId") int departmentId,
                                    Model model) {
-        teacherService.changeTeacherDepartment(id, teacherRequest.getDepartmentId());
+        teacherService.changeTeacherDepartment(id, departmentId);
 
         model.addAttribute("teacher", teacherService.findById(id));
         model.addAttribute("groups", groupService.findGroupsRelateToTeacher(id));
@@ -137,6 +137,19 @@ public class TeachersController {
 
         return "teachers/show-teacher";
     }
+
+//    @PatchMapping("/{id}/edit/department")
+//    public String updateDepartment(@PathVariable(value = "id") int id,
+//                                   @ModelAttribute("teacher") TeacherRequest teacherRequest,
+//                                   Model model) {
+//        teacherService.changeTeacherDepartment(id, teacherRequest.getDepartmentId());
+//
+//        model.addAttribute("teacher", teacherService.findById(id));
+//        model.addAttribute("groups", groupService.findGroupsRelateToTeacher(id));
+//        model.addAttribute("courses", courseService.findCoursesRelateToTeacher(id));
+//
+//        return "teachers/show-teacher";
+//    }
 
     @PatchMapping("/{id}/subscribe/groups")
     public String subscribeTeacherToGroups(@PathVariable(value = "id") int id,

@@ -61,7 +61,7 @@
             <br>
             <h5>Change teacher title</h5>
             <br>
-            <select class="form-select mb-3" th:field="*{teacherTitleId}">
+            <select class="form-select mb-3" th:name="teacherTitleId">
                 <th:block th:each="teacherTitle : ${teacherTitles}">
                     <option th:value="${teacherTitle.id}" th:text="${teacherTitle.name}">TEACHER TITLE NAME</option>
                 </th:block>
@@ -74,7 +74,7 @@
             <br>
             <h5>Change department</h5>
             <br>
-            <select class="form-select mb-3" th:field="*{departmentId}">
+            <select class="form-select mb-3" th:name="departmentId">
                 <th:block th:each="department : ${departments}">
                     <option th:value="${department.id}" th:text="${department.name}">DEPARTMENT NAME</option>
                 </th:block>

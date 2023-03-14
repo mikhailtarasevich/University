@@ -98,9 +98,9 @@ public class StudentsController {
     }
 
     @PatchMapping("/{id}/leave/group")
-    public String leaveGroup(@ModelAttribute("student") StudentRequest studentRequest, Model model) {
-        studentService.unsubscribeStudentFromGroup(studentRequest.getId());
-        model.addAttribute("student", studentService.findById(studentRequest.getId()));
+    public String leaveGroup(@PathVariable("id") int id, Model model) {
+        studentService.unsubscribeStudentFromGroup(id);
+        model.addAttribute("student", studentService.findById(id));
 
         return "students/show-student";
     }
