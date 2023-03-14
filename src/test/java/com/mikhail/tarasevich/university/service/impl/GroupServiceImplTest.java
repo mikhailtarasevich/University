@@ -176,6 +176,20 @@ class GroupServiceImplTest {
     }
 
     @Test
+    void findGroupsNotRelateToTeacher_inputTeacherId_expectedFoundGroupsFromDB() {
+        when(groupDao.findGroupsNotRelateToTeacher(1)).thenReturn(groupEntitiesWithId);
+        when(mapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
+        when(mapper.toResponse(GROUP_ENTITY_WITH_ID_2)).thenReturn(GROUP_RESPONSE_WITH_ID_2);
+
+        List<GroupResponse> foundGroups = groupService.findGroupsNotRelateToTeacher(1);
+
+        assertEquals(groupResponses, foundGroups);
+        verify(groupDao, times(1)).findGroupsNotRelateToTeacher(1);
+        verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
+        verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_2);
+    }
+
+    @Test
     void edit_inputGroupRequest_expectedNothing() {
         final Group GROUP_ENTITY_FOR_UPDATE_1 = Group.builder().withId(1).withName("update1").build();
         final GroupRequest GROUP_REQUEST_FOR_UPDATE_1 = new GroupRequest();

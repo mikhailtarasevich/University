@@ -92,7 +92,7 @@ public class TeacherServiceImpl
     @Override
     public void subscribeTeacherToGroups(int teacherId, List<Integer> groupIds) {
         if (!groupIds.isEmpty()) {
-            groupIds.forEach((groupId) -> userDao.addUserToGroup(teacherId, groupId));
+            groupIds.forEach(groupId -> userDao.addUserToGroup(teacherId, groupId));
             log.info("Teacher with id = {} have been subscribed to groups with ids = {}", teacherId, groupIds);
         }
     }
@@ -100,7 +100,7 @@ public class TeacherServiceImpl
     @Override
     public void unsubscribeTeacherFromGroups(int teacherId, List<Integer> groupIds) {
         if (!groupIds.isEmpty()) {
-            groupIds.forEach((groupId) -> userDao.deleteTeacherFromGroup(teacherId, groupId));
+            groupIds.forEach(groupId -> userDao.deleteTeacherFromGroup(teacherId, groupId));
             log.info("Teacher with id = {} have been unsubscribed from groups with ids = {}", teacherId, groupIds);
         }
     }
@@ -119,13 +119,13 @@ public class TeacherServiceImpl
 
     @Override
     public void subscribeTeacherToCourses(int teacherId, List<Integer> courseIds) {
-        courseIds.forEach(courseId->userDao.addTeacherToCourse(teacherId, courseId));
+        courseIds.forEach(courseId -> userDao.addTeacherToCourse(teacherId, courseId));
         log.info("Teacher with id = {} have been subscribed to courses with id = {}", teacherId, courseIds);
     }
 
     @Override
     public void unsubscribeTeacherFromCourses(int teacherId, List<Integer> courseIds) {
-        courseIds.forEach(courseId->userDao.deleteTeacherFromCourse(teacherId, courseId));
+        courseIds.forEach(courseId -> userDao.deleteTeacherFromCourse(teacherId, courseId));
         log.info("Teacher with id = {} have been unsubscribed from courses with id = {}", teacherId, courseIds);
     }
 
