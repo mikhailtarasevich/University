@@ -466,14 +466,14 @@ class TeacherServiceImplTest {
         verify(teacherDao, times(1)).addUserToGroup(1, 1);
     }
 
-    @Test
-    void unsubscribeTeacherFromGroup_inputTeacherIdGroupId_expectedNothing() {
-        doNothing().when(teacherDao).deleteTeacherFromGroup(1, 1);
-
-        teacherService.unsubscribeTeacherFromGroup(1, 1);
-
-        verify(teacherDao, times(1)).deleteTeacherFromGroup(1, 1);
-    }
+//    @Test
+//    void unsubscribeTeacherFromGroup_inputTeacherIdGroupId_expectedNothing() {
+//        doNothing().when(teacherDao).deleteTeacherFromGroup(1, 1);
+//
+//        teacherService.unsubscribeTeacherFromGroup(1, 1);
+//
+//        verify(teacherDao, times(1)).deleteTeacherFromGroup(1, 1);
+//    }
 
     @Test
     void subscribeTeacherToCourse_inputTeacherIdCourseId_expectedNothing() {

@@ -42,7 +42,7 @@
     <div class="mb-2 row">
         <label for="teacherTitle" class="col col-form-label">Teacher title:</label>
         <div class="col">
-            <a th:href="@{/teacherTitles/{id}(id=${teacher.TeacherTitle.Id})}">
+            <a th:href="@{/teacher-titles/{id}(id=${teacher.TeacherTitle.Id})}">
                 <input type="text" readonly class="form-control-plaintext text-center" id="teacherTitle"
                        th:value="${teacher.TeacherTitle.Name}"/>
             </a>

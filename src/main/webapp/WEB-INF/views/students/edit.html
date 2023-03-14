@@ -38,7 +38,7 @@
         <input class="btn btn-success" type="submit" value="Update general information"/>
         <br><br>
     </form>
-    <form th:method="PATCH" th:action="@{/students/{id}/edit-password(id=${student.Id})}" th:object="${student}"
+    <form th:method="PATCH" th:action="@{/students/{id}/edit/password(id=${student.Id})}" th:object="${student}"
           class="border-bottom">
         <br>
         <h5>Change password</h5>
@@ -54,7 +54,7 @@
         <input class="btn btn-success" type="submit" value="Change password"/>
         <br><br>
     </form>
-    <form th:method="PATCH" th:action="@{/students/{id}/edit-group(id=${student.Id})}" th:object="${student}">
+    <form th:method="PATCH" th:action="@{/students/{id}/edit/group(id=${student.Id})}" th:object="${student}">
         <br>
         <h5>Change group</h5>
         <br>
@@ -66,7 +66,7 @@
         <input class="btn btn-success" type="submit" value="Set new group"/>
     </form>
     <br>
-    <form th:method="PATCH" th:action="@{/students/{id}/leave-group(id=${student.Id})}" th:object="${student}"
+    <form th:method="PATCH" th:action="@{/students/{id}/leave/group(id=${student.Id})}" th:object="${student}"
           class="border-bottom">
         <input class="btn btn-danger" type="submit" value="Unsubscribe student from group"/>
         <br><br>

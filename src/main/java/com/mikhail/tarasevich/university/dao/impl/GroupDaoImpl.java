@@ -41,6 +41,12 @@ public class GroupDaoImpl extends AbstractPageableCrudDaoImpl<Group> implements 
     private static final String UPDATE_EDUCATION_FORM_QUERY = "UPDATE groups SET education_form_id = ? WHERE id = ?";
     private static final String FIND_GROUPS_RELATE_TO_TEACHER_QUERY = FIND_COMMON_PART_QUERY +
             "LEFT JOIN user_groups ON groups.id = user_groups.group_id WHERE user_id = ? ORDER BY groups.id";
+    private static final String FIND_GROUPS_NOT_RELATE_TO_TEACHER_QUERY = FIND_COMMON_PART_QUERY +
+            "WHERE groups.id <> ALL (SELECT group_id " +
+            "FROM groups " +
+            "LEFT JOIN user_groups ON groups.id = group_id " +
+            "WHERE user_id = ?) " +
+            "ORDER BY groups.id";
     private static final String UNBIND_GROUPS_FROM_STUDENT_QUERY =
             "UPDATE groups SET head_user_id = NULL WHERE head_user_id = ?";
     private static final String UNBIND_GROUPS_FROM_TEACHER_QUERY =
@@ -102,6 +108,11 @@ public class GroupDaoImpl extends AbstractPageableCrudDaoImpl<Group> implements 
     @Override
     public List<Group> findGroupsRelateToTeacher(int teacherId) {
         return jdbcTemplate.query(FIND_GROUPS_RELATE_TO_TEACHER_QUERY, ROW_MAPPER, teacherId);
+    }
+
+    @Override
+    public List<Group> findGroupsNotRelateToTeacher(int teacherId) {
+        return jdbcTemplate.query(FIND_GROUPS_NOT_RELATE_TO_TEACHER_QUERY, ROW_MAPPER, teacherId);
     }
 
     @Override

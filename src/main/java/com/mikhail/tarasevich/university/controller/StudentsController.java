@@ -47,7 +47,7 @@ public class StudentsController {
         return "students/new";
     }
 
-    @PostMapping()
+    @PostMapping
     public String register(@ModelAttribute("student") StudentRequest studentRequest) {
         studentService.register(studentRequest);
 
@@ -81,7 +81,7 @@ public class StudentsController {
         return "students/show-student";
     }
 
-    @PatchMapping("/{id}/edit-password")
+    @PatchMapping("/{id}/edit/password")
     public String updatePassword(@ModelAttribute("student") StudentRequest studentRequest, Model model) {
         studentService.editPassword(studentRequest);
         model.addAttribute("student", studentService.findById(studentRequest.getId()));
@@ -89,7 +89,7 @@ public class StudentsController {
         return "students/show-student";
     }
 
-    @PatchMapping("/{id}/edit-group")
+    @PatchMapping("/{id}/edit/group")
     public String updateGroup(@ModelAttribute("student") StudentRequest studentRequest, Model model) {
         studentService.subscribeUserToGroup(studentRequest.getId(), studentRequest.getGroupId());
         model.addAttribute("student", studentService.findById(studentRequest.getId()));
@@ -97,7 +97,7 @@ public class StudentsController {
         return "students/show-student";
     }
 
-    @PatchMapping("/{id}/leave-group")
+    @PatchMapping("/{id}/leave/group")
     public String leaveGroup(@ModelAttribute("student") StudentRequest studentRequest, Model model) {
         studentService.unsubscribeStudentFromGroup(studentRequest.getId());
         model.addAttribute("student", studentService.findById(studentRequest.getId()));

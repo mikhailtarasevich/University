@@ -7,8 +7,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Controller
 @RequestMapping("teachers")
 public class TeachersController {
@@ -78,8 +76,12 @@ public class TeachersController {
         teacherRequest.setDepartmentId(teacherResponse.getDepartment().getId());
 
         model.addAttribute("teacher", teacherRequest);
-        model.addAttribute("groups", groupService.findAll());
-        model.addAttribute("courses", courseService.findAll());
+        model.addAttribute("groupsRelateToTeacher", groupService.findGroupsRelateToTeacher(id));
+        model.addAttribute("groupsNotRelateToTeacher", groupService.findGroupsNotRelateToTeacher(id));
+        model.addAttribute("coursesRelateToTeacher", courseService.findCoursesRelateToTeacher(id));
+        model.addAttribute("coursesRelateToDepartmentNotRelateToTeacher", courseService.findCoursesRelateToDepartmentNotRelateToTeacher(teacherResponse.getDepartment().getId(), id));
+        model.addAttribute("teacherTitles", teacherTitleService.findAll());
+        model.addAttribute("departments", departmentService.findAll());
 
         return "teachers/edit";
     }
@@ -97,7 +99,7 @@ public class TeachersController {
         return "teachers/show-teacher";
     }
 
-    @PatchMapping("/{id}/edit-password")
+    @PatchMapping("/{id}/edit/password")
     public String updatePassword(@PathVariable(value = "id") int id,
                                  @ModelAttribute("teacher") TeacherRequest teacherRequest,
                                  Model model) {
@@ -108,6 +110,92 @@ public class TeachersController {
         model.addAttribute("courses", courseService.findCoursesRelateToTeacher(id));
 
         return "teachers/show-teacher";
+    }
+
+    @PatchMapping("/{id}/edit/teacher-title")
+    public String updateTeacherTitle(@PathVariable(value = "id") int id,
+                                     @ModelAttribute("teacher") TeacherRequest teacherRequest,
+                                     Model model) {
+        teacherService.changeTeacherTeacherTitle(id, teacherRequest.getTeacherTitleId());
+
+        model.addAttribute("teacher", teacherService.findById(id));
+        model.addAttribute("groups", groupService.findGroupsRelateToTeacher(id));
+        model.addAttribute("courses", courseService.findCoursesRelateToTeacher(id));
+
+        return "teachers/show-teacher";
+    }
+
+    @PatchMapping("/{id}/edit/department")
+    public String updateDepartment(@PathVariable(value = "id") int id,
+                                   @ModelAttribute("teacher") TeacherRequest teacherRequest,
+                                   Model model) {
+        teacherService.changeTeacherDepartment(id, teacherRequest.getDepartmentId());
+
+        model.addAttribute("teacher", teacherService.findById(id));
+        model.addAttribute("groups", groupService.findGroupsRelateToTeacher(id));
+        model.addAttribute("courses", courseService.findCoursesRelateToTeacher(id));
+
+        return "teachers/show-teacher";
+    }
+
+    @PatchMapping("/{id}/subscribe/groups")
+    public String subscribeTeacherToGroups(@PathVariable(value = "id") int id,
+                                           @ModelAttribute("teacher") TeacherRequest teacherRequest,
+                                           Model model) {
+        teacherService.subscribeTeacherToGroups(id, teacherRequest.getGroupIds());
+
+        model.addAttribute("teacher", teacherService.findById(id));
+        model.addAttribute("groups", groupService.findGroupsRelateToTeacher(id));
+        model.addAttribute("courses", courseService.findCoursesRelateToTeacher(id));
+
+        return "teachers/show-teacher";
+    }
+
+    @PatchMapping("/{id}/unsubscribe/groups")
+    public String unsubscribeTeacherFromGroups(@PathVariable(value = "id") int id,
+                                               @ModelAttribute("teacher") TeacherRequest teacherRequest,
+                                               Model model) {
+        teacherService.unsubscribeTeacherFromGroups(id, teacherRequest.getGroupIds());
+
+        model.addAttribute("teacher", teacherService.findById(id));
+        model.addAttribute("groups", groupService.findGroupsRelateToTeacher(id));
+        model.addAttribute("courses", courseService.findCoursesRelateToTeacher(id));
+
+        return "teachers/show-teacher";
+    }
+
+    @PatchMapping("/{id}/subscribe/courses")
+    public String subscribeTeacherToCourses(@PathVariable(value = "id") int id,
+                                            @ModelAttribute("teacher") TeacherRequest teacherRequest,
+                                            Model model) {
+
+        teacherService.subscribeTeacherToCourses(id, teacherRequest.getCourseIds());
+
+        model.addAttribute("teacher", teacherService.findById(id));
+        model.addAttribute("groups", groupService.findGroupsRelateToTeacher(id));
+        model.addAttribute("courses", courseService.findCoursesRelateToTeacher(id));
+
+        return "teachers/show-teacher";
+    }
+
+    @PatchMapping("/{id}/unsubscribe/courses")
+    public String unsubscribeTeacherToGroup(@PathVariable(value = "id") int id,
+                                            @ModelAttribute("teacher") TeacherRequest teacherRequest,
+                                            Model model) {
+        teacherService.unsubscribeTeacherFromCourses(id, teacherRequest.getCourseIds());
+
+        model.addAttribute("teacher", teacherService.findById(id));
+        model.addAttribute("groups", groupService.findGroupsRelateToTeacher(id));
+        model.addAttribute("courses", courseService.findCoursesRelateToTeacher(id));
+
+        return "teachers/show-teacher";
+    }
+
+    @DeleteMapping("/{id}")
+    public String deleteTeacher(@PathVariable(value = "id") int id) {
+        teacherService.deleteById(id);
+
+        return "redirect:/teachers";
     }
 
 }
