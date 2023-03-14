@@ -15,36 +15,36 @@
         <label for="firstName" class="col col-form-label">First name:</label>
         <div class="col">
             <input type="text" readonly class="form-control-plaintext text-center" id="firstName"
-                   th:value="${student.getFirstName()}"/>
+                   th:value="${student.FirstName}"/>
         </div>
     </div>
     <div class="mb-2 row">
         <label for="lastName" class="col col-form-label">Last name:</label>
         <div class="col">
             <input type="text" readonly class="form-control-plaintext text-center" id="lastName"
-                   th:value="${student.getLastName()}"/>
+                   th:value="${student.LastName}"/>
         </div>
     </div>
     <div class="mb-2 row">
         <label for="email" class="col col-form-label">Email:</label>
         <div class="col">
             <input type="text" readonly class="form-control-plaintext text-center" id="email"
-                   th:value="${student.getEmail()}"/>
+                   th:value="${student.Email}"/>
         </div>
     </div>
     <div class="mb-2 row">
         <label for="gender" class="col col-form-label">Gender:</label>
         <div class="col">
             <input type="text" readonly class="form-control-plaintext text-center" id="gender"
-                   th:value="${student.getGender()}"/>
+                   th:value="${student.Gender}"/>
         </div>
     </div>
     <div class="mb-4 row">
         <label for="groupName" class="col col-form-label">Group name:</label>
         <div class="col">
-            <a th:href="@{/groups/{id}(id=${student.getGroup().getId()})}">
+            <a th:href="${student.Group.Id == 0} ? '' : @{/groups/{id}(id=${student.Group.Id})}">
                 <input type="text" readonly class="form-control-plaintext text-center" id="groupName"
-                       th:value="${student.getGroup() == NULL} ? 'group not selected' : ${student.getGroup().getName()}"/>
+                       th:value="${student.Group.Id == 0} ? 'group not selected' : ${student.Group.Name}"/>
             </a>
         </div>
     </div>
@@ -55,12 +55,12 @@
         </a>
     </div>
     <div class="mb-4 row">
-        <a th:href="@{/students/{id}/edit(id=${student.getId()})}">
+        <a th:href="@{/students/{id}/edit(id=${student.Id})}">
             <button class="btn btn-primary">Edit student information</button>
         </a>
     </div>
     <div class="mb-4 row">
-        <form th:method="DELETE" th:action="@{/students/{id}(id=${student.getId()})}" th:object="${student}">
+        <form th:method="DELETE" th:action="@{/students/{id}(id=${student.Id})}" th:object="${student}">
             <input class="btn btn-primary" type="submit" value="Delete student"/>
         </form>
     </div>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}"
+>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Edit teacher</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-90 p-2 mx-auto">
+    <h1>Edit teacher information</h1>
+    <br>
+    <div class="w-50 p-2 mx-auto">
+        <form th:method="PATCH" th:action="@{/teachers/{id}(id=${teacher.id})}" th:object="${teacher}"
+              class="border-bottom">
+            <div class="form-floating mb-3">
+                <input class="form-control" th:field="*{firstName}" id="firstName"/>
+                <label for="firstName">Edit first name: </label>
+            </div>
+            <div class="form-floating mb-3">
+                <input class="form-control" th:field="*{lastName}" id="lastName"/>
+                <label for="lastName">Edit last name: </label>
+            </div>
+            <div class="form-floating mb-3">
+                <input class="form-control" th:field="*{email}" id="email"/>
+                <label for="email">Edit email: </label>
+            </div>
+            <div class="row row-cols-2 w-75 mx-auto">
+                <th:block th:each="gender : ${T(com.mikhail.tarasevich.university.entity.Gender).values()}">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" th:field="*{gender}" th:value="${gender}"
+                               id="${gender}"/>
+                        <a th:text="${gender}">VALUE</a>
+                    </div>
+                </th:block>
+            </div>
+            <br>
+            <input class="btn btn-success" type="submit" value="Update general information"/>
+            <br><br>
+        </form>
+        <form th:method="PATCH" th:action="@{/teachers/{id}/edit/password(id=${teacher.id})}" th:object="${teacher}"
+              class="border-bottom">
+            <br>
+            <h5>Change password</h5>
+            <br>
+            <div class="form-floating mb-3">
+                <input type="password" th:field="*{password}" class="form-control" id="password">
+                <label for="password">Enter new password:</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="password" th:field="*{confirmPassword}" class="form-control" id="confirmPassword">
+                <label for="confirmPassword">Confirm new password:</label>
+            </div>
+            <input class="btn btn-success" type="submit" value="Change password"/>
+            <br><br>
+        </form>
+        <form th:method="PATCH" th:action="@{/teachers/{id}/edit/teacher-title(id=${teacher.Id})}"
+              th:object="${teacher}"
+              class="border-bottom">
+            <br>
+            <h5>Change teacher title</h5>
+            <br>
+            <select class="form-select mb-3" th:name="teacherTitleId">
+                <th:block th:each="teacherTitle : ${teacherTitles}">
+                    <option th:value="${teacherTitle.id}" th:text="${teacherTitle.name}">TEACHER TITLE NAME</option>
+                </th:block>
+            </select>
+            <input class="btn btn-success" type="submit" value="Set new teacher title"/>
+            <br><br>
+        </form>
+        <form th:method="PATCH" th:action="@{/teachers/{id}/edit/department(id=${teacher.id})}" th:object="${teacher}"
+              class="border-bottom">
+            <br>
+            <h5>Change department</h5>
+            <br>
+            <select class="form-select mb-3" th:name="departmentId">
+                <th:block th:each="department : ${departments}">
+                    <option th:value="${department.id}" th:text="${department.name}">DEPARTMENT NAME</option>
+                </th:block>
+            </select>
+            <input class="btn btn-success" type="submit" value="Set new department"/>
+            <br><br>
+        </form>
+    </div>
+    <div class="container text-center">
+        <div class="row align-items-start border-bottom">
+            <div class="col">
+                <form th:method="PATCH" th:action="@{/teachers/{id}/subscribe/groups(id=${teacher.id})}"
+                      th:object="${teacher}">
+                    <br>
+                    <h5>Subscribe teacher to groups</h5>
+                    <br>
+                    <div th:each="group : ${groupsNotRelateToTeacher}">
+                        <input class="form-check-input" type="checkbox" th:value="${group.id}"
+                               th:id="${'group_' + group.id}"
+                               th:name="groupIds">
+                        <label class="form-check-label mb-2" th:for="${'group_' + group.id}" th:text="${group.name}"/>
+                        <br>
+                    </div>
+                    <br>
+                    <button class="btn btn-success" type="submit">Subscribe teacher to selected groups</button>
+                    <br><br>
+                </form>
+            </div>
+            <div class="col">
+                <form th:method="PATCH" th:action="@{/teachers/{id}/unsubscribe/groups(id=${teacher.id})}"
+                      th:object="${teacher}">
+                    <br>
+                    <h5>Unsubscribe teacher from groups</h5>
+                    <br>
+                    <div th:each="group : ${groupsRelateToTeacher}">
+                        <input class="form-check-input" type="checkbox" th:value="${group.id}"
+                               th:id="${'group_' + group.id}"
+                               th:name="groupIds">
+                        <label class="form-check-label mb-2" th:for="${'group_' + group.id}" th:text="${group.name}"/>
+                        <br>
+                    </div>
+                    <br>
+                    <button class="btn btn-danger" type="submit">Unsubscribe teacher from selected groups</button>
+                    <br><br>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="container text-center">
+        <div class="row align-items-start border-bottom">
+            <div class="col">
+                <form th:method="PATCH" th:action="@{/teachers/{id}/subscribe/courses(id=${teacher.id})}"
+                      th:object="${teacher}">
+                    <br>
+                    <h5>Subscribe teacher to courses</h5>
+                    <br>
+                    <div th:each="course : ${coursesRelateToDepartmentNotRelateToTeacher}">
+                        <input class="form-check-input" type="checkbox" th:value="${course.id}"
+                               th:id="${'course_' + course.id}"
+                               th:name="courseIds">
+                        <label class="form-check-label mb-2" th:for="${'course_' + course.id}"
+                               th:text="${course.name}"/>
+                        <br>
+                    </div>
+                    <br>
+                    <button class="btn btn-success" type="submit">Subscribe teacher to selected courses</button>
+                    <br><br>
+                </form>
+            </div>
+            <div class="col">
+                <form th:method="PATCH" th:action="@{/teachers/{id}/unsubscribe/courses(id=${teacher.id})}"
+                      th:object="${teacher}">
+                    <br>
+                    <h5>Unsubscribe teacher from courses</h5>
+                    <br>
+                    <div th:each="course : ${coursesRelateToTeacher}">
+                        <input class="form-check-input" type="checkbox" th:value="${course.id}"
+                               th:id="${'course_' + course.id}"
+                               th:name="courseIds">
+                        <label class="form-check-label mb-2" th:for="${'course_' + course.id}"
+                               th:text="${course.name}"/>
+                        <br>
+                    </div>
+                    <br>
+                    <button class="btn btn-danger" type="submit">Unsubscribe teacher from selected courses</button>
+                    <br><br>
+                </form>
+            </div>
+        </div>
+    </div>
+    <br>
+    <br>
+    <a href="/teachers">
+        <button class="btn btn-primary">Back to all teachers page</button>
+    </a>
+    <br>
+</div>
+</body>
+</html>

@@ -28,9 +28,16 @@ class TeacherDaoImplTest {
             .withEmail("rsapolski@gmail.com")
             .withPassword("3245")
             .withTeacherTitle(
-                    TeacherTitle.builder().withId(1).build()
+                    TeacherTitle.builder()
+                            .withId(1)
+                            .withName("Professor")
+                            .build()
             )
-            .withDepartment(Department.builder().withId(1).build())
+            .withDepartment(Department.builder()
+                    .withId(1)
+                    .withName("Mathematics and mechanics")
+                    .withDescription("without description")
+                    .build())
             .build();
 
     private static final Teacher teacher2 = Teacher.builder()
@@ -41,9 +48,16 @@ class TeacherDaoImplTest {
             .withEmail("drugova@gmail.com")
             .withPassword("drdrug18")
             .withTeacherTitle(
-                    TeacherTitle.builder().withId(2).build()
+                    TeacherTitle.builder()
+                            .withId(2)
+                            .withName("Lecturer")
+                            .build()
             )
-            .withDepartment(Department.builder().withId(2).build())
+            .withDepartment(Department.builder()
+                    .withId(2)
+                    .withName("Computer and information sciences")
+                    .withDescription("without description")
+                    .build())
             .build();
 
     private static final Teacher teacher3 = Teacher.builder()
@@ -54,9 +68,16 @@ class TeacherDaoImplTest {
             .withEmail("test3@gmail.com")
             .withPassword("test3")
             .withTeacherTitle(
-                    TeacherTitle.builder().withId(1).build()
+                    TeacherTitle.builder()
+                            .withId(1)
+                            .withName("Professor")
+                            .build()
             )
-            .withDepartment(Department.builder().withId(1).build())
+            .withDepartment(Department.builder()
+                    .withId(1)
+                    .withName("Mathematics and mechanics")
+                    .withDescription("without description")
+                    .build())
             .build();
 
     private static final Teacher teacher4 = Teacher.builder()
@@ -67,9 +88,16 @@ class TeacherDaoImplTest {
             .withEmail("test4@gmail.com")
             .withPassword("test4")
             .withTeacherTitle(
-                    TeacherTitle.builder().withId(2).build()
+                    TeacherTitle.builder()
+                            .withId(2)
+                            .withName("Lecturer")
+                            .build()
             )
-            .withDepartment(Department.builder().withId(2).build())
+            .withDepartment(Department.builder()
+                    .withId(2)
+                    .withName("Computer and information sciences")
+                    .withDescription("without description")
+                    .build())
             .build();
 
     List<Teacher> teachers = new ArrayList<>();

@@ -186,7 +186,7 @@ class StudentsControllerTest {
         doNothing().when(studentService).editPassword(studentRequest);
         when(studentService.findById(STUDENT_ID)).thenReturn(studentResponse);
 
-        mockMvc.perform(patch("/students/{id}/edit-password", STUDENT_ID)
+        mockMvc.perform(patch("/students/{id}/edit/password", STUDENT_ID)
                         .flashAttr("student", studentRequest))
                 .andExpectAll(status().isOk(),
                         model().attribute("student", studentResponse),
@@ -210,7 +210,7 @@ class StudentsControllerTest {
         doNothing().when(studentService).subscribeUserToGroup(studentRequest.getId(), studentRequest.getGroupId());
         when(studentService.findById(STUDENT_ID)).thenReturn(studentResponse);
 
-        mockMvc.perform(patch("/students/{id}/edit-group", STUDENT_ID)
+        mockMvc.perform(patch("/students/{id}/edit/group", STUDENT_ID)
                         .flashAttr("student", studentRequest))
                 .andExpectAll(status().isOk(),
                         model().attribute("student", studentResponse),
@@ -232,7 +232,7 @@ class StudentsControllerTest {
         doNothing().when(studentService).unsubscribeStudentFromGroup(studentRequest.getId());
         when(studentService.findById(STUDENT_ID)).thenReturn(studentResponse);
 
-        mockMvc.perform(patch("/students/{id}/leave-group", STUDENT_ID)
+        mockMvc.perform(patch("/students/{id}/leave/group", STUDENT_ID)
                         .flashAttr("student", studentRequest))
                 .andExpectAll(status().isOk(),
                         model().attribute("student", studentResponse),

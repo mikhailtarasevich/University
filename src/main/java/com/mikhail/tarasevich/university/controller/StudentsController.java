@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("students")
 public class StudentsController {
 
+    private static final String STUDENT = "student";
+    private static final String SHOW_STUDENT_PAGE = "students/show-student";
+
     private final StudentService studentService;
     private final GroupService groupService;
 
@@ -34,28 +37,28 @@ public class StudentsController {
 
     @GetMapping("/{id}")
     public String showStudent(@PathVariable("id") int id, Model model) {
-        model.addAttribute("student", studentService.findById(id));
+        model.addAttribute(STUDENT, studentService.findById(id));
 
-        return "students/show-student";
+        return SHOW_STUDENT_PAGE;
     }
 
     @GetMapping("/new")
     public String newStudent(Model model) {
-        model.addAttribute("student", new StudentRequest());
+        model.addAttribute(STUDENT, new StudentRequest());
         model.addAttribute("groups", groupService.findAll());
 
         return "students/new";
     }
 
-    @PostMapping()
-    public String register(@ModelAttribute("student") StudentRequest studentRequest) {
+    @PostMapping
+    public String register(@ModelAttribute(STUDENT) StudentRequest studentRequest) {
         studentService.register(studentRequest);
 
         return "redirect:/students";
     }
 
     @GetMapping("/{id}/edit")
-    public String edit(Model model, @PathVariable("id") int id) {
+    public String edit(@PathVariable("id") int id, Model model) {
         StudentResponse studentResponse = studentService.findById(id);
 
         StudentRequest studentForUpdate = new StudentRequest();
@@ -66,7 +69,7 @@ public class StudentsController {
         studentForUpdate.setEmail(studentResponse.getEmail());
         studentForUpdate.setGroupId(studentResponse.getGroup().getId());
 
-        model.addAttribute("student", studentForUpdate);
+        model.addAttribute(STUDENT, studentForUpdate);
         model.addAttribute("groups", groupService.findAll());
 
         return "students/edit";
@@ -76,33 +79,33 @@ public class StudentsController {
     public String update(@ModelAttribute("student") StudentRequest studentRequest, Model model) {
         studentRequest.setGroupId(0);
         studentService.editGeneralUserInfo(studentRequest);
-        model.addAttribute("student", studentService.findById(studentRequest.getId()));
+        model.addAttribute(STUDENT, studentService.findById(studentRequest.getId()));
 
-        return "students/show-student";
+        return SHOW_STUDENT_PAGE;
     }
 
-    @PatchMapping("/{id}/edit-password")
-    public String updatePassword(@ModelAttribute("student") StudentRequest studentRequest, Model model) {
+    @PatchMapping("/{id}/edit/password")
+    public String updatePassword(@ModelAttribute(STUDENT) StudentRequest studentRequest, Model model) {
         studentService.editPassword(studentRequest);
-        model.addAttribute("student", studentService.findById(studentRequest.getId()));
+        model.addAttribute(STUDENT, studentService.findById(studentRequest.getId()));
 
-        return "students/show-student";
+        return SHOW_STUDENT_PAGE;
     }
 
-    @PatchMapping("/{id}/edit-group")
-    public String updateGroup(@ModelAttribute("student") StudentRequest studentRequest, Model model) {
+    @PatchMapping("/{id}/edit/group")
+    public String updateGroup(@ModelAttribute(STUDENT) StudentRequest studentRequest, Model model) {
         studentService.subscribeUserToGroup(studentRequest.getId(), studentRequest.getGroupId());
-        model.addAttribute("student", studentService.findById(studentRequest.getId()));
+        model.addAttribute(STUDENT, studentService.findById(studentRequest.getId()));
 
-        return "students/show-student";
+        return SHOW_STUDENT_PAGE;
     }
 
-    @PatchMapping("/{id}/leave-group")
-    public String leaveGroup(@ModelAttribute("student") StudentRequest studentRequest, Model model) {
-        studentService.unsubscribeStudentFromGroup(studentRequest.getId());
-        model.addAttribute("student", studentService.findById(studentRequest.getId()));
+    @PatchMapping("/{id}/leave/group")
+    public String leaveGroup(@PathVariable("id") int id, Model model) {
+        studentService.unsubscribeStudentFromGroup(id);
+        model.addAttribute(STUDENT, studentService.findById(id));
 
-        return "students/show-student";
+        return SHOW_STUDENT_PAGE;
     }
 
     @DeleteMapping("/{id}")

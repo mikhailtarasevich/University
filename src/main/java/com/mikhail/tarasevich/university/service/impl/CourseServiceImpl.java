@@ -157,6 +157,17 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     }
 
     @Override
+    public List<CourseResponse> findCoursesRelateToDepartmentNotRelateToTeacher(int departmentId, int teacherId) {
+        List<Course> coursesRelateToDepartment = courseDao.findCoursesRelateToDepartment(departmentId);
+        List<Course> coursesRelateToTeacher = courseDao.findCoursesRelateToTeacher(teacherId);
+
+        return coursesRelateToDepartment.stream()
+                .filter(c -> !coursesRelateToTeacher.contains(c))
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void subscribeCourseToDepartment(int departmentId, int courseId) {
         departmentDao.addCourseToDepartment(departmentId, courseId);
         log.info("Course with id = {} have been subscribed to department with id = {}",

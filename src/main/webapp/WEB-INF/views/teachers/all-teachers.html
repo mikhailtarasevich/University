@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/layout}">
 <head>
     <meta charset="UTF-8"/>
-    <title>All students</title>
+    <title>All teachers</title>
 </head>
 <body>
 <div layout:fragment="content">
-    <h3 class="mb-3">Students' table</h3>
+    <h3 class="mb-3">Teachers' table</h3>
     <table class="table table-bordered table-hover">
         <thead class="table-primary">
         <tr>
@@ -18,12 +19,12 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="student : ${students}">
-            <td th:text="${student.Id}">VALUE</td>
-            <td th:text="${student.FirstName}">VALUE</td>
-            <td th:text="${student.LastName}">VALUE</td>
+        <tr th:each="teacher : ${teachers}">
+            <td th:text="${teacher.Id}">VALUE</td>
+            <td th:text="${teacher.FirstName}">VALUE</td>
+            <td th:text="${teacher.LastName}">VALUE</td>
             <td>
-                <a th:href="@{/students/{id}(id=${student.Id})}" th:text="${student.Email}">VALUE</a>
+                <a th:href="@{/teachers/{id}(id=${teacher.Id})}" th:text="${teacher.Email}">VALUE</a>
             </td>
         </tr>
         </tbody>
@@ -31,15 +32,15 @@
     <nav aria-label="Page navigation example">
         <ul class="pagination justify-content-center">
             <li th:class="${currentPage <= 1} ? 'page-item disabled' : 'page-item'">
-                <a class="page-link" th:href="@{/students(page=${currentPage - 1})}">Previous</a>
+                <a class="page-link" th:href="@{/teachers(page=${currentPage - 1})}">Previous</a>
             </li>
             <li th:class="${currentPage >= lastPage} ? 'page-item disabled' : 'page-item'">
-                <a class="page-link" th:href="@{/students(page=${currentPage + 1})}">Next</a>
+                <a class="page-link" th:href="@{/teachers(page=${currentPage + 1})}">Next</a>
             </li>
         </ul>
     </nav>
-    <a href="/students/new" class="btn btn-primary mt-3">
-        Add new student
+    <a href="/teachers/new" class="btn btn-primary mt-3">
+        Add new teacher
     </a>
 </div>
 </body>
