@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8"/>
+    <title>All education forms</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-75 p-2 mx-auto">
+    <h3 class="mb-3">Education forms' table</h3>
+    <table class="table table-bordered table-hover">
+        <thead class="table-primary">
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Education form name</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="educationForm : ${educationForms}">
+            <td th:text="${educationForm.id}">VALUE</td>
+            <td>
+                <a th:href="@{/education-forms/{id}(id=${educationForm.id})}" th:text="${educationForm.name}">VALUE</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            <li th:class="${currentPage <= 1} ? 'page-item disabled' : 'page-item'">
+                <a class="page-link" th:href="@{/education-forms(page=${currentPage - 1})}">Previous</a>
+            </li>
+            <li th:class="${currentPage >= lastPage} ? 'page-item disabled' : 'page-item'">
+                <a class="page-link" th:href="@{/education-forms(page=${currentPage + 1})}">Next</a>
+            </li>
+        </ul>
+    </nav>
+    <a href="/education-forms/new" class="btn btn-primary mt-3">
+        Add new education form
+    </a>
+</div>
+</body>
+</html>

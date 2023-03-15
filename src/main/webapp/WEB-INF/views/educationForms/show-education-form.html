@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}"
+>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Education form's info</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-50 p-3 mx-auto">
+    <h1>Education form information</h1>
+    <br>
+    <div class="mb-2 row">
+        <label for="name" class="col col-form-label">Name:</label>
+        <div class="col">
+            <input type="text" readonly class="form-control-plaintext text-center" id="name"
+                   th:value="${educationForm.name}"/>
+        </div>
+    </div>
+    <br><br>
+    <div class="mb-4 row">
+        <a href="/education-forms">
+            <button class="btn btn-primary">Back to all education forms page</button>
+        </a>
+    </div>
+    <div class="mb-4 row">
+        <a th:href="@{/education-forms/{id}/edit(id=${educationForm.id})}">
+            <button class="btn btn-primary">Edit education form information</button>
+        </a>
+    </div>
+    <div class="mb-4 row">
+        <form th:method="DELETE" th:action="@{/education-forms/{id}(id=${educationForm.id})}" th:object="${educationForm}">
+            <input class="btn btn-primary" type="submit" value="Delete education form"/>
+        </form>
+    </div>
+</div>
+</body>
+</html>

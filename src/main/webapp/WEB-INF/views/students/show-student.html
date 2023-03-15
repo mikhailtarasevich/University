@@ -42,7 +42,7 @@
     <div class="mb-4 row">
         <label for="groupName" class="col col-form-label">Group name:</label>
         <div class="col">
-            <a th:href="${student.Group.Id == 0} ? '' : @{/groups/{id}(id=${student.Group.Id})}">
+            <a th:href="${student.Group.Id == 0} ? '#' : @{/groups/{id}(id=${student.Group.Id})}">
                 <input type="text" readonly class="form-control-plaintext text-center" id="groupName"
                        th:value="${student.Group.Id == 0} ? 'group not selected' : ${student.Group.Name}"/>
             </a>

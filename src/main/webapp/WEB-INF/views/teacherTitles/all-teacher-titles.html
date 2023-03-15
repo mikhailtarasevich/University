@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8"/>
+    <title>All teacher titles</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-75 p-2 mx-auto">
+    <h3 class="mb-3">Teacher titles' table</h3>
+    <table class="table table-bordered table-hover">
+        <thead class="table-primary">
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Teacher title name</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="teacherTitle : ${teacherTitles}">
+            <td th:text="${teacherTitle.id}">VALUE</td>
+            <td>
+                <a th:href="@{/teacher-titles/{id}(id=${teacherTitle.id})}" th:text="${teacherTitle.name}">VALUE</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            <li th:class="${currentPage <= 1} ? 'page-item disabled' : 'page-item'">
+                <a class="page-link" th:href="@{/teacher-titles(page=${currentPage - 1})}">Previous</a>
+            </li>
+            <li th:class="${currentPage >= lastPage} ? 'page-item disabled' : 'page-item'">
+                <a class="page-link" th:href="@{/teacher-titles(page=${currentPage + 1})}">Next</a>
+            </li>
+        </ul>
+    </nav>
+    <a href="/teacher-titles/new" class="btn btn-primary mt-3">
+        Add new teacher title
+    </a>
+</div>
+</body>
+</html>

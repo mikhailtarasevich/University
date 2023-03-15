@@ -59,7 +59,7 @@
     </div>
     <div class="mb-2 row">
         <label for="groups" class="col col-form-label">Groups relate to teacher:</label>
-        <div class="col">
+        <div class="col col-form-label">
             <ul th:each="group : ${groups}">
                 <a th:href="@{/groups/{id}(id=${group.getId()})}">
                     <li th:text="${group.Name}" id="groups"/>
@@ -69,7 +69,7 @@
     </div>
     <div class="mb-2 row">
         <label for="courses" class="col col-form-label">Courses relate to teacher:</label>
-        <div class="col">
+        <div class="col col-form-label">
             <ul th:each="course : ${courses}">
                 <a th:href="@{/courses/{id}(id=${course.Id})}">
                     <li th:text="${course.Name}" id="courses"/>
