@@ -9,6 +9,7 @@ public interface CourseService extends CrudService<CourseRequest, CourseResponse
 
     List<CourseResponse> findCoursesRelateToDepartment(int departmentId);
     List<CourseResponse> findCoursesRelateToTeacher(int teacherId);
+    List<CourseResponse> findCoursesRelateToDepartmentNotRelateToTeacher(int departmentId, int teacherId);
     void subscribeCourseToDepartment(int departmentId, int courseId);
     void unsubscribeCourseFromDepartment(int departmentId, int courseId);
 

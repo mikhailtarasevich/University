@@ -1,8 +1,6 @@
 package com.mikhail.tarasevich.university.service.impl;
 
-import com.mikhail.tarasevich.university.dao.impl.AbstractPageableCrudDaoImpl;
-
-public abstract class AbstractPageableService<E extends AbstractPageableCrudDaoImpl> {
+public abstract class AbstractPageableService {
 
     public static final int ITEMS_PER_PAGE = 10;
 

@@ -265,6 +265,19 @@ class GroupDaoImplTest {
     }
 
     @Test
+    void findGroupsNotRelateToTeacher_inputTeacherId_expectedEntitiesFromDB() {
+        List<Group> foundEntities = groupDao.findGroupsNotRelateToTeacher(5);
+
+        List<Group> expectedEntities = new ArrayList<>();
+        expectedEntities.add(group3);
+        expectedEntities.add(group4);
+        expectedEntities.add(group5);
+        expectedEntities.add(group6);
+
+        assertEquals(expectedEntities, foundEntities);
+    }
+
+    @Test
     void count_inputNothing_expectedQuantityOfRowsInTable() {
         long rows = groupDao.count();
 

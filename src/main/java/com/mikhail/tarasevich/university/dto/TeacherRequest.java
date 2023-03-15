@@ -10,9 +10,9 @@ import java.util.List;
 @ToString(callSuper = true)
 public class TeacherRequest extends UserRequest {
 
-    private List<Group> groups;
-    private List<Course> courses;
-    private TeacherTitle teacherTitle;
-    private Department department;
+    private List<Integer> groupIds;
+    private List<Integer> courseIds;
+    private int teacherTitleId;
+    private int departmentId;
 
 }

@@ -2,7 +2,9 @@ package com.mikhail.tarasevich.university.mapper.impl;
 
 import com.mikhail.tarasevich.university.dto.TeacherRequest;
 import com.mikhail.tarasevich.university.dto.TeacherResponse;
+import com.mikhail.tarasevich.university.entity.Department;
 import com.mikhail.tarasevich.university.entity.Teacher;
+import com.mikhail.tarasevich.university.entity.TeacherTitle;
 import com.mikhail.tarasevich.university.mapper.TeacherMapper;
 import org.springframework.stereotype.Component;
 
@@ -18,8 +20,8 @@ public class TeacherMapperImpl implements TeacherMapper {
                 .withGender(t.getGender())
                 .withEmail(t.getEmail())
                 .withPassword(t.getPassword())
-                .withTeacherTitle(t.getTeacherTitle())
-                .withDepartment(t.getDepartment())
+                .withTeacherTitle(TeacherTitle.builder().withId(t.getTeacherTitleId()).build())
+                .withDepartment(Department.builder().withId(t.getDepartmentId()).build())
                 .build();
     }
 

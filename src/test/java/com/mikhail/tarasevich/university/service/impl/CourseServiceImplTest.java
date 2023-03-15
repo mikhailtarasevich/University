@@ -241,6 +241,26 @@ class CourseServiceImplTest {
     }
 
     @Test
+    void findCoursesRelateToDepartmentNotRelateToTeacher_inputDepartmentIdTeacherId_expectedFoundCourses() {
+        List<CourseResponse> expected = new ArrayList<>();
+        expected.add(COURSE_RESPONSE_WITH_ID_1);
+
+        List<Course> coursesRelateToTeacher = new ArrayList<>();
+        coursesRelateToTeacher.add(COURSE_ENTITY_WITH_ID_2);
+
+        when(courseDao.findCoursesRelateToDepartment(1)).thenReturn(courseEntitiesWithId);
+        when(courseDao.findCoursesRelateToTeacher(1)).thenReturn(coursesRelateToTeacher);
+        when(mapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
+
+        List<CourseResponse> foundCourses = courseService.findCoursesRelateToDepartmentNotRelateToTeacher(1,1);
+
+        assertEquals(expected, foundCourses);
+        verify(courseDao, times(1)).findCoursesRelateToDepartment(1);
+        verify(courseDao, times(1)).findCoursesRelateToTeacher(1);
+        verify(mapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
+    }
+
+    @Test
     void edit_inputCourseRequest_expectedNothing() {
         final Course COURSE_ENTITY_FOR_UPDATE_1 = Course.builder()
                 .withId(1)
