@@ -143,6 +143,23 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
         return result;
     }
 
+    @Override
+    public void addCoursesToDepartment(int departmentId, List<Integer> courseIds) {
+        courseIds.forEach(courseId -> departmentDao.addCourseToDepartment(departmentId, courseId));
+        log.info("Courses with ids = {} have been added to department with id = {} ", courseIds, departmentId);
+    }
+
+    @Override
+    public void deleteCoursesFromDepartment(int departmentId, List<Integer> courseIds) {
+        courseIds.forEach(courseId -> departmentDao.deleteCourseFromDepartment(departmentId, courseId));
+        log.info("Courses with ids = {} have been deleted from department with id = {} ", courseIds, departmentId);
+    }
+
+    @Override
+    public int lastPageNumber() {
+        return (int) Math.ceil((double) departmentDao.count() / ITEMS_PER_PAGE);
+    }
+
     private void unbindDependenciesBeforeDelete(int id) {
         courseDao.unbindCoursesFromDepartment(id);
         teacherDao.unbindTeachersFromDepartment(id);

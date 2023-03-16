@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}"
+>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Edit department</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-90 p-2 mx-auto">
+    <h1>Edit department information</h1>
+    <br>
+    <div class="w-50 p-2 mx-auto">
+        <form th:method="PATCH" th:action="@{/departments/{id}(id=${department.id})}" th:object="${department}"
+              class="border-bottom">
+            <div class="form-floating mb-3">
+                <input class="form-control" th:field="*{name}" id="name"/>
+                <label for="name">Edit name: </label>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Write description here:</label>
+                <textarea th:field="*{description}" class="form-control" id="description" rows="3"></textarea>
+            </div>
+            <br>
+            <input class="btn btn-success" type="submit" value="Update department information"/>
+            <br><br>
+        </form>
+    </div>
+    <div class="container text-center">
+        <div class="row align-items-start border-bottom">
+            <div class="col">
+                <form th:method="PATCH" th:action="@{/departments/{id}/add/courses(id=${department.id})}"
+                      th:object="${department}">
+                    <br>
+                    <h5>Add courses to department:</h5>
+                    <br>
+                    <div th:each="course : ${coursesNotRelateToDepartment}">
+                        <input class="form-check-input" type="checkbox" th:value="${course.id}"
+                               th:id="${'course_' + course.id}"
+                               th:name="courseIds">
+                        <label class="form-check-label mb-2" th:for="${'course_' + course.id}"
+                               th:text="${course.name}"/>
+                        <br>
+                    </div>
+                    <br>
+                    <button class="btn btn-success" type="submit">Add selected courses to department:</button>
+                    <br><br>
+                </form>
+            </div>
+            <div class="col">
+                <form th:method="PATCH" th:action="@{/departments/{id}/delete/courses(id=${department.id})}"
+                      th:object="${department}">
+                    <br>
+                    <h5>Delete courses from department:</h5>
+                    <br>
+                    <div th:each="course : ${coursesRelateToDepartment}">
+                        <input class="form-check-input" type="checkbox" th:value="${course.id}"
+                               th:id="${'course_' + course.id}"
+                               th:name="courseIds">
+                        <label class="form-check-label mb-2" th:for="${'course_' + course.id}"
+                               th:text="${course.name}"/>
+                        <br>
+                    </div>
+                    <br>
+                    <button class="btn btn-danger" type="submit">Delete selected courses from department</button>
+                    <br><br>
+                </form>
+            </div>
+        </div>
+    </div>
+    <br>
+    <br>
+    <a href="/departments">
+        <button class="btn btn-primary">Back to all departments page</button>
+    </a>
+    <br>
+</div>
+</body>
+</html>

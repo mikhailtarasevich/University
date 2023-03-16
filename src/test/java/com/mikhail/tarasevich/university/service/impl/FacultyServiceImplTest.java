@@ -315,4 +315,15 @@ class FacultyServiceImplTest {
         verify(groupDao, times(1)).unbindGroupsFromFaculty(2);
     }
 
+    @Test
+    void lastPageNumber_inputNothing_expectedLastPageNumber() {
+        when(facultyDao.count()).thenReturn(5L);
+
+        int expected = (int) Math.ceil(5.0 / AbstractPageableService.ITEMS_PER_PAGE);
+
+        assertEquals(expected, facultyService.lastPageNumber());
+
+        verify(facultyDao, times(1)).count();
+    }
+
 }

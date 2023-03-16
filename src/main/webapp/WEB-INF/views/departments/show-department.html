@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}"
+>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Department's info</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-75 p-3 mx-auto">
+    <h1>Department information</h1>
+    <br>
+    <div class="mb-2 row">
+        <label for="name" class="col col-form-label">Department name:</label>
+        <div class="col">
+            <input type="text" readonly class="form-control-plaintext text-center" id="name"
+                   th:value="${department.name}"/>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="description" class="form-label">Course's description:</label>
+        <div class="col">
+            <span type="text" readonly class="form-control-plaintext text-center" id="description"
+                  th:text="${department.description}"/>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="courses" class="col col-form-label">Courses relate to department:</label>
+        <div class="col col-form-label">
+            <ul th:each="course : ${courses}">
+                <a th:href="@{/courses/{id}(id=${course.id})}">
+                    <li th:text="${course.name}" id="courses"/>
+                </a>
+            </ul>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="teachers" class="col col-form-label">Teachers relate to department:</label>
+        <div class="col col-form-label">
+            <ul th:each="teacher : ${teachers}">
+                <a th:href="@{/teachers/{id}(id=${teacher.id})}">
+                    <li th:text="${teacher.firstName + ' ' + teacher.lastName}" id="teachers"/>
+                </a>
+            </ul>
+        </div>
+    </div>
+    <br><br>
+    <div class="mb-4 row">
+        <a href="/departments">
+            <button class="btn btn-primary">Back to all departments page</button>
+        </a>
+    </div>
+    <div class="mb-4 row">
+        <a th:href="@{/departments/{id}/edit(id=${department.id})}">
+            <button class="btn btn-primary">Edit department information</button>
+        </a>
+    </div>
+    <div class="mb-4 row">
+        <form th:method="DELETE" th:action="@{/departments/{id}(id=${department.id})}" th:object="${department}">
+            <input class="btn btn-primary" type="submit" value="Delete department"/>
+        </form>
+    </div>
+</div>
+</body>
+</html>

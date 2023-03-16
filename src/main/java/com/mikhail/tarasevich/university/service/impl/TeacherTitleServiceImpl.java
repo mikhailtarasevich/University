@@ -143,8 +143,8 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
     }
 
     @Override
-    public int lastPageNumber(){
-        return (int) Math.ceil((double)teacherTitleDao.count() / ITEMS_PER_PAGE);
+    public int lastPageNumber() {
+        return (int) Math.ceil((double) teacherTitleDao.count() / ITEMS_PER_PAGE);
     }
 
     private void unbindDependenciesBeforeDelete(int id) {

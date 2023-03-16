@@ -330,4 +330,51 @@ class DepartmentServiceImplTest {
         verify(teacherDao, times(1)).unbindTeachersFromDepartment(2);
     }
 
+    @Test
+    void addCoursesToDepartment_inputDepartmentIdCourseIds_expectedNothing() {
+        final int departmentId = 1;
+        final List<Integer> courses = new ArrayList<>();
+        courses.add(1);
+        courses.add(2);
+
+        doNothing().when(departmentDao).addCourseToDepartment(departmentId, courses.get(0));
+        doNothing().when(departmentDao).addCourseToDepartment(departmentId, courses.get(1));
+
+        assertDoesNotThrow(() -> departmentService.addCoursesToDepartment(departmentId, courses));
+
+        verify(departmentDao, times(1)).addCourseToDepartment(departmentId, courses.get(0));
+        verify(departmentDao, times(1)).addCourseToDepartment(departmentId, courses.get(1));
+        verifyNoInteractions(teacherDao);
+        verifyNoInteractions(courseDao);
+    }
+
+    @Test
+    void deleteCoursesFromDepartment_inputDepartmentIdCourseIds_expectedNothing() {
+        final int departmentId = 1;
+        final List<Integer> courses = new ArrayList<>();
+        courses.add(1);
+        courses.add(2);
+
+        doNothing().when(departmentDao).deleteCourseFromDepartment(departmentId, courses.get(0));
+        doNothing().when(departmentDao).deleteCourseFromDepartment(departmentId, courses.get(1));
+
+        assertDoesNotThrow(() -> departmentService.deleteCoursesFromDepartment(departmentId, courses));
+
+        verify(departmentDao, times(1)).deleteCourseFromDepartment(departmentId, courses.get(0));
+        verify(departmentDao, times(1)).deleteCourseFromDepartment(departmentId, courses.get(1));
+        verifyNoInteractions(teacherDao);
+        verifyNoInteractions(courseDao);
+    }
+
+    @Test
+    void lastPageNumber_inputNothing_expectedLastPageNumber() {
+        when(departmentDao.count()).thenReturn(5L);
+
+        int expected = (int) Math.ceil(5.0 / AbstractPageableService.ITEMS_PER_PAGE);
+
+        assertEquals(expected, departmentService.lastPageNumber());
+
+        verify(departmentDao, times(1)).count();
+    }
+
 }

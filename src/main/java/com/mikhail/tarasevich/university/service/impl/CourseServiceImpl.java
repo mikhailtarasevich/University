@@ -150,6 +150,17 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     }
 
     @Override
+    public List<CourseResponse> findCoursesNotRelateToDepartment(int departmentId) {
+        List<Course> allCourses = courseDao.findAll();
+        List<Course> relateToDepartment = courseDao.findCoursesRelateToDepartment(departmentId);
+
+        return allCourses.stream()
+                .filter(course -> !relateToDepartment.contains(course))
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<CourseResponse> findCoursesRelateToTeacher(int teacherId) {
         return courseDao.findCoursesRelateToTeacher(teacherId).stream()
                 .map(mapper::toResponse)
@@ -179,6 +190,11 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
         departmentDao.deleteCourseFromDepartment(departmentId, courseId);
         log.info("Course with id = {} have been unsubscribed from department with id = {}",
                 courseId, departmentId);
+    }
+
+    @Override
+    public int lastPageNumber() {
+        return (int) Math.ceil((double) courseDao.count() / ITEMS_PER_PAGE);
     }
 
     private void unbindDependenciesBeforeDelete(int id) {

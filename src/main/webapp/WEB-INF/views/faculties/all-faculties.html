@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8"/>
+    <title>All faculties</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-75 p-2 mx-auto">
+    <h3 class="mb-3">Faculties' table</h3>
+    <table class="table table-bordered table-hover">
+        <thead class="table-primary">
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Faculty name</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="faculty : ${faculties}">
+            <td th:text="${faculty.id}">VALUE</td>
+            <td>
+                <a th:href="@{/faculties/{id}(id=${faculty.id})}" th:text="${faculty.name}">VALUE</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            <li th:class="${currentPage <= 1} ? 'page-item disabled' : 'page-item'">
+                <a class="page-link" th:href="@{/faculties(page=${currentPage - 1})}">Previous</a>
+            </li>
+            <li th:class="${currentPage >= lastPage} ? 'page-item disabled' : 'page-item'">
+                <a class="page-link" th:href="@{/faculties(page=${currentPage + 1})}">Next</a>
+            </li>
+        </ul>
+    </nav>
+    <a href="/faculties/new" class="btn btn-primary mt-3">
+        Add new faculty
+    </a>
+</div>
+</body>
+</html>

@@ -252,7 +252,7 @@ class CourseServiceImplTest {
         when(courseDao.findCoursesRelateToTeacher(1)).thenReturn(coursesRelateToTeacher);
         when(mapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
 
-        List<CourseResponse> foundCourses = courseService.findCoursesRelateToDepartmentNotRelateToTeacher(1,1);
+        List<CourseResponse> foundCourses = courseService.findCoursesRelateToDepartmentNotRelateToTeacher(1, 1);
 
         assertEquals(expected, foundCourses);
         verify(courseDao, times(1)).findCoursesRelateToDepartment(1);
@@ -415,6 +415,28 @@ class CourseServiceImplTest {
     }
 
     @Test
+    void findCoursesNotRelateToDepartment_inputDepartmentId_expectedCoursesList() {
+        List<Course> coursesRelateToDepartment = new ArrayList<>();
+        coursesRelateToDepartment.add(COURSE_ENTITY_WITH_ID_2);
+
+        List<CourseResponse> expected = new ArrayList<>();
+        expected.add(COURSE_RESPONSE_WITH_ID_1);
+
+        int departmentId = 1;
+
+        when(courseDao.findAll()).thenReturn(courseEntitiesWithId);
+        when(courseDao.findCoursesRelateToDepartment(departmentId)).thenReturn(coursesRelateToDepartment);
+        when(mapper.toResponse(COURSE_ENTITY_WITH_ID_1)).thenReturn(COURSE_RESPONSE_WITH_ID_1);
+
+        List<CourseResponse> courses = courseService.findCoursesNotRelateToDepartment(departmentId);
+
+        assertEquals(expected, courses);
+        verify(courseDao, times(1)).findAll();
+        verify(courseDao, times(1)).findCoursesRelateToDepartment(departmentId);
+        verify(mapper, times(1)).toResponse(COURSE_ENTITY_WITH_ID_1);
+    }
+
+    @Test
     void findCoursesRelateToTeacher_inputTeacherId_expectedCoursesList() {
         int teacherId = 1;
 
@@ -446,6 +468,17 @@ class CourseServiceImplTest {
         courseService.unsubscribeCourseFromDepartment(1, 1);
 
         verify(departmentDao, times(1)).deleteCourseFromDepartment(1, 1);
+    }
+
+    @Test
+    void lastPageNumber_inputNothing_expectedLastPageNumber() {
+        when(courseDao.count()).thenReturn(5L);
+
+        int expected = (int) Math.ceil(5.0 / AbstractPageableService.ITEMS_PER_PAGE);
+
+        assertEquals(expected, courseService.lastPageNumber());
+
+        verify(courseDao, times(1)).count();
     }
 
 }
