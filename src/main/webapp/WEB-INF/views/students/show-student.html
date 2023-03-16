@@ -50,18 +50,18 @@
     </div>
     <br><br>
     <div class="mb-4 row">
-        <a href="/students">
-            <button class="btn btn-primary">Back to all students page</button>
-        </a>
-    </div>
-    <div class="mb-4 row">
         <a th:href="@{/students/{id}/edit(id=${student.Id})}">
             <button class="btn btn-primary">Edit student information</button>
         </a>
     </div>
     <div class="mb-4 row">
+        <a href="/students">
+            <button class="btn btn-primary">Back to all students page</button>
+        </a>
+    </div>
+    <div class="mb-4 row">
         <form th:method="DELETE" th:action="@{/students/{id}(id=${student.Id})}" th:object="${student}">
-            <input class="btn btn-primary" type="submit" value="Delete student"/>
+            <input class="btn btn-danger" type="submit" value="Delete student"/>
         </form>
     </div>
 </div>

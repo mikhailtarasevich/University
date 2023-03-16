@@ -6,6 +6,8 @@ import com.mikhail.tarasevich.university.dao.StudentDao;
 import com.mikhail.tarasevich.university.dao.TeacherDao;
 import com.mikhail.tarasevich.university.dto.GroupRequest;
 import com.mikhail.tarasevich.university.dto.GroupResponse;
+import com.mikhail.tarasevich.university.entity.EducationForm;
+import com.mikhail.tarasevich.university.entity.Faculty;
 import com.mikhail.tarasevich.university.entity.Group;
 import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.exception.ObjectWithSpecifiedIdNotFoundException;
@@ -326,6 +328,77 @@ class GroupServiceImplTest {
         verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
         verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_2);
         verify(groupDao, times(1)).findGroupsRelateToTeacher(1);
+    }
+
+    @Test
+    void findGroupsRelateToFaculty_inputFacultyId_expectedGroupList() {
+        final Group GROUP_ENTITY_WITH_ID_1 = Group.builder()
+                .withId(1)
+                .withName("name1")
+                .withFaculty(Faculty.builder().withId(1).build())
+                .build();
+        final Group GROUP_ENTITY_WITH_ID_2 = Group.builder()
+                .withId(2)
+                .withName("name2")
+                .withFaculty(Faculty.builder().withId(2).build())
+                .build();
+
+        final List<Group> groups = new ArrayList<>();
+        groups.add(GROUP_ENTITY_WITH_ID_1);
+        groups.add(GROUP_ENTITY_WITH_ID_2);
+
+        final List<GroupResponse> expected = new ArrayList<>();
+        expected.add(GROUP_RESPONSE_WITH_ID_1);
+
+        when(groupDao.findAll()).thenReturn(groups);
+        when(mapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
+
+        List<GroupResponse> foundGroups = groupService.findGroupsRelateToFaculty(1);
+
+        assertEquals(expected, foundGroups);
+        verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
+        verify(groupDao, times(1)).findAll();
+    }
+
+    @Test
+    void findGroupsRelateToEducationForm_inputEducationFormId_expectedGroupList() {
+        final Group GROUP_ENTITY_WITH_ID_1 = Group.builder()
+                .withId(1)
+                .withName("name1")
+                .withEducationForm(EducationForm.builder().withId(1).build())
+                .build();
+        final Group GROUP_ENTITY_WITH_ID_2 = Group.builder()
+                .withId(2)
+                .withName("name2")
+                .withEducationForm(EducationForm.builder().withId(2).build())
+                .build();
+
+        final List<Group> groups = new ArrayList<>();
+        groups.add(GROUP_ENTITY_WITH_ID_1);
+        groups.add(GROUP_ENTITY_WITH_ID_2);
+
+        final List<GroupResponse> expected = new ArrayList<>();
+        expected.add(GROUP_RESPONSE_WITH_ID_1);
+
+        when(groupDao.findAll()).thenReturn(groups);
+        when(mapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
+
+        List<GroupResponse> foundGroups = groupService.findGroupsRelateToEducationForm(1);
+
+        assertEquals(expected, foundGroups);
+        verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
+        verify(groupDao, times(1)).findAll();
+    }
+
+    @Test
+    void lastPageNumber_inputNothing_expectedLastPageNumber() {
+        when(groupDao.count()).thenReturn(5L);
+
+        int expected = (int) Math.ceil(5.0 / AbstractPageableService.ITEMS_PER_PAGE);
+
+        assertEquals(expected, groupService.lastPageNumber());
+
+        verify(groupDao, times(1)).count();
     }
 
 }

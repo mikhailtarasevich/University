@@ -3,8 +3,11 @@ package com.mikhail.tarasevich.university.mapper.impl;
 import com.mikhail.tarasevich.university.dto.LessonRequest;
 import com.mikhail.tarasevich.university.dto.LessonResponse;
 import com.mikhail.tarasevich.university.entity.*;
+import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.mapper.LessonMapper;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 @Component
 public class LessonMapperImpl implements LessonMapper {
@@ -14,10 +17,10 @@ public class LessonMapperImpl implements LessonMapper {
         return Lesson.builder()
                 .withId(l.getId())
                 .withName(l.getName())
-                .withGroup(l.getGroup())
-                .withTeacher(l.getTeacher())
-                .withCourse(l.getCourse())
-                .withLessonType(l.getLessonType())
+                .withGroup(Group.builder().withId(l.getGroupId()).build())
+                .withTeacher(Teacher.builder().withId(l.getTeacherId()).build())
+                .withCourse(Course.builder().withId(l.getCourseId()).build())
+                .withLessonType(LessonType.builder().withId(l.getLessonTypeId()).build())
                 .withStartTime(l.getStartTime())
                 .build();
     }

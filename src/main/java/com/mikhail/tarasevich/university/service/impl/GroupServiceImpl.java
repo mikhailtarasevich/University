@@ -158,6 +158,27 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<GroupResponse> findGroupsRelateToFaculty(int facultyId) {
+        return groupDao.findAll().stream()
+                .filter(g-> g.getFaculty().getId() == facultyId)
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<GroupResponse> findGroupsRelateToEducationForm(int educationFormId) {
+        return groupDao.findAll().stream()
+                .filter(g-> g.getEducationForm().getId() == educationFormId)
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public int lastPageNumber() {
+        return (int) Math.ceil((double) groupDao.count() / ITEMS_PER_PAGE);
+    }
+
     private void unbindDependenciesBeforeDelete(int id) {
         lessonDao.unbindLessonsFromGroup(id);
         studentDao.unbindStudentsFromGroup(id);

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8"/>
+    <title>All lessons</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-90 p-2 mx-auto">
+    <h3 class="mb-3">Groups' table</h3>
+    <table class="table table-bordered table-hover">
+        <thead class="table-primary">
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Lesson name</th>
+            <th scope="col">Group name</th>
+            <th scope="col">Course name</th>
+            <th scope="col">Start time</th>
+            <th scope="col">Duration</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="lesson : ${lessons}">
+            <td th:text="${lesson.id}">VALUE</td>
+            <td>
+                <a th:href="@{/lessons/{id}(id=${lesson.id})}" th:text="${lesson.name}">VALUE</a>
+            </td>
+            <td th:text="${lesson.group.name}">VALUE</td>
+            <td th:text="${lesson.course.name}">VALUE</td>
+            <td th:text="${#temporals.format(lesson.startTime, 'dd-MM-yyyy HH:mm')}">VALUE</td>
+            <td th:switch="${lesson.lessonType.duration.toHours()}">
+                <span th:case="'0'" th:text="${lesson.lessonType.duration.toMinutes() + ' minutes'}"></span>
+                <span th:case="'1'" th:text="${lesson.lessonType.duration.toHours() + ' hour ' +
+                (lesson.lessonType.duration.toMinutes() - 60*lesson.lessonType.duration.toHours()) + ' minutes'}"></span>
+                <span th:case="*" th:text="${lesson.lessonType.duration.toHours() + ' hours ' +
+                (lesson.lessonType.duration.toMinutes() - 60*lesson.lessonType.duration.toHours()) + ' minutes'}"></span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            <li th:class="${currentPage <= 1} ? 'page-item disabled' : 'page-item'">
+                <a class="page-link" th:href="@{/lessons(page=${currentPage - 1})}">Previous</a>
+            </li>
+            <li th:class="${currentPage >= lastPage} ? 'page-item disabled' : 'page-item'">
+                <a class="page-link" th:href="@{/lessons(page=${currentPage + 1})}">Next</a>
+            </li>
+        </ul>
+    </nav>
+    <a href="/lessons/new" class="btn btn-primary mt-3">
+        Add new lesson
+    </a>
+    <br>
+    <form th:method="GET" th:action="@{/lessons/group}" class="w-50 p-2 mx-auto">
+        <br>
+        <h5>Choose group which lessons do you want to find:</h5>
+        <br>
+        <select class="form-select mb-3" th:name="groupId">
+            <th:block th:each="group : ${groups}">
+                <option th:value="${group.id}" th:text="${group.name}">GROUP NAME</option>
+            </th:block>
+        </select>
+        <br>
+        <input class="btn btn-primary" type="submit" value="Show lessons relate to group"/>
+        <br><br>
+    </form>
+</div>
+</body>
+</html>

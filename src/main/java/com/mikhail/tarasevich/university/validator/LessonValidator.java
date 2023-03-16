@@ -6,5 +6,6 @@ public interface LessonValidator {
 
     void validateUniqueNameInDB(LessonRequest request);
     void validateNameNotNullOrEmpty(LessonRequest request);
+    void validateStartTimeNotNull(LessonRequest request);
 
 }

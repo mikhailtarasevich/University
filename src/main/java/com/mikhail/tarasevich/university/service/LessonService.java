@@ -8,5 +8,6 @@ import java.util.List;
 public interface LessonService extends CrudService<LessonRequest, LessonResponse> {
 
     List<LessonResponse> findLessonsRelateToGroup(int groupId);
+    int lastPageNumber();
 
 }

@@ -18,5 +18,6 @@ public interface TeacherService extends UserService<TeacherRequest, TeacherRespo
     List<TeacherResponse> findTeachersRelateToGroup(int groupId);
     List<TeacherResponse> findTeachersRelateToCourse(int courseId);
     List<TeacherResponse> findTeachersRelateToDepartment(int departmentId);
+    List<TeacherResponse> findTeachersRelateToTeacherTitle(int teacherTitleId);
 
 }

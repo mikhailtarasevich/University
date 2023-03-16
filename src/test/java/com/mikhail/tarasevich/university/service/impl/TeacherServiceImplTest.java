@@ -4,9 +4,13 @@ import com.mikhail.tarasevich.university.dao.CourseDao;
 import com.mikhail.tarasevich.university.dao.GroupDao;
 import com.mikhail.tarasevich.university.dao.LessonDao;
 import com.mikhail.tarasevich.university.dao.TeacherDao;
+import com.mikhail.tarasevich.university.dto.GroupResponse;
 import com.mikhail.tarasevich.university.dto.TeacherRequest;
 import com.mikhail.tarasevich.university.dto.TeacherResponse;
+import com.mikhail.tarasevich.university.entity.EducationForm;
+import com.mikhail.tarasevich.university.entity.Group;
 import com.mikhail.tarasevich.university.entity.Teacher;
+import com.mikhail.tarasevich.university.entity.TeacherTitle;
 import com.mikhail.tarasevich.university.exception.EmailAlreadyExistsException;
 import com.mikhail.tarasevich.university.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.exception.ObjectWithSpecifiedIdNotFoundException;
@@ -684,6 +688,42 @@ class TeacherServiceImplTest {
         verify(teacherDao, times(1)).deleteTeacherFromCourse(teacherId, courseIds.get(1));
         verifyNoInteractions(lessonDao);
         verifyNoInteractions(groupDao);
+    }
+
+    @Test
+    void findTeachersRelateToTeacherTitle_inputTeacherTitleId_expectedGroupList() {
+        final Teacher TEACHER_ENTITY_WITH_ID_1 =
+                Teacher.builder()
+                        .withId(1)
+                        .withFirstName("firstName1")
+                        .withLastName("lastName1")
+                        .withEmail("1@email.com")
+                        .withTeacherTitle(TeacherTitle.builder().withId(1).build())
+                        .build();
+        final Teacher TEACHER_ENTITY_WITH_ID_2 =
+                Teacher.builder()
+                        .withId(2)
+                        .withFirstName("firstName2")
+                        .withLastName("lastName2")
+                        .withEmail("2@email.com")
+                        .withTeacherTitle(TeacherTitle.builder().withId(2).build())
+                        .build();
+
+        final List<Teacher> teachers = new ArrayList<>();
+        teachers.add(TEACHER_ENTITY_WITH_ID_1);
+        teachers.add(TEACHER_ENTITY_WITH_ID_2);
+
+        final List<TeacherResponse> expected = new ArrayList<>();
+        expected.add(TEACHER_RESPONSE_WITH_ID_1);
+
+        when(teacherDao.findAll()).thenReturn(teachers);
+        when(mapper.toResponse(TEACHER_ENTITY_WITH_ID_1)).thenReturn(TEACHER_RESPONSE_WITH_ID_1);
+
+        List<TeacherResponse> found = teacherService.findTeachersRelateToTeacherTitle(1);
+
+        assertEquals(expected, found);
+        verify(mapper, times(1)).toResponse(TEACHER_ENTITY_WITH_ID_1);
+        verify(teacherDao, times(1)).findAll();
     }
 
 }

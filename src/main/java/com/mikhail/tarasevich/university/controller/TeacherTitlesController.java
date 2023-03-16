@@ -2,6 +2,7 @@ package com.mikhail.tarasevich.university.controller;
 
 import com.mikhail.tarasevich.university.dto.TeacherTitleRequest;
 import com.mikhail.tarasevich.university.dto.TeacherTitleResponse;
+import com.mikhail.tarasevich.university.service.TeacherService;
 import com.mikhail.tarasevich.university.service.TeacherTitleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,10 +14,12 @@ import org.springframework.web.bind.annotation.*;
 public class TeacherTitlesController {
 
     private final TeacherTitleService teacherTitleService;
+    private final TeacherService teacherService;
 
     @Autowired
-    public TeacherTitlesController(TeacherTitleService teacherTitleService) {
+    public TeacherTitlesController(TeacherTitleService teacherTitleService, TeacherService teacherService) {
         this.teacherTitleService = teacherTitleService;
+        this.teacherService = teacherService;
     }
 
     @GetMapping
@@ -31,6 +34,7 @@ public class TeacherTitlesController {
     @GetMapping("/{id}")
     public String showTeacherTitle(@PathVariable("id") int id, Model model) {
         model.addAttribute("teacherTitle", teacherTitleService.findById(id));
+        model.addAttribute("teachers", teacherService.findTeachersRelateToTeacherTitle(id));
 
         return "teacherTitles/show-teacher-title";
     }

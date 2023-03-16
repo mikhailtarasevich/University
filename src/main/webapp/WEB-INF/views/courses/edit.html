@@ -8,7 +8,7 @@
     <title>Edit course</title>
 </head>
 <body>
-<div layout:fragment="content" class="w-50 p-2 mx-auto">
+<div layout:fragment="content" class="w-75 p-2 mx-auto">
     <h1>Edit course information</h1>
     <br>
     <form th:method="PATCH" th:action="@{/courses/{id}(id=${course.id})}" th:object="${course}">

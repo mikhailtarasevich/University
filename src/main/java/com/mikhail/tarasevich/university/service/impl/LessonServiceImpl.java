@@ -34,6 +34,7 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
     public LessonResponse register(LessonRequest r) {
         validator.validateUniqueNameInDB(r);
         validator.validateNameNotNullOrEmpty(r);
+        validator.validateStartTimeNotNull(r);
 
         return mapper.toResponse(lessonDao.save(mapper.toEntity(r)));
     }
@@ -46,6 +47,7 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
             try {
                 validator.validateUniqueNameInDB(r);
                 validator.validateNameNotNullOrEmpty(r);
+                validator.validateStartTimeNotNull(r);
                 acceptableRequests.add(r);
             } catch (IncorrectRequestDataException e) {
                 log.info("The lesson were deleted from the save list. The lesson: {} .", r);
@@ -89,6 +91,7 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
     @Override
     public void edit(LessonRequest r) {
         validator.validateNameNotNullOrEmpty(r);
+        validator.validateStartTimeNotNull(r);
         lessonDao.update(mapper.toEntity(r));
     }
 
@@ -99,6 +102,7 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
         requests.forEach(r -> {
             try {
                 validator.validateNameNotNullOrEmpty(r);
+                validator.validateStartTimeNotNull(r);
                 acceptableRequests.add(r);
             } catch (IncorrectRequestDataException e) {
                 log.info("The lesson was deleted from the update list. The lesson: {} .", r);
@@ -138,6 +142,11 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
         return lessonDao.findLessonsRelateToGroup(groupId).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public int lastPageNumber() {
+        return (int) Math.ceil((double) lessonDao.count() / ITEMS_PER_PAGE);
     }
 
 }

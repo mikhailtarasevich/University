@@ -12,7 +12,7 @@
     <h1>Lesson type information</h1>
     <br>
     <div class="mb-2 row">
-        <label for="name" class="col col-form-label">Name:</label>
+        <label for="name" class="col col-form-label">Lesson type:</label>
         <div class="col">
             <input type="text" readonly class="form-control-plaintext text-center" id="name"
                    th:value="${lessonType.name}"/>
@@ -30,18 +30,18 @@
     </div>
     <br><br>
     <div class="mb-4 row">
-        <a href="/lesson-types">
-            <button class="btn btn-primary">Back to all lesson types page</button>
-        </a>
-    </div>
-    <div class="mb-4 row">
         <a th:href="@{/lesson-types/{id}/edit(id=${lessonType.id})}">
             <button class="btn btn-primary">Edit lesson type information</button>
         </a>
     </div>
     <div class="mb-4 row">
+        <a href="/lesson-types">
+            <button class="btn btn-primary">Back to all lesson types page</button>
+        </a>
+    </div>
+    <div class="mb-4 row">
         <form th:method="DELETE" th:action="@{/lesson-types/{id}(id=${lessonType.id})}" th:object="${lessonType}">
-            <input class="btn btn-primary" type="submit" value="Delete lesson type"/>
+            <input class="btn btn-danger" type="submit" value="Delete lesson type"/>
         </form>
     </div>
 </div>

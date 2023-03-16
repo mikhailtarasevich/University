@@ -3,6 +3,7 @@ package com.mikhail.tarasevich.university.controller;
 import com.mikhail.tarasevich.university.dto.FacultyRequest;
 import com.mikhail.tarasevich.university.dto.FacultyResponse;
 import com.mikhail.tarasevich.university.service.FacultyService;
+import com.mikhail.tarasevich.university.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,10 +14,12 @@ import org.springframework.web.bind.annotation.*;
 public class FacultiesController {
 
     private final FacultyService facultyService;
+    private final GroupService groupService;
 
     @Autowired
-    public FacultiesController(FacultyService facultyService) {
+    public FacultiesController(FacultyService facultyService, GroupService groupService) {
         this.facultyService = facultyService;
+        this.groupService = groupService;
     }
 
     @GetMapping
@@ -31,6 +34,7 @@ public class FacultiesController {
     @GetMapping("/{id}")
     public String showFaculty(@PathVariable("id") int id, Model model) {
         model.addAttribute("faculty", facultyService.findById(id));
+        model.addAttribute("groups", groupService.findGroupsRelateToFaculty(id));
 
         return "faculties/show-faculty";
     }

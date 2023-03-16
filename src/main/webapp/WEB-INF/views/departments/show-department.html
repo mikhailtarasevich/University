@@ -9,17 +9,10 @@
 </head>
 <body>
 <div layout:fragment="content" class="w-75 p-3 mx-auto">
-    <h1>Department information</h1>
+    <h2 th:text="${department.name} + ' department'">VALUE</h2>
     <br>
     <div class="mb-2 row">
-        <label for="name" class="col col-form-label">Department name:</label>
-        <div class="col">
-            <input type="text" readonly class="form-control-plaintext text-center" id="name"
-                   th:value="${department.name}"/>
-        </div>
-    </div>
-    <div class="mb-2 row">
-        <label for="description" class="form-label">Course's description:</label>
+        <label for="description" class="form-label">Description:</label>
         <div class="col">
             <span type="text" readonly class="form-control-plaintext text-center" id="description"
                   th:text="${department.description}"/>
@@ -47,18 +40,18 @@
     </div>
     <br><br>
     <div class="mb-4 row">
-        <a href="/departments">
-            <button class="btn btn-primary">Back to all departments page</button>
-        </a>
-    </div>
-    <div class="mb-4 row">
         <a th:href="@{/departments/{id}/edit(id=${department.id})}">
             <button class="btn btn-primary">Edit department information</button>
         </a>
     </div>
     <div class="mb-4 row">
+        <a href="/departments">
+            <button class="btn btn-primary">Back to all departments page</button>
+        </a>
+    </div>
+    <div class="mb-4 row">
         <form th:method="DELETE" th:action="@{/departments/{id}(id=${department.id})}" th:object="${department}">
-            <input class="btn btn-primary" type="submit" value="Delete department"/>
+            <input class="btn btn-danger" type="submit" value="Delete department"/>
         </form>
     </div>
 </div>

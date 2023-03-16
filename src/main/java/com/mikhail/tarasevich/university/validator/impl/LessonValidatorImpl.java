@@ -31,4 +31,10 @@ public class LessonValidatorImpl implements LessonValidator {
             throw new IncorrectRequestDataException("The lesson name can't be null or empty.");
     }
 
+    @Override
+    public void validateStartTimeNotNull(LessonRequest request) {
+        if (request.getStartTime() == null)
+            throw new IncorrectRequestDataException("Please, set lesson start time.");
+    }
+
 }

@@ -5,40 +5,43 @@
 >
 <head>
     <meta charset="UTF-8"/>
-    <title>Course's info</title>
+    <title>Faculty's info</title>
 </head>
 <body>
 <div layout:fragment="content" class="w-50 p-3 mx-auto">
-    <h1>Course information</h1>
+    <h2 th:text="${faculty.name} + ' faculty'">VALUE</h2>
     <br>
     <div class="mb-2 row">
-        <label for="name" class="col col-form-label">Name:</label>
-        <div class="col">
-            <input type="text" readonly class="form-control-plaintext text-center" id="name"
-                   th:value="${faculty.name}"/>
-        </div>
-    </div>
-    <div class="mb-2 row">
-        <label for="description" class="form-label">Course's description:</label>
+        <label for="description" class="form-label">Description:</label>
         <div class="col">
             <span type="text" readonly class="form-control-plaintext text-center" id="description"
                    th:text="${faculty.description}"/>
         </div>
     </div>
-    <br><br>
-    <div class="mb-4 row">
-        <a href="/faculties">
-            <button class="btn btn-primary">Back to all faculties page</button>
-        </a>
+    <div class="mb-2 row">
+        <label for="groups" class="col col-form-label">Groups relate to faculties:</label>
+        <div class="col col-form-label">
+            <ul th:each="group : ${groups}">
+                <a th:href="@{/groups/{id}(id=${group.id})}">
+                    <li th:text="${group.name}" id="groups"/>
+                </a>
+            </ul>
+        </div>
     </div>
+    <br><br>
     <div class="mb-4 row">
         <a th:href="@{/faculties/{id}/edit(id=${faculty.id})}">
             <button class="btn btn-primary">Edit faculty information</button>
         </a>
     </div>
     <div class="mb-4 row">
+        <a href="/faculties">
+            <button class="btn btn-primary">Back to all faculties page</button>
+        </a>
+    </div>
+    <div class="mb-4 row">
         <form th:method="DELETE" th:action="@{/faculties/{id}(id=${faculty.id})}" th:object="${faculty}">
-            <input class="btn btn-primary" type="submit" value="Delete faculty"/>
+            <input class="btn btn-danger" type="submit" value="Delete faculty"/>
         </form>
     </div>
 </div>

@@ -15,45 +15,45 @@
         <label for="firstName" class="col col-form-label">First name:</label>
         <div class="col">
             <input type="text" readonly class="form-control-plaintext text-center" id="firstName"
-                   th:value="${teacher.FirstName}"/>
+                   th:value="${teacher.firstName}"/>
         </div>
     </div>
     <div class="mb-2 row">
         <label for="lastName" class="col col-form-label">Last name:</label>
         <div class="col">
             <input type="text" readonly class="form-control-plaintext text-center" id="lastName"
-                   th:value="${teacher.LastName}"/>
+                   th:value="${teacher.lastName}"/>
         </div>
     </div>
     <div class="mb-2 row">
         <label for="email" class="col col-form-label">Email:</label>
         <div class="col">
             <input type="text" readonly class="form-control-plaintext text-center" id="email"
-                   th:value="${teacher.Email}"/>
+                   th:value="${teacher.email}"/>
         </div>
     </div>
     <div class="mb-2 row">
         <label for="gender" class="col col-form-label">Gender:</label>
         <div class="col">
             <input type="text" readonly class="form-control-plaintext text-center" id="gender"
-                   th:value="${teacher.Gender}"/>
+                   th:value="${teacher.gender}"/>
         </div>
     </div>
     <div class="mb-2 row">
         <label for="teacherTitle" class="col col-form-label">Teacher title:</label>
         <div class="col">
-            <a th:href="@{/teacher-titles/{id}(id=${teacher.TeacherTitle.Id})}">
+            <a th:href="@{/teacher-titles/{id}(id=${teacher.teacherTitle.id})}">
                 <input type="text" readonly class="form-control-plaintext text-center" id="teacherTitle"
-                       th:value="${teacher.TeacherTitle.Name}"/>
+                       th:value="${teacher.teacherTitle.name}"/>
             </a>
         </div>
     </div>
     <div class="mb-2 row">
         <label for="department" class="col col-form-label">Department:</label>
         <div class="col">
-            <a th:href="@{/departments/{id}(id=${teacher.Department.Id})}">
+            <a th:href="@{/departments/{id}(id=${teacher.department.id})}">
                 <input type="text" readonly class="form-control-plaintext text-center" id="department"
-                       th:value="${teacher.Department.Name}"/>
+                       th:value="${teacher.department.name}"/>
             </a>
         </div>
     </div>
@@ -61,8 +61,8 @@
         <label for="groups" class="col col-form-label">Groups relate to teacher:</label>
         <div class="col col-form-label">
             <ul th:each="group : ${groups}">
-                <a th:href="@{/groups/{id}(id=${group.getId()})}">
-                    <li th:text="${group.Name}" id="groups"/>
+                <a th:href="@{/groups/{id}(id=${group.id})}">
+                    <li th:text="${group.name}" id="groups"/>
                 </a>
             </ul>
         </div>
@@ -71,26 +71,26 @@
         <label for="courses" class="col col-form-label">Courses relate to teacher:</label>
         <div class="col col-form-label">
             <ul th:each="course : ${courses}">
-                <a th:href="@{/courses/{id}(id=${course.Id})}">
-                    <li th:text="${course.Name}" id="courses"/>
+                <a th:href="@{/courses/{id}(id=${course.id})}">
+                    <li th:text="${course.name}" id="courses"/>
                 </a>
             </ul>
         </div>
     </div>
     <br><br>
     <div class="mb-4 row">
+        <a th:href="@{/teachers/{id}/edit(id=${teacher.id})}">
+            <button class="btn btn-primary">Edit teacher information</button>
+        </a>
+    </div>
+    <div class="mb-4 row">
         <a href="/teachers">
             <button class="btn btn-primary">Back to all teachers page</button>
         </a>
     </div>
     <div class="mb-4 row">
-        <a th:href="@{/teachers/{id}/edit(id=${teacher.Id})}">
-            <button class="btn btn-primary">Edit teacher information</button>
-        </a>
-    </div>
-    <div class="mb-4 row">
-        <form th:method="DELETE" th:action="@{/teachers/{id}(id=${teacher.Id})}" th:object="${teacher}">
-            <input class="btn btn-primary" type="submit" value="Delete teacher"/>
+        <form th:method="DELETE" th:action="@{/teachers/{id}(id=${teacher.id})}" th:object="${teacher}">
+            <input class="btn btn-danger" type="submit" value="Delete teacher"/>
         </form>
     </div>
 </div>

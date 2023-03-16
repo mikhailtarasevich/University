@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -70,6 +71,18 @@ class LessonValidatorImplTest {
         LESSON_REQUEST.setName(null);
 
         assertThrows(IncorrectRequestDataException.class, () -> lessonValidator.validateNameNotNullOrEmpty(LESSON_REQUEST));
+    }
+
+    @Test
+    void validateStartTimeNotNull_inputStartTimeNotNull_expectedNothing() {
+        final LessonRequest LESSON_REQUEST = new LessonRequest();
+        LESSON_REQUEST.setStartTime(LocalDateTime.now());
+        assertDoesNotThrow(() -> lessonValidator.validateStartTimeNotNull(LESSON_REQUEST));
+    }
+
+    @Test
+    void validateStartTimeNotNull_inputStartTimeIsNull_expectedNothing() {
+        assertThrows(IncorrectRequestDataException.class, () -> lessonValidator.validateStartTimeNotNull(LESSON_REQUEST));
     }
 
 }

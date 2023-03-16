@@ -2,8 +2,10 @@ package com.mikhail.tarasevich.university.service.impl;
 
 import com.mikhail.tarasevich.university.dao.GroupDao;
 import com.mikhail.tarasevich.university.dao.StudentDao;
+import com.mikhail.tarasevich.university.dto.CourseResponse;
 import com.mikhail.tarasevich.university.dto.StudentRequest;
 import com.mikhail.tarasevich.university.dto.StudentResponse;
+import com.mikhail.tarasevich.university.entity.Course;
 import com.mikhail.tarasevich.university.entity.Student;
 import com.mikhail.tarasevich.university.mapper.StudentMapper;
 import com.mikhail.tarasevich.university.service.StudentService;
@@ -79,6 +81,17 @@ public class StudentServiceImpl
     public List<StudentResponse> findStudentsRelateToGroup(int groupId) {
         return userDao.findStudentsRelateToGroup(groupId)
                 .stream().map(userMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<StudentResponse> findStudentsNotRelateToGroup(int groupId) {
+        List<Student> allStudents = userDao.findAll();
+        List<Student> relateToGroup = userDao.findStudentsRelateToGroup(groupId);
+
+        return allStudents.stream()
+                .filter(student -> !relateToGroup.contains(student))
+                .map(userMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
