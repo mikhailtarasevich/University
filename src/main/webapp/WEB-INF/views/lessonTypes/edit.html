@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}"
+>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Edit lesson type</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-50 p-2 mx-auto">
+    <h1>Edit lesson type information</h1>
+    <br>
+    <form th:method="PATCH" th:action="@{/lesson-types/{id}(id=${lessonType.id})}" th:object="${lessonType}">
+        <div class="form-floating mb-3">
+            <input class="form-control" th:value="*{name}" th:name="name" id="name"/>
+            <label for="name">Edit name: </label>
+        </div>
+        <br>
+        <h5>Change lesson duration:</h5>
+        <br>
+        <select class="form-select mb-3" th:name="duration">
+            <option selected th:value="${lessonType.getDuration().toMinutes()}">duration without changes</option>
+            <option th:value="45">45 minutes</option>
+            <option th:value="60">1 hour 0 minutes</option>
+            <option th:value="90">1 hour 30 minutes</option>
+            <option th:value="120">2 hours 0 minutes</option>
+        </select>
+        <br>
+        <input class="btn btn-success" type="submit" value="Update lesson type information"/>
+        <br><br>
+    </form>
+    <br>
+    <a href="/lesson-types">
+        <button class="btn btn-primary">Back to all lesson types page</button>
+    </a>
+    <br>
+</div>
+</body>
+</html>

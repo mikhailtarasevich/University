@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}"
+>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Edit education form</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-50 p-2 mx-auto">
+    <h1>Edit education form information</h1>
+    <br>
+    <form th:method="PATCH" th:action="@{/education-forms/{id}(id=${educationForm.id})}" th:object="${educationForm}"
+          class="border-bottom">
+        <div class="form-floating mb-3">
+            <input class="form-control" th:field="*{name}" id="name"/>
+            <label for="name">Edit name: </label>
+        </div>
+        <br>
+        <input class="btn btn-success" type="submit" value="Update education form information"/>
+        <br><br>
+    </form>
+    <br>
+    <br>
+    <a href="/education-forms">
+        <button class="btn btn-primary">Back to all education forms page</button>
+    </a>
+    <br>
+</div>
+</body>
+</html>

@@ -141,6 +141,11 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
         return result;
     }
 
+    @Override
+    public int lastPageNumber(){
+        return (int) Math.ceil((double)lessonTypeDao.count() / ITEMS_PER_PAGE);
+    }
+
     private void unbindDependenciesBeforeDelete(int id) {
         lessonDao.unbindLessonsFromLessonType(id);
     }

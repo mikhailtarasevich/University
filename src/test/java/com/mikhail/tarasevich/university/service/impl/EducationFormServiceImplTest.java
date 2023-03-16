@@ -299,4 +299,15 @@ class EducationFormServiceImplTest {
         verify(groupDao, times(1)).unbindGroupsFromEducationForm(2);
     }
 
+    @Test
+    void lastPageNumber_inputNothing_expectedLastPageNumber() {
+        when(educationFormDao.count()).thenReturn(5L);
+
+        int expected = (int) Math.ceil(5.0 / AbstractPageableService.ITEMS_PER_PAGE);
+
+        assertEquals(expected, educationFormService.lastPageNumber());
+
+        verify(educationFormDao, times(1)).count();
+    }
+
 }

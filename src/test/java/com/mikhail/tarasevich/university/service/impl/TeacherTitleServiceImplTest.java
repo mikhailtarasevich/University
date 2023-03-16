@@ -294,4 +294,15 @@ class TeacherTitleServiceImplTest {
         verify(teacherDao, times(1)).unbindTeachersFromTeacherTitle(2);
     }
 
+    @Test
+    void lastPageNumber_inputNothing_expectedLastPageNumber() {
+        when(teacherTitleDao.count()).thenReturn(5L);
+
+        int expected = (int) Math.ceil(5.0 / AbstractPageableService.ITEMS_PER_PAGE);
+
+        assertEquals(expected, teacherTitleService.lastPageNumber());
+
+        verify(teacherTitleDao, times(1)).count();
+    }
+
 }

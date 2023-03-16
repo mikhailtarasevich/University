@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8"/>
+    <title>All lesson types</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-75 p-2 mx-auto">
+    <h3 class="mb-3">Lesson types' table</h3>
+    <table class="table table-bordered table-hover">
+        <thead class="table-primary">
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Lesson type name</th>
+            <th scope="col">Duration</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="lessonType : ${lessonTypes}">
+            <td th:text="${lessonType.id}">VALUE</td>
+            <td>
+                <a th:href="@{/lesson-types/{id}(id=${lessonType.id})}" th:text="${lessonType.name}">VALUE</a>
+            </td>
+            <td th:switch="${lessonType.duration.toHours()}">
+                <span th:case="'0'" th:text="${lessonType.duration.toMinutes() + ' minutes'}"></span>
+                <span th:case="'1'" th:text="${lessonType.duration.toHours() + ' hour ' +
+                (lessonType.duration.toMinutes() - 60*lessonType.duration.toHours()) + ' minutes'}"></span>
+                <span th:case="*" th:text="${lessonType.duration.toHours() + ' hours ' +
+                (lessonType.duration.toMinutes() - 60*lessonType.duration.toHours()) + ' minutes'}"></span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            <li th:class="${currentPage <= 1} ? 'page-item disabled' : 'page-item'">
+                <a class="page-link" th:href="@{/lesson-types(page=${currentPage - 1})}">Previous</a>
+            </li>
+            <li th:class="${currentPage >= lastPage} ? 'page-item disabled' : 'page-item'">
+                <a class="page-link" th:href="@{/lesson-types(page=${currentPage + 1})}">Next</a>
+            </li>
+        </ul>
+    </nav>
+    <a href="/lesson-types/new" class="btn btn-primary mt-3">
+        Add new lesson type
+    </a>
+</div>
+</body>
+</html>

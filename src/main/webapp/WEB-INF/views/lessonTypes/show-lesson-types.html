@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}"
+>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Lesson type's info</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-50 p-3 mx-auto">
+    <h1>Lesson type information</h1>
+    <br>
+    <div class="mb-2 row">
+        <label for="name" class="col col-form-label">Name:</label>
+        <div class="col">
+            <input type="text" readonly class="form-control-plaintext text-center" id="name"
+                   th:value="${lessonType.name}"/>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="duration" class="col col-form-label">Duration:</label>
+        <div class="col col-form-label" th:switch="${lessonType.duration.toHours()}" id="duration">
+            <span th:case="'0'" th:text="${lessonType.duration.toMinutes() + ' minutes'}"/>
+            <span th:case="'1'" th:text="${lessonType.duration.toHours() + ' hour ' +
+                (lessonType.duration.toMinutes() - 60*lessonType.duration.toHours()) + ' minutes'}"/>
+            <span th:case="*" th:text="${lessonType.duration.toHours() + ' hours ' +
+                (lessonType.duration.toMinutes() - 60*lessonType.duration.toHours()) + ' minutes'}"/>
+        </div>
+    </div>
+    <br><br>
+    <div class="mb-4 row">
+        <a href="/lesson-types">
+            <button class="btn btn-primary">Back to all lesson types page</button>
+        </a>
+    </div>
+    <div class="mb-4 row">
+        <a th:href="@{/lesson-types/{id}/edit(id=${lessonType.id})}">
+            <button class="btn btn-primary">Edit lesson type information</button>
+        </a>
+    </div>
+    <div class="mb-4 row">
+        <form th:method="DELETE" th:action="@{/lesson-types/{id}(id=${lessonType.id})}" th:object="${lessonType}">
+            <input class="btn btn-primary" type="submit" value="Delete lesson type"/>
+        </form>
+    </div>
+</div>
+</body>
+</html>
