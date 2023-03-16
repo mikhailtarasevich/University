@@ -139,6 +139,11 @@ public class FacultyServiceImpl extends AbstractPageableService implements Facul
         return result;
     }
 
+    @Override
+    public int lastPageNumber() {
+        return (int) Math.ceil((double) facultyDao.count() / ITEMS_PER_PAGE);
+    }
+
     private void unbindDependenciesBeforeDelete(int id) {
         groupDao.unbindGroupsFromFaculty(id);
     }

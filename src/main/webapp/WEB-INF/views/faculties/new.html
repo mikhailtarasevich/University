@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}"
+>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Create faculty</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-50 p-2 mx-auto">
+    <h1>Create new faculty</h1>
+    <br>
+    <form th:method="POST" th:action="@{/faculties}" th:object="${faculty}" class="needs-validation">
+        <div class="form-floating mb-3">
+            <input class="form-control" th:field="*{name}" id="name"/>
+            <label for="name">Enter faculty name: </label>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Write description here:</label>
+            <textarea th:field="*{description}" class="form-control" id="description" rows="3"></textarea>
+        </div>
+        <br>
+        <input class="btn btn-primary" type="submit" value="Add faculty"/>
+        <br><br>
+    </form>
+    <a href="/faculties">
+        <button class="btn btn-primary">Back to all faculties page</button>
+    </a>
+</div>
+</body>
+</html>

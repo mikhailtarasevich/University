@@ -617,7 +617,7 @@ class TeacherServiceImplTest {
     @Test
     void subscribeTeacherToGroups_inputTeacherIdGroupIds_expectedNothing() {
         final int teacherId = 1;
-        final List <Integer> groupIds = new ArrayList<>();
+        final List<Integer> groupIds = new ArrayList<>();
         groupIds.add(1);
         groupIds.add(2);
 
@@ -635,7 +635,7 @@ class TeacherServiceImplTest {
     @Test
     void unsubscribeTeacherFromGroups_inputTeacherIdGroupIds_expectedNothing() {
         final int teacherId = 1;
-        final List <Integer> groupIds = new ArrayList<>();
+        final List<Integer> groupIds = new ArrayList<>();
         groupIds.add(1);
         groupIds.add(2);
 
@@ -653,7 +653,7 @@ class TeacherServiceImplTest {
     @Test
     void subscribeTeacherToCourses_inputTeacherIdCourseIds_expectedNothing() {
         final int teacherId = 1;
-        final List <Integer> courseIds = new ArrayList<>();
+        final List<Integer> courseIds = new ArrayList<>();
         courseIds.add(1);
         courseIds.add(2);
 
@@ -671,7 +671,7 @@ class TeacherServiceImplTest {
     @Test
     void unsubscribeTeacherToCourses_inputTeacherIdCourseIds_expectedNothing() {
         final int teacherId = 1;
-        final List <Integer> courseIds = new ArrayList<>();
+        final List<Integer> courseIds = new ArrayList<>();
         courseIds.add(1);
         courseIds.add(2);
 

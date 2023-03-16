@@ -41,12 +41,12 @@ public class DepartmentDaoImpl extends AbstractPageableCrudDaoImpl<Department> i
     }
 
     @Override
-    public void addCourseToDepartment(int departmentId, Integer courseId) {
+    public void addCourseToDepartment(int departmentId, int courseId) {
         jdbcTemplate.update(ADD_COURSE_TO_DEPARTMENT_QUERY, departmentId, courseId);
     }
 
     @Override
-    public void deleteCourseFromDepartment(int departmentId, Integer courseId) {
+    public void deleteCourseFromDepartment(int departmentId, int courseId) {
         jdbcTemplate.update(DELETE_COURSE_FROM_DEPARTMENT_QUERY, departmentId, courseId);
     }
 

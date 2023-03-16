@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8"/>
+    <title>All departments</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <h3 class="mb-3">Departments' table</h3>
+    <table class="table table-bordered table-hover">
+        <thead class="table-primary">
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Department name</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="department : ${departments}">
+            <td th:text="${department.id}">VALUE</td>
+            <td>
+                <a th:href="@{/departments/{id}(id=${department.id})}" th:text="${department.name}">VALUE</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            <li th:class="${currentPage <= 1} ? 'page-item disabled' : 'page-item'">
+                <a class="page-link" th:href="@{/departments(page=${currentPage - 1})}">Previous</a>
+            </li>
+            <li th:class="${currentPage >= lastPage} ? 'page-item disabled' : 'page-item'">
+                <a class="page-link" th:href="@{/departments(page=${currentPage + 1})}">Next</a>
+            </li>
+        </ul>
+    </nav>
+    <a href="/departments/new" class="btn btn-primary mt-3">
+        Add new department
+    </a>
+</div>
+</body>
+</html>
