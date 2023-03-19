@@ -2,6 +2,7 @@ package com.mikhail.tarasevich.university.service.impl;
 
 import com.mikhail.tarasevich.university.dao.GroupDao;
 import com.mikhail.tarasevich.university.dao.StudentDao;
+import com.mikhail.tarasevich.university.dto.CourseResponse;
 import com.mikhail.tarasevich.university.dto.StudentRequest;
 import com.mikhail.tarasevich.university.dto.StudentResponse;
 import com.mikhail.tarasevich.university.entity.Student;
@@ -464,6 +465,28 @@ class StudentServiceImplTest {
         verify(studentDao, times(1)).findStudentsRelateToGroup(teacherId);
         verify(mapper, times(1)).toResponse(STUDENT_ENTITY_WITH_ID_1);
         verify(mapper, times(1)).toResponse(STUDENT_ENTITY_WITH_ID_2);
+    }
+
+    @Test
+    void findStudentsNotRelateToGroup_inputGroupId_expectedStudentList() {
+        List<Student> studentsRelateToGroup = new ArrayList<>();
+        studentsRelateToGroup.add(STUDENT_ENTITY_WITH_ID_2);
+
+        List<StudentResponse> expected = new ArrayList<>();
+        expected.add(STUDENT_RESPONSE_WITH_ID_1);
+
+        int groupId = 1;
+
+        when(studentDao.findAll()).thenReturn(studentEntitiesWithId);
+        when(studentDao.findStudentsRelateToGroup(groupId)).thenReturn(studentsRelateToGroup);
+        when(mapper.toResponse(STUDENT_ENTITY_WITH_ID_1)).thenReturn(STUDENT_RESPONSE_WITH_ID_1);
+
+        List<StudentResponse> students = studentService.findStudentsNotRelateToGroup(groupId);
+
+        assertEquals(expected, students);
+        verify(studentDao, times(1)).findAll();
+        verify(studentDao, times(1)).findStudentsRelateToGroup(groupId);
+        verify(mapper, times(1)).toResponse(STUDENT_ENTITY_WITH_ID_1);
     }
 
     @Test

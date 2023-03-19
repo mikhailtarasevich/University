@@ -9,5 +9,8 @@ public interface GroupService extends CrudService<GroupRequest, GroupResponse> {
 
     List<GroupResponse> findGroupsRelateToTeacher (int teacherId);
     List<GroupResponse> findGroupsNotRelateToTeacher (int teacherId);
+    List<GroupResponse> findGroupsRelateToFaculty(int facultyId);
+    List<GroupResponse> findGroupsRelateToEducationForm(int educationFormId);
+    int lastPageNumber();
 
 }

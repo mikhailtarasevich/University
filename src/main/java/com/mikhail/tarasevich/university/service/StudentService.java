@@ -10,5 +10,6 @@ public interface StudentService extends UserService<StudentRequest, StudentRespo
 
     void unsubscribeStudentFromGroup(int userId);
     List<StudentResponse> findStudentsRelateToGroup(int groupId);
+    List<StudentResponse> findStudentsNotRelateToGroup(int groupId);
 
 }

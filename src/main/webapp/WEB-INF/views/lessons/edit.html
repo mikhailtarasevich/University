@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}"
+>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Edit lesson</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-50 p-2 mx-auto">
+    <h1>Edit lesson information</h1>
+    <br>
+    <form th:method="PATCH" th:action="@{/lessons/{id}(id=${lesson.id})}" th:object="${lesson}">
+        <div class="form-floating mb-3">
+            <input class="form-control" th:field="*{name}" id="name"/>
+            <label for="name">Edit name: </label>
+        </div>
+        <br>
+        <h5>Choose group:</h5>
+        <br>
+        <select class="form-select mb-3" th:field="*{groupId}">
+            <th:block th:each="group : ${groups}">
+                <option th:value="${group.id}" th:text="${group.name}">GROUP NAME</option>
+            </th:block>
+        </select>
+        <br>
+        <h5>Choose teacher:</h5>
+        <br>
+        <select class="form-select mb-3" th:field="*{teacherId}">
+            <th:block th:each="teacher : ${teachers}">
+                <option th:value="${teacher.id}" th:text="${teacher.firstName + ' ' + teacher.lastName}">TEACHER
+                </option>
+            </th:block>
+        </select>
+        <br>
+        <h5>Choose course:</h5>
+        <br>
+        <select class="form-select mb-3" th:field="*{courseId}">
+            <th:block th:each="course : ${courses}">
+                <option th:value="${course.id}" th:text="${course.name}">COURSE NAME</option>
+            </th:block>
+        </select>
+        <br>
+        <h5>Choose lesson type:</h5>
+        <br>
+        <select class="form-select mb-3" th:field="*{lessonTypeId}">
+            <th:block th:each="lessonType : ${lessonTypes}">
+                <option th:value="${lessonType.id}" th:text="${lessonType.name}">LESSON TYPE NAME</option>
+            </th:block>
+        </select>
+        <br>
+        <h5>Choose start time:</h5>
+        <br>
+        <input th:value="*{startTime}" th:name="dateTime" class="form-control" type="datetime-local"
+               placeholder="Select datetime">
+        <br>
+        <input class="btn btn-primary" type="submit" value="Edit lesson information"/>
+        <br><br>
+    </form>
+    <a href="/lessons">
+        <button class="btn btn-primary">Back to all lessons page</button>
+    </a>
+    <br>
+</div>
+</body>
+</html>

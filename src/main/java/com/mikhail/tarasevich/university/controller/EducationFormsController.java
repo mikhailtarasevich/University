@@ -4,6 +4,8 @@ import com.mikhail.tarasevich.university.dto.EducationFormRequest;
 import com.mikhail.tarasevich.university.dto.EducationFormResponse;
 import com.mikhail.tarasevich.university.dto.TeacherTitleRequest;
 import com.mikhail.tarasevich.university.service.EducationFormService;
+import com.mikhail.tarasevich.university.service.GroupService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -13,9 +15,12 @@ import org.springframework.web.bind.annotation.*;
 public class EducationFormsController {
 
     private final EducationFormService educationFormService;
+    private final GroupService groupService;
 
-    public EducationFormsController(EducationFormService educationFormService) {
+    @Autowired
+    public EducationFormsController(EducationFormService educationFormService, GroupService groupService) {
         this.educationFormService = educationFormService;
+        this.groupService = groupService;
     }
 
     @GetMapping
@@ -30,6 +35,7 @@ public class EducationFormsController {
     @GetMapping("/{id}")
     public String showEducationForm(@PathVariable("id") int id, Model model) {
         model.addAttribute("educationForm", educationFormService.findById(id));
+        model.addAttribute("groups", groupService.findGroupsRelateToEducationForm(id));
 
         return "educationForms/show-education-form";
     }

@@ -286,4 +286,15 @@ class LessonServiceImplTest {
         verify(lessonDao, times(1)).findLessonsRelateToGroup(1);
     }
 
+    @Test
+    void lastPageNumber_inputNothing_expectedLastPageNumber() {
+        when(lessonDao.count()).thenReturn(5L);
+
+        int expected = (int) Math.ceil(5.0 / AbstractPageableService.ITEMS_PER_PAGE);
+
+        assertEquals(expected, lessonService.lastPageNumber());
+
+        verify(lessonDao, times(1)).count();
+    }
+
 }

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}"
+>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Create group</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-50 p-2 mx-auto">
+    <h1>Create new group</h1>
+    <br>
+    <form th:method="POST" th:action="@{/groups}" th:object="${group}" class="needs-validation">
+        <div class="form-floating mb-3">
+            <input class="form-control" th:field="*{name}" id="name"/>
+            <label for="name">Enter group name: </label>
+        </div>
+        <br>
+        <h5>Choose faculty:</h5>
+        <br>
+        <select class="form-select mb-3" th:field="*{facultyId}">
+            <th:block th:each="faculty : ${faculties}">
+                <option th:value="${faculty.id}" th:text="${faculty.name}">FACULTY NAME</option>
+            </th:block>
+        </select>
+        <br>
+        <h5>Choose head student:</h5>
+        <br>
+        <select class="form-select mb-3" th:field="*{headStudentId}">
+            <th:block th:each="student : ${students}">
+                <option th:value="${student.id}" th:text="${student.firstName + ' ' + student.lastName}">HEAD STUDENT
+                </option>
+            </th:block>
+        </select>
+        <br>
+        <h5>Choose education form:</h5>
+        <br>
+        <select class="form-select mb-3" th:field="*{educationFormId}">
+            <th:block th:each="educationForm : ${educationForms}">
+                <option th:value="${educationForm.id}" th:text="${educationForm.name}">EDUCATION FORM NAME</option>
+            </th:block>
+        </select>
+        <br>
+        <input class="btn btn-primary" type="submit" value="Add group"/>
+        <br><br>
+    </form>
+    <a href="/groups">
+        <button class="btn btn-primary">Back to all groups page</button>
+    </a>
+</div>
+</body>
+</html>

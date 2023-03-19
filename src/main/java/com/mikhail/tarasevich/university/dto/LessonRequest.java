@@ -1,9 +1,5 @@
 package com.mikhail.tarasevich.university.dto;
 
-import com.mikhail.tarasevich.university.entity.Course;
-import com.mikhail.tarasevich.university.entity.Group;
-import com.mikhail.tarasevich.university.entity.LessonType;
-import com.mikhail.tarasevich.university.entity.Teacher;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -13,10 +9,10 @@ public class LessonRequest {
 
     private int id;
     private String name;
-    private Group group;
-    private Teacher teacher;
-    private Course course;
-    private LessonType lessonType;
+    private int groupId;
+    private int teacherId;
+    private int courseId;
+    private int lessonTypeId;
     private LocalDateTime startTime;
 
 }

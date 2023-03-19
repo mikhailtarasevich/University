@@ -12,26 +12,36 @@
     <h1>Teacher title information</h1>
     <br>
     <div class="mb-2 row">
-        <label for="name" class="col col-form-label">Name:</label>
+        <label for="name" class="col col-form-label">Teacher title:</label>
         <div class="col">
             <input type="text" readonly class="form-control-plaintext text-center" id="name"
                    th:value="${teacherTitle.name}"/>
         </div>
     </div>
-    <br><br>
-    <div class="mb-4 row">
-        <a href="/teacher-titles">
-            <button class="btn btn-primary">Back to all teacher titles page</button>
-        </a>
+    <div class="mb-2 row">
+        <label for="teachers" class="col col-form-label" th:text="${teacherTitle.name} + 's\' list:'">VALUE</label>
+        <div class="col col-form-label">
+            <ul th:each="teacher : ${teachers}">
+                <a th:href="@{/teachers/{id}(id=${teacher.id})}">
+                    <li th:text="${teacher.firstName + ' ' + teacher.lastName}" id="teachers"/>
+                </a>
+            </ul>
+        </div>
     </div>
+    <br><br>
     <div class="mb-4 row">
         <a th:href="@{/teacher-titles/{id}/edit(id=${teacherTitle.id})}">
             <button class="btn btn-primary">Edit teacher title information</button>
         </a>
     </div>
     <div class="mb-4 row">
+        <a href="/teacher-titles">
+            <button class="btn btn-primary">Back to all teacher titles page</button>
+        </a>
+    </div>
+    <div class="mb-4 row">
         <form th:method="DELETE" th:action="@{/teacher-titles/{id}(id=${teacherTitle.id})}" th:object="${teacherTitle}">
-            <input class="btn btn-primary" type="submit" value="Delete teacher title"/>
+            <input class="btn btn-danger" type="submit" value="Delete teacher title"/>
         </form>
     </div>
 </div>

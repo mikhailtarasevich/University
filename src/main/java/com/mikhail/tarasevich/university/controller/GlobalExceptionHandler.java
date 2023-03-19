@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
         return mav;
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler({Exception.class, RuntimeException.class})
     public ModelAndView commonException(Exception ex, HttpServletRequest req) {
         ModelAndView mav = new ModelAndView();
         mav.addObject("exception", ex);

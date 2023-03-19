@@ -14,9 +14,9 @@ public class GroupMapperImpl implements GroupMapper {
         return Group.builder()
                 .withId(g.getId())
                 .withName(g.getName())
-                .withFaculty(g.getFaculty())
-                .withHeadStudent(g.getHeadStudent())
-                .withEducationForm(g.getEducationForm())
+                .withFaculty(Faculty.builder().withId(g.getFacultyId()).build())
+                .withHeadStudent(Student.builder().withId(g.getHeadStudentId()).build())
+                .withEducationForm(EducationForm.builder().withId(g.getEducationFormId()).build())
                 .build();
     }
 

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}"
+>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Lesson's info</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-50 p-3 mx-auto">
+    <h1>Lesson information</h1>
+    <br>
+    <div class="mb-2 row">
+        <label for="lessonName" class="col col-form-label">Lesson name:</label>
+        <div class="col">
+            <input type="text" readonly class="form-control-plaintext text-center" id="lessonName"
+                   th:value="${lesson.name}"/>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="startTime" class="col col-form-label">Start time:</label>
+        <div class="col">
+            <input type="text" readonly class="form-control-plaintext text-center" id="startTime"
+                   th:value="${#temporals.format(lesson.startTime, 'dd-MM-yyyy HH:mm')}"/>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="duration" class="col col-form-label">Duration:</label>
+        <div class="col col-form-label" th:switch="${lesson.lessonType.duration.toHours()}" id="duration">
+            <span th:case="'0'" th:text="${lesson.lessonType.duration.toMinutes() + ' minutes'}"/>
+            <span th:case="'1'" th:text="${lesson.lessonType.duration.toHours() + ' hour ' +
+                (lesson.lessonType.duration.toMinutes() - 60*lesson.lessonType.duration.toHours()) + ' minutes'}"/>
+            <span th:case="*" th:text="${lesson.lessonType.duration.toHours() + ' hours ' +
+                (lesson.lessonType.duration.toMinutes() - 60*lesson.lessonType.duration.toHours()) + ' minutes'}"/>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="groupName" class="col col-form-label">Group:</label>
+        <div class="col">
+            <a th:href="@{/groups/{id}(id=${lesson.group.id})}">
+                <input type="text" readonly class="form-control-plaintext text-center" id="groupName"
+                       th:value="${lesson.group.name}"/>
+            </a>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="teacherName" class="col col-form-label">Teacher name:</label>
+        <div class="col">
+            <a th:href="@{/teachers/{id}(id=${lesson.teacher.id})}">
+                <input type="text" readonly class="form-control-plaintext text-center" id="teacherName"
+                       th:value="${lesson.teacher.firstName + ' ' + lesson.teacher.lastName}"/>
+            </a>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="courseName" class="col col-form-label">Course:</label>
+        <div class="col">
+            <a th:href="@{/courses/{id}(id=${lesson.course.id})}">
+                <input type="text" readonly class="form-control-plaintext text-center" id="courseName"
+                       th:value="${lesson.course.name}"/>
+            </a>
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label for="lessonTypeName" class="col col-form-label">Lesson type:</label>
+        <div class="col">
+            <a th:href="@{/lesson-types/{id}(id=${lesson.lessonType.id})}">
+                <input type="text" readonly class="form-control-plaintext text-center" id="lessonTypeName"
+                       th:value="${lesson.lessonType.name}"/>
+            </a>
+        </div>
+    </div>
+    <br><br>
+    <div class="mb-4 row">
+        <a th:href="@{/lessons/{id}/edit(id=${lesson.id})}">
+            <button class="btn btn-primary">Edit lesson information</button>
+        </a>
+    </div>
+    <div class="mb-4 row">
+        <a href="/lessons">
+            <button class="btn btn-primary">Back to all lessons page</button>
+        </a>
+    </div>
+    <div class="mb-4 row">
+        <form th:method="DELETE" th:action="@{/lessons/{id}(id=${lesson.id})}" th:object="${lesson}">
+            <input class="btn btn-danger" type="submit" value="Delete lesson"/>
+        </form>
+    </div>
+</div>
+</body>
+</html>

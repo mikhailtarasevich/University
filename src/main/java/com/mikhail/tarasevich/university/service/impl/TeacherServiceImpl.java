@@ -4,6 +4,7 @@ import com.mikhail.tarasevich.university.dao.CourseDao;
 import com.mikhail.tarasevich.university.dao.GroupDao;
 import com.mikhail.tarasevich.university.dao.LessonDao;
 import com.mikhail.tarasevich.university.dao.TeacherDao;
+import com.mikhail.tarasevich.university.dto.GroupResponse;
 import com.mikhail.tarasevich.university.dto.TeacherRequest;
 import com.mikhail.tarasevich.university.dto.TeacherResponse;
 import com.mikhail.tarasevich.university.entity.Teacher;
@@ -146,6 +147,14 @@ public class TeacherServiceImpl
     @Override
     public List<TeacherResponse> findTeachersRelateToDepartment(int departmentId) {
         return userDao.findTeachersRelateToDepartment(departmentId).stream()
+                .map(userMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TeacherResponse> findTeachersRelateToTeacherTitle(int teacherTitleId) {
+        return userDao.findAll().stream()
+                .filter(t-> t.getTeacherTitle().getId() == teacherTitleId)
                 .map(userMapper::toResponse)
                 .collect(Collectors.toList());
     }

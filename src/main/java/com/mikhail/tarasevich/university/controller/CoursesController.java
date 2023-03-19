@@ -3,6 +3,7 @@ package com.mikhail.tarasevich.university.controller;
 import com.mikhail.tarasevich.university.dto.CourseRequest;
 import com.mikhail.tarasevich.university.dto.CourseResponse;
 import com.mikhail.tarasevich.university.service.CourseService;
+import com.mikhail.tarasevich.university.service.TeacherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,10 +14,12 @@ import org.springframework.web.bind.annotation.*;
 public class CoursesController {
 
     private final CourseService courseService;
+    private final TeacherService teacherService;
 
     @Autowired
-    public CoursesController(CourseService courseService) {
+    public CoursesController(CourseService courseService, TeacherService teacherService) {
         this.courseService = courseService;
+        this.teacherService = teacherService;
     }
 
     @GetMapping
@@ -31,6 +34,7 @@ public class CoursesController {
     @GetMapping("/{id}")
     public String showCourse(@PathVariable("id") int id, Model model) {
         model.addAttribute("course", courseService.findById(id));
+        model.addAttribute("teachers", teacherService.findTeachersRelateToCourse(id));
 
         return "courses/show-course";
     }
