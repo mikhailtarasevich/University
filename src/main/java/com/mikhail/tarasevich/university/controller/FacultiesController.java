@@ -73,6 +73,7 @@ public class FacultiesController {
         facultyService.edit(facultyRequest);
 
         model.addAttribute("faculty", facultyService.findById(id));
+        model.addAttribute("groups", groupService.findGroupsRelateToFaculty(id));
 
         return "faculties/show-faculty";
     }

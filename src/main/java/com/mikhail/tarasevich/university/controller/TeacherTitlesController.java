@@ -72,6 +72,7 @@ public class TeacherTitlesController {
         teacherTitleService.edit(teacherTitleRequest);
 
         model.addAttribute("teacherTitle", teacherTitleService.findById(id));
+        model.addAttribute("teachers", teacherService.findTeachersRelateToTeacherTitle(id));
 
         return "teacherTitles/show-teacher-title";
     }

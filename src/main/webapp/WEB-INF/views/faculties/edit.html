@@ -11,7 +11,7 @@
 <div layout:fragment="content" class="w-50 p-2 mx-auto">
     <h1>Edit faculty information</h1>
     <br>
-    <form th:method="PATCH" th:action="@{/facultys/{id}(id=${faculty.id})}" th:object="${faculty}">
+    <form th:method="PATCH" th:action="@{/faculties/{id}(id=${faculty.id})}" th:object="${faculty}">
         <div class="form-floating mb-3">
             <input class="form-control" th:field="*{name}" id="name"/>
             <label for="name">Edit name: </label>

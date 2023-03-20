@@ -73,6 +73,7 @@ public class EducationFormsController {
         educationFormService.edit(educationFormRequest);
 
         model.addAttribute("educationForm", educationFormService.findById(id));
+        model.addAttribute("groups", groupService.findGroupsRelateToEducationForm(id));
 
         return "educationForms/show-education-form";
     }
