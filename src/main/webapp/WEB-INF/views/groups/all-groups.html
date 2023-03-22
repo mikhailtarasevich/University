@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/layout}">
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}"
+      xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8"/>
     <title>All groups</title>
@@ -34,9 +36,11 @@
             </li>
         </ul>
     </nav>
-    <a href="/groups/new" class="btn btn-primary mt-3">
-        Add new group
-    </a>
+    <div sec:authorize="hasAuthority('WRITE')">
+        <a href="/groups/new" class="btn btn-primary mt-3">
+            Add new group
+        </a>
+    </div>
 </div>
 </body>
 </html>

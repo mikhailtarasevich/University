@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/layout}">
+      layout:decorate="~{layouts/layout}" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8"/>
     <title>All lessons relate to group</title>
@@ -40,9 +40,11 @@
         </tr>
         </tbody>
     </table>
-    <a href="/lessons/new" class="btn btn-primary mt-3">
-        Add new lesson
-    </a>
+    <div sec:authorize="hasAuthority('WRITE')">
+        <a href="/lessons/new" class="btn btn-primary mt-3">
+            Add new lesson
+        </a>
+    </div>
     <br>
     <a href="/lessons" class="btn btn-primary mt-3">
         Back to all lessons page

@@ -1,8 +1,8 @@
 package com.mikhail.tarasevich.university.service.impl;
 
 import com.mikhail.tarasevich.university.dao.GroupDao;
+import com.mikhail.tarasevich.university.dao.RoleDao;
 import com.mikhail.tarasevich.university.dao.StudentDao;
-import com.mikhail.tarasevich.university.dto.CourseResponse;
 import com.mikhail.tarasevich.university.dto.StudentRequest;
 import com.mikhail.tarasevich.university.dto.StudentResponse;
 import com.mikhail.tarasevich.university.entity.Student;
@@ -32,6 +32,8 @@ class StudentServiceImplTest {
     StudentDao studentDao;
     @Mock
     GroupDao groupDao;
+    @Mock
+    RoleDao roleDao;
     @Mock
     PasswordEncoder passwordEncoder;
     @Mock
@@ -114,6 +116,7 @@ class StudentServiceImplTest {
         when(studentDao.save(STUDENT_ENTITY_1)).thenReturn(STUDENT_ENTITY_WITH_ID_1);
         when(mapper.toResponse(STUDENT_ENTITY_WITH_ID_1)).thenReturn(STUDENT_RESPONSE_WITH_ID_1);
         doNothing().when(validator).validateUserNameNotNullOrEmpty(STUDENT_REQUEST_1);
+        doNothing().when(roleDao).addRoleForUser(1, 3);
 
         StudentResponse StudentResponse = studentService.register(STUDENT_REQUEST_1);
 
@@ -122,6 +125,7 @@ class StudentServiceImplTest {
         verify(studentDao, times(1)).save(STUDENT_ENTITY_1);
         verify(mapper, times(1)).toResponse(STUDENT_ENTITY_WITH_ID_1);
         verify(validator, times(1)).validateUserNameNotNullOrEmpty(STUDENT_REQUEST_1);
+        verify(roleDao, times(1)).addRoleForUser(1,3);
     }
 
     @Test
@@ -373,6 +377,7 @@ class StudentServiceImplTest {
 
         when(studentDao.findById(id)).thenReturn(Optional.of(STUDENT_ENTITY_1));
         doNothing().when(groupDao).unbindGroupsFromStudent(id);
+        doNothing().when(roleDao).unbindRoleFromUser(id);
         when(studentDao.deleteById(id)).thenReturn(true);
 
         boolean result = studentService.deleteById(1);
@@ -381,6 +386,7 @@ class StudentServiceImplTest {
         verify(studentDao, times(1)).findById(id);
         verify(studentDao, times(1)).deleteById(id);
         verify(groupDao, times(1)).unbindGroupsFromStudent(id);
+        verify(roleDao, times(1)).unbindRoleFromUser(id);
     }
 
     @Test
@@ -405,6 +411,8 @@ class StudentServiceImplTest {
 
         doNothing().when(groupDao).unbindGroupsFromStudent(1);
         doNothing().when(groupDao).unbindGroupsFromStudent(2);
+        doNothing().when(roleDao).unbindRoleFromUser(1);
+        doNothing().when(roleDao).unbindRoleFromUser(2);
         when(studentDao.deleteByIds(ids)).thenReturn(true);
 
         boolean result = studentService.deleteByIds(ids);
@@ -413,6 +421,8 @@ class StudentServiceImplTest {
         verify(studentDao, times(1)).deleteByIds(ids);
         verify(groupDao, times(1)).unbindGroupsFromStudent(1);
         verify(groupDao, times(1)).unbindGroupsFromStudent(2);
+        verify(roleDao, times(1)).unbindRoleFromUser(1);
+        verify(roleDao, times(1)).unbindRoleFromUser(2);
     }
 
     @Test
@@ -423,6 +433,8 @@ class StudentServiceImplTest {
 
         doNothing().when(groupDao).unbindGroupsFromStudent(1);
         doNothing().when(groupDao).unbindGroupsFromStudent(2);
+        doNothing().when(roleDao).unbindRoleFromUser(1);
+        doNothing().when(roleDao).unbindRoleFromUser(2);
         when(studentDao.deleteByIds(ids)).thenReturn(false);
 
         boolean result = studentService.deleteByIds(ids);
@@ -431,6 +443,8 @@ class StudentServiceImplTest {
         verify(studentDao, times(1)).deleteByIds(ids);
         verify(groupDao, times(1)).unbindGroupsFromStudent(1);
         verify(groupDao, times(1)).unbindGroupsFromStudent(2);
+        verify(roleDao, times(1)).unbindRoleFromUser(1);
+        verify(roleDao, times(1)).unbindRoleFromUser(2);
     }
 
     @Test

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/layout}">
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}"
+      xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8"/>
     <title>All lessons</title>
@@ -48,9 +50,11 @@
             </li>
         </ul>
     </nav>
-    <a href="/lessons/new" class="btn btn-primary mt-3">
-        Add new lesson
-    </a>
+    <div sec:authorize="hasAuthority('WRITE')">
+        <a href="/lessons/new" class="btn btn-primary mt-3">
+            Add new lesson
+        </a>
+    </div>
     <br>
     <form th:method="GET" th:action="@{/lessons/group}" class="w-50 p-2 mx-auto">
         <br>

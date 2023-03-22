@@ -5,7 +5,6 @@ import com.mikhail.tarasevich.university.entity.User;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.RowMapper;
 
-
 public abstract class AbstractUserDaoImpl<E extends User> extends AbstractPageableCrudDaoImpl<E> implements UserDao<E> {
 
     protected final String updateGeneralUserInfoQuery;

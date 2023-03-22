@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/layout}"
->
+      xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8"/>
     <title>Teacher title's info</title>
@@ -29,7 +29,7 @@
         </div>
     </div>
     <br><br>
-    <div class="mb-4 row">
+    <div sec:authorize="hasAuthority('WRITE')" class="mb-4 row">
         <a th:href="@{/teacher-titles/{id}/edit(id=${teacherTitle.id})}">
             <button class="btn btn-primary">Edit teacher title information</button>
         </a>
@@ -39,7 +39,7 @@
             <button class="btn btn-primary">Back to all teacher titles page</button>
         </a>
     </div>
-    <div class="mb-4 row">
+    <div sec:authorize="hasAuthority('DELETE')" class="mb-4 row">
         <form th:method="DELETE" th:action="@{/teacher-titles/{id}(id=${teacherTitle.id})}" th:object="${teacherTitle}">
             <input class="btn btn-danger" type="submit" value="Delete teacher title"/>
         </form>

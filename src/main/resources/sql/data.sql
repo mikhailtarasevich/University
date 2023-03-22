@@ -130,67 +130,132 @@ VALUES ('Professor'),
        ('Lecturer'),
        ('Assistant');
 
-INSERT INTO users (user_type, first_name, last_name, gender, email, password, group_id, teacher_title_id, department_id)
-VALUES ('student', 'Tom', 'Robinson', 0, 'tomrobinson@gmail.com', '1234', NULL, NULL, NULL),
-       ('student', 'Rory', 'McDonald', 0, 'mcdonald@yandex.ru', '1111', NULL, NULL, NULL),
-       ('student', 'Kate', 'Austin', 1, 'kitty@yahoo.com', 'kate12#', NULL, NULL, NULL),
-       ('student', 'Amanda', 'Johnson', 1, 'amandaj@gmail.com', '0000', NULL, NULL, NULL),
-       ('student', 'Ron', 'Wisley', 0, 'ron@rambler.ru', '43gb', NULL, NULL, NULL),
-       ('student', 'Harry', 'Portnoy', 0, 'gryffindor@hogwarts.com', 'magic7', NULL, NULL, NULL),
-       ('student', 'Lilly', 'Potter', 1, 'lilly@gmail.com', '43gg', NULL, NULL, NULL),
-       ('student', 'Miguel', 'Fernandez', 0, 'fernandez@yahoo.com', '9999', NULL, NULL, NULL),
-       ('student', 'John', 'Doe', 0, 'johndoe@example.com', 'password', NULL, NULL, NULL),
-       ('student', 'Jane', 'Doe', 1, 'janedoe@example.com', 'password', NULL, NULL, NULL),
-       ('student', 'Bob', 'Smith', 0, 'bobsmith@example.com', 'password', NULL, NULL, NULL),
-       ('student', 'Mary', 'Johnson', 1, 'maryjohnson@example.com', 'password', NULL, NULL, NULL),
-       ('student', 'David', 'Lee', 0, 'davidlee@example.com', 'password', NULL, NULL, NULL),
-       ('student', 'Sarah', 'Kim', 1, 'sarahkim@example.com', 'password', NULL, NULL, NULL),
-       ('student', 'Michael', 'Wang', 0, 'michaelwang@example.com', 'password', NULL, NULL, NULL),
-       ('student', 'Emily', 'Chen', 1, 'emilychen@example.com', 'password', NULL, NULL, NULL),
-       ('student', 'William', 'Liu', 0, 'williamliu@example.com', 'password', NULL, NULL, NULL),
-       ('student', 'Lucy', 'Garcia', 1, 'lucygarcia@example.com', 'password', NULL, NULL, NULL),
-       ('student', 'Andrew', 'Martinez', 0, 'andrewmartinez@example.com', 'password', NULL, NULL, NULL),
-       ('student', 'Olivia', 'Rodriguez', 1, 'oliviarodriguez@example.com', 'password', NULL, NULL, NULL),
-       ('student', 'Daniel', 'Lee', 0, 'daniellee@example.com', 'password', NULL, NULL, NULL),
-       ('student', 'Sophia', 'Hernandez', 1, 'sophiahernandez@example.com', 'password', NULL, NULL, NULL),
-       ('student', 'Emma', 'Jones', 1, 'emmajones@gmail.com', 'emj42', NULL, NULL, NULL),
-       ('student', 'Ethan', 'Jackson', 0, 'ethanjackson@gmail.com', 'pass2021', NULL, NULL, NULL),
-       ('student', 'Mia', 'Clark', 1, 'miaclark@gmail.com', 'pass2223', NULL, NULL, NULL),
-       ('student', 'Oliver', 'Lee', 0, 'oliverlee@gmail.com', 'pass2425', NULL, NULL, NULL),
-       ('student', 'Ava', 'Green', 1, 'avagreen@gmail.com', 'pass2627', NULL, NULL, NULL),
-       ('student', 'Noah', 'Baker', 0, 'noahbaker@gmail.com', 'pass2829', NULL, NULL, NULL),
-       ('student', 'Charlotte', 'Garcia', 1, 'charlottegarcia@gmail.com', 'pass3031', NULL, NULL, NULL),
-       ('student', 'Liam', 'Rodriguez', 0, 'liamrodriguez@gmail.com', 'pass3233', NULL, NULL, NULL),
-       ('student', 'Amelia', 'Martinez', 1, 'ameliamartinez@gmail.com', 'pass3435', NULL, NULL, NULL),
-       ('student', 'Lucas', 'Hernandez', 0, 'lucashernandez@gmail.com', 'pass3637', NULL, NULL, NULL),
-       ('student', 'Emily', 'Lopez', 1, 'emilylopez@gmail.com', 'pass3839', NULL, NULL, NULL),
-       ('student', 'Mason', 'Gonzalez', 0, 'masongonzalez@gmail.com', 'pass4041', NULL, NULL, NULL),
-       ('student', 'Sofia', 'Perez', 1, 'sofiaperez@gmail.com', 'pass4243', NULL, NULL, NULL),
-       ('student', 'Elijah', 'Sanchez', 0, 'elijahsanchez@gmail.com', 'pass4445', NULL, NULL, NULL),
-       ('student', 'Victoria', 'Taylor', 1, 'victoriataylor@gmail.com', 'pass4647', NULL, NULL, NULL),
-       ('student', 'Adam', 'Smith', 0, 'asmith@gmail.com', 'smith12', NULL, NULL, NULL),
-       ('student', 'Mia', 'Garcia', 1, 'miagarcia@hotmail.com', 'mg123', NULL, NULL, NULL),
-       ('student', 'Oliver', 'Davis', 0, 'odavis@gmail.com', 'oliv3r', NULL, NULL, NULL),
-       ('student', 'Isabella', 'Miller', 1, 'isamiller@yahoo.com', 'isamill', NULL, NULL, NULL),
-       ('student', 'Lucas', 'Martinez', 0, 'lucasmartinez@gmail.com', 'lucm23', NULL, NULL, NULL),
-       ('student', 'Charlotte', 'Wilson', 1, 'cwilson@gmail.com', 'charwil', NULL, NULL, NULL),
-       ('student', 'Noah', 'Taylor', 0, 'ntaylor@yahoo.com', 'noaht23', NULL, NULL, NULL),
-       ('student', 'Sophia', 'Anderson', 1, 'sanderson@gmail.com', 'sophiaa', NULL, NULL, NULL);
 
 INSERT INTO users (user_type, first_name, last_name, gender, email, password, group_id, teacher_title_id, department_id)
-VALUES ('teacher', 'John', 'Smith', 0, 'johnsmith@gmail.com', '1234', NULL, 1, NULL),
-       ('teacher', 'Jane', 'Carlos', 1, 'carlos@yandex.ru', '1234', NULL, 2, NULL),
-       ('teacher', 'David', 'Johnson', 0, 'davidj@yahoo.com', 'david123#', NULL, 3, NULL),
-       ('teacher', 'Sarah', 'Lee', 1, 'sarahlee@gmail.com', '0000', NULL, 1, NULL),
-       ('teacher', 'Michael', 'Jordan', 0, 'mjordan@rambler.ru', 'mjordan23', NULL, 2, NULL),
-       ('teacher', 'Katie', 'Johnson', 1, 'katiej@gmail.com', '43gg', NULL, 3, NULL),
-       ('teacher', 'Anthony', 'Giddens', 0, 'giddensa@yahoo.com', '9999', NULL, 1, NULL),
-       ('teacher', 'Linda', 'Briskin', 1, 'lindab@gmail.com', 'briskin19', NULL, 2, NULL),
-       ('teacher', 'James', 'Baldwin', 0, 'baldwinj@gmail.com', 'baldwin33', NULL, 3, NULL),
-       ('teacher', 'Angela', 'Davis', 1, 'davisa@gmail.com', 'davis22#', NULL, 1, NULL),
-       ('teacher', 'Robert', 'Sapolski', 0, 'rsapolski@gmail.com', '3245', NULL, 1, NULL),
-       ('teacher', 'Jordan', 'Pitersen', 0, 'pitersen@mail.ru', 'wo#$', NULL, 2, NULL),
-       ('teacher', 'Kristina', 'Drugova', 1, 'drugova@gmail.com', 'drdrug18', NULL, 2, NULL);
+VALUES ('student', 'Tom', 'Robinson', 0, 'tomrobinson@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Rory', 'McDonald', 0, 'mcdonald@yandex.ru',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Kate', 'Austin', 1, 'kitty@yahoo.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Amanda', 'Johnson', 1, 'amandaj@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Ron', 'Wisley', 0, 'ron@rambler.ru', '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK',
+        NULL, NULL, NULL),
+       ('student', 'Harry', 'Portnoy', 0, 'gryffindor@hogwarts.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Lilly', 'Potter', 1, 'lilly@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Miguel', 'Fernandez', 0, 'fernandez@yahoo.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'John', 'Doe', 0, 'johndoe@example.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Jane', 'Doe', 1, 'janedoe@example.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Bob', 'Smith', 0, 'bobsmith@example.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Mary', 'Johnson', 1, 'maryjohnson@example.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'David', 'Lee', 0, 'davidlee@example.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Sarah', 'Kim', 1, 'sarahkim@example.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Michael', 'Wang', 0, 'michaelwang@example.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Emily', 'Chen', 1, 'emilychen@example.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'William', 'Liu', 0, 'williamliu@example.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Lucy', 'Garcia', 1, 'lucygarcia@example.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Andrew', 'Martinez', 0, 'andrewmartinez@example.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Olivia', 'Rodriguez', 1, 'oliviarodriguez@example.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Daniel', 'Lee', 0, 'daniellee@example.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Sophia', 'Hernandez', 1, 'sophiahernandez@example.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Emma', 'Jones', 1, 'emmajones@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Ethan', 'Jackson', 0, 'ethanjackson@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Mia', 'Clark', 1, 'miaclark@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Oliver', 'Lee', 0, 'oliverlee@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Ava', 'Green', 1, 'avagreen@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Noah', 'Baker', 0, 'noahbaker@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Charlotte', 'Garcia', 1, 'charlottegarcia@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Liam', 'Rodriguez', 0, 'liamrodriguez@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Amelia', 'Martinez', 1, 'ameliamartinez@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Lucas', 'Hernandez', 0, 'lucashernandez@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Emily', 'Lopez', 1, 'emilylopez@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Mason', 'Gonzalez', 0, 'masongonzalez@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Sofia', 'Perez', 1, 'sofiaperez@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Elijah', 'Sanchez', 0, 'elijahsanchez@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Victoria', 'Taylor', 1, 'victoriataylor@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Adam', 'Smith', 0, 'asmith@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Mia', 'Garcia', 1, 'miagarcia@hotmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Oliver', 'Davis', 0, 'odavis@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Isabella', 'Miller', 1, 'isamiller@yahoo.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Lucas', 'Martinez', 0, 'lucasmartinez@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Charlotte', 'Wilson', 1, 'cwilson@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Noah', 'Taylor', 0, 'ntaylor@yahoo.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL),
+       ('student', 'Sophia', 'Anderson', 1, 'sanderson@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL);
+
+INSERT INTO users (user_type, first_name, last_name, gender, email, password, group_id, teacher_title_id, department_id)
+VALUES ('teacher', 'John', 'Smith', 0, 'johnsmith@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, 1, NULL),
+       ('teacher', 'Jane', 'Carlos', 1, 'carlos@yandex.ru',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, 2, NULL),
+       ('teacher', 'David', 'Johnson', 0, 'davidj@yahoo.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK#', NULL, 3, NULL),
+       ('teacher', 'Sarah', 'Lee', 1, 'sarahlee@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, 1, NULL),
+       ('teacher', 'Michael', 'Jordan', 0, 'mjordan@rambler.ru',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, 2, NULL),
+       ('teacher', 'Katie', 'Johnson', 1, 'katiej@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, 3, NULL),
+       ('teacher', 'Anthony', 'Giddens', 0, 'giddensa@yahoo.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, 1, NULL),
+       ('teacher', 'Linda', 'Briskin', 1, 'lindab@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, 2, NULL),
+       ('teacher', 'James', 'Baldwin', 0, 'baldwinj@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, 3, NULL),
+       ('teacher', 'Angela', 'Davis', 1, 'davisa@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK#', NULL, 1, NULL),
+       ('teacher', 'Robert', 'Sapolski', 0, 'rsapolski@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, 1, NULL),
+       ('teacher', 'Jordan', 'Pitersen', 0, 'pitersen@mail.ru',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK#$', NULL, 2, NULL),
+       ('teacher', 'Kristina', 'Drugova', 1, 'drugova@gmail.com',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, 2, NULL),
+       ('teacher', 'admin', 'admin', 0, 'admin',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, 1, NULL),
+       ('teacher', 'teacher', 'teacher', 1, 'teacher',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, 1, NULL),
+       ('student', 'student', 'student', 1, 'student',
+        '$2a$10$9LBpAplZfA8SLaD1iLKtcedvzpPWdRD/aIKzCqlWZcZhL8hZ8KgQK', NULL, NULL, NULL);
 
 INSERT INTO groups (name, faculty_id, head_user_id, education_form_id)
 VALUES ('g1', 1, 1, 1),
@@ -203,276 +268,75 @@ VALUES ('g1', 1, 1, 1),
        ('g8', 4, 36, 1),
        ('g9', 5, 41, 1);
 
-UPDATE users
-SET group_id = 1
-WHERE id = 1;
-UPDATE users
-SET group_id = 1
-WHERE id = 2;
-UPDATE users
-SET group_id = 1
-WHERE id = 3;
-UPDATE users
-SET group_id = 1
-WHERE id = 4;
-UPDATE users
-SET group_id = 1
-WHERE id = 5;
+UPDATE users SET group_id = 1 WHERE id = 1;
+UPDATE users SET group_id = 1 WHERE id = 2;
+UPDATE users SET group_id = 1 WHERE id = 3;
+UPDATE users SET group_id = 1 WHERE id = 4;
+UPDATE users SET group_id = 1 WHERE id = 5;
 
-UPDATE users
-SET group_id = 2
-WHERE id = 6;
-UPDATE users
-SET group_id = 2
-WHERE id = 7;
-UPDATE users
-SET group_id = 2
-WHERE id = 8;
-UPDATE users
-SET group_id = 2
-WHERE id = 9;
-UPDATE users
-SET group_id = 2
-WHERE id = 10;
+UPDATE users SET group_id = 2 WHERE id = 6;
+UPDATE users SET group_id = 2 WHERE id = 7;
+UPDATE users SET group_id = 2 WHERE id = 8;
+UPDATE users SET group_id = 2 WHERE id = 9;
+UPDATE users SET group_id = 2 WHERE id = 10;
 
-UPDATE users
-SET group_id = 3
-WHERE id = 11;
-UPDATE users
-SET group_id = 3
-WHERE id = 12;
-UPDATE users
-SET group_id = 3
-WHERE id = 13;
-UPDATE users
-SET group_id = 3
-WHERE id = 14;
-UPDATE users
-SET group_id = 3
-WHERE id = 15;
+UPDATE users SET group_id = 3 WHERE id = 11;
+UPDATE users SET group_id = 3 WHERE id = 12;
+UPDATE users SET group_id = 3 WHERE id = 13;
+UPDATE users SET group_id = 3 WHERE id = 14;
+UPDATE users SET group_id = 3 WHERE id = 15;
 
-UPDATE users
-SET group_id = 4
-WHERE id = 16;
-UPDATE users
-SET group_id = 4
-WHERE id = 17;
-UPDATE users
-SET group_id = 4
-WHERE id = 18;
-UPDATE users
-SET group_id = 4
-WHERE id = 19;
-UPDATE users
-SET group_id = 4
-WHERE id = 20;
+UPDATE users SET group_id = 4 WHERE id = 16;
+UPDATE users SET group_id = 4 WHERE id = 17;
+UPDATE users SET group_id = 4 WHERE id = 18;
+UPDATE users SET group_id = 4 WHERE id = 19;
+UPDATE users SET group_id = 4 WHERE id = 20;
 
-UPDATE users
-SET group_id = 5
-WHERE id = 21;
-UPDATE users
-SET group_id = 5
-WHERE id = 22;
-UPDATE users
-SET group_id = 5
-WHERE id = 23;
-UPDATE users
-SET group_id = 5
-WHERE id = 24;
-UPDATE users
-SET group_id = 5
-WHERE id = 25;
+UPDATE users SET group_id = 5 WHERE id = 21;
+UPDATE users SET group_id = 5 WHERE id = 22;
+UPDATE users SET group_id = 5 WHERE id = 23;
+UPDATE users SET group_id = 5 WHERE id = 24;
+UPDATE users SET group_id = 5 WHERE id = 25;
 
-UPDATE users
-SET group_id = 6
-WHERE id = 26;
-UPDATE users
-SET group_id = 6
-WHERE id = 27;
-UPDATE users
-SET group_id = 6
-WHERE id = 28;
-UPDATE users
-SET group_id = 6
-WHERE id = 29;
-UPDATE users
-SET group_id = 6
-WHERE id = 30;
-UPDATE users
-SET group_id = 7
-WHERE id = 31;
-UPDATE users
-SET group_id = 7
-WHERE id = 32;
-UPDATE users
-SET group_id = 7
-WHERE id = 33;
-UPDATE users
-SET group_id = 7
-WHERE id = 34;
-UPDATE users
-SET group_id = 7
-WHERE id = 35;
-UPDATE users
-SET group_id = 8
-WHERE id = 36;
-UPDATE users
-SET group_id = 8
-WHERE id = 37;
-UPDATE users
-SET group_id = 8
-WHERE id = 38;
-UPDATE users
-SET group_id = 8
-WHERE id = 39;
-UPDATE users
-SET group_id = 8
-WHERE id = 40;
-UPDATE users
-SET group_id = 9
-WHERE id = 41;
-UPDATE users
-SET group_id = 9
-WHERE id = 42;
-UPDATE users
-SET group_id = 9
-WHERE id = 43;
-UPDATE users
-SET group_id = 9
-WHERE id = 44;
-UPDATE users
-SET group_id = 9
-WHERE id = 45;
+UPDATE users SET group_id = 6 WHERE id = 26;
+UPDATE users SET group_id = 6 WHERE id = 27;
+UPDATE users SET group_id = 6 WHERE id = 28;
+UPDATE users SET group_id = 6 WHERE id = 29;
+UPDATE users SET group_id = 6 WHERE id = 30;
+
+UPDATE users SET group_id = 7 WHERE id = 31;
+UPDATE users SET group_id = 7 WHERE id = 32;
+UPDATE users SET group_id = 7 WHERE id = 33;
+UPDATE users SET group_id = 7 WHERE id = 34;
+UPDATE users SET group_id = 7 WHERE id = 35;
+
+UPDATE users SET group_id = 8 WHERE id = 36;
+UPDATE users SET group_id = 8 WHERE id = 37;
+UPDATE users SET group_id = 8 WHERE id = 38;
+UPDATE users SET group_id = 8 WHERE id = 39;
+UPDATE users SET group_id = 8 WHERE id = 40;
+
+UPDATE users SET group_id = 9 WHERE id = 41;
+UPDATE users SET group_id = 9 WHERE id = 42;
+UPDATE users SET group_id = 9 WHERE id = 43;
+UPDATE users SET group_id = 9 WHERE id = 44;
+UPDATE users SET group_id = 9 WHERE id = 45;
 
 INSERT INTO user_groups
-VALUES (46, 1),
-       (46, 2),
-       (46, 3),
-       (46, 4),
-       (47, 1),
-       (47, 2),
-       (47, 3),
-       (47, 4),
-       (48, 5),
-       (48, 6),
-       (48, 7),
-       (48, 8),
-       (49, 5),
-       (49, 6),
-       (49, 7),
-       (49, 8),
-       (50, 9),
-       (50, 2),
-       (50, 3),
-       (50, 4),
-       (51, 9),
-       (51, 2),
-       (51, 3),
-       (51, 4),
-       (52, 5),
-       (52, 6),
-       (52, 7),
-       (52, 8),
-       (53, 5),
-       (53, 6),
-       (53, 7),
-       (53, 8),
-       (54, 1),
-       (54, 2),
-       (54, 3),
-       (54, 4),
-       (55, 1),
-       (55, 2),
-       (55, 3),
-       (55, 9),
-       (56, 5),
-       (56, 6),
-       (56, 7),
-       (56, 8),
-       (57, 5),
-       (57, 9),
-       (57, 7),
-       (57, 8),
-       (58, 3),
-       (58, 4),
-       (58, 9),
-       (58, 6);
+VALUES (46, 1), (46, 2), (46, 3), (46, 4), (47, 1), (47, 2), (47, 3), (47, 4), (48, 5), (48, 6), (48, 7), (48, 8),
+       (49, 5), (49, 6), (49, 7), (49, 8), (50, 9), (50, 2), (50, 3), (50, 4), (51, 9), (51, 2), (51, 3), (51, 4),
+       (52, 5), (52, 6), (52, 7), (52, 8), (53, 5), (53, 6), (53, 7), (53, 8), (54, 1), (54, 2), (54, 3), (54, 4),
+       (55, 1), (55, 2), (55, 3), (55, 9), (56, 5), (56, 6), (56, 7), (56, 8), (57, 5), (57, 9), (57, 7), (57, 8),
+       (58, 3), (58, 4), (58, 9), (58, 6);
 
 INSERT INTO user_courses
-VALUES (46, 1),
-       (46, 2),
-       (46, 3),
-       (46, 5),
-       (46, 6),
-       (46, 7),
-       (47, 1),
-       (47, 2),
-       (47, 3),
-       (47, 4),
-       (47, 6),
-       (47, 7),
-       (48, 8),
-       (48, 9),
-       (49, 10),
-       (49, 11),
-       (49, 12),
-       (49, 13),
-       (49, 14),
-       (50, 10),
-       (50, 11),
-       (50, 12),
-       (50, 13),
-       (50, 14),
-       (51, 15),
-       (51, 18),
-       (51, 19),
-       (52, 15),
-       (52, 16),
-       (52, 17),
-       (52, 18),
-       (53, 20),
-       (53, 21),
-       (53, 22),
-       (53, 23),
-       (53, 24),
-       (53, 25),
-       (53, 26),
-       (53, 27),
-       (53, 28),
-       (54, 35),
-       (54, 29),
-       (54, 30),
-       (54, 31),
-       (54, 32),
-       (54, 33),
-       (54, 34),
-       (55, 1),
-       (55, 2),
-       (55, 3),
-       (55, 5),
-       (55, 6),
-       (55, 7),
-       (56, 8),
-       (56, 9),
-       (57, 10),
-       (57, 11),
-       (57, 13),
-       (57, 14),
-       (58, 20),
-       (58, 21),
-       (58, 22),
-       (58, 23),
-       (58, 24),
-       (58, 25),
-       (58, 26),
-       (58, 27),
-       (58, 28),
-       (58, 29),
-       (58, 30),
-       (58, 31),
-       (58, 32),
-       (58, 33),
-       (58, 34);
+VALUES (46, 1), (46, 2), (46, 3), (46, 5), (46, 6), (46, 7), (47, 1), (47, 2), (47, 3), (47, 4), (47, 6), (47, 7),
+       (48, 8), (48, 9), (49, 10), (49, 11), (49, 12), (49, 13), (49, 14), (50, 10), (50, 11), (50, 12), (50, 13),
+       (50, 14), (51, 15), (51, 18), (51, 19), (52, 15), (52, 16), (52, 17), (52, 18), (53, 20), (53, 21), (53, 22),
+       (53, 23), (53, 24), (53, 25), (53, 26), (53, 27), (53, 28), (54, 35), (54, 29), (54, 30), (54, 31), (54, 32),
+       (54, 33), (54, 34), (55, 1), (55, 2), (55, 3), (55, 5), (55, 6), (55, 7), (56, 8), (56, 9), (57, 10), (57, 11),
+       (57, 13), (57, 14), (58, 20), (58, 21), (58, 22), (58, 23), (58, 24), (58, 25), (58, 26), (58, 27), (58, 28),
+       (58, 29), (58, 30), (58, 31), (58, 32), (58, 33), (58, 34);
 
 INSERT INTO departments (name, description)
 VALUES ('Mathematics and mechanics',
@@ -486,88 +350,33 @@ VALUES ('Mathematics and mechanics',
        ('Electrical and heat power engineering',
         'This department focuses on the study of electrical and thermal systems and their applications to engineering problems. Topics may include circuit design, power electronics, control systems, renewable energy, and thermodynamics. Students in this department may learn how to design and analyze systems that convert electrical or thermal energy into useful work or other forms of energy. ');
 
-UPDATE users
-SET department_id = 1
-WHERE id = 46;
-UPDATE users
-SET department_id = 1
-WHERE id = 47;
-UPDATE users
-SET department_id = 2
-WHERE id = 48;
-UPDATE users
-SET department_id = 3
-WHERE id = 49;
-UPDATE users
-SET department_id = 3
-WHERE id = 50;
-UPDATE users
-SET department_id = 4
-WHERE id = 51;
-UPDATE users
-SET department_id = 4
-WHERE id = 52;
-UPDATE users
-SET department_id = 5
-WHERE id = 53;
-UPDATE users
-SET department_id = 5
-WHERE id = 54;
-UPDATE users
-SET department_id = 1
-WHERE id = 55;
-UPDATE users
-SET department_id = 2
-WHERE id = 56;
-UPDATE users
-SET department_id = 3
-WHERE id = 57;
-UPDATE users
-SET department_id = 5
-WHERE id = 58;
+UPDATE users SET department_id = 1 WHERE id = 46;
+UPDATE users SET department_id = 1 WHERE id = 47;
+UPDATE users SET department_id = 2 WHERE id = 48;
+UPDATE users SET department_id = 3 WHERE id = 49;
+UPDATE users SET department_id = 3 WHERE id = 50;
+UPDATE users SET department_id = 4 WHERE id = 51;
+UPDATE users SET department_id = 4 WHERE id = 52;
+UPDATE users SET department_id = 5 WHERE id = 53;
+UPDATE users SET department_id = 5 WHERE id = 54;
+UPDATE users SET department_id = 1 WHERE id = 55;
+UPDATE users SET department_id = 2 WHERE id = 56;
+UPDATE users SET department_id = 3 WHERE id = 57;
+UPDATE users SET department_id = 5 WHERE id = 58;
 
 INSERT INTO department_courses
 VALUES
 --Mathematics and mechanics department
-(1, 1),
-(1, 2),
-(1, 3),
-(1, 4),
-(1, 5),
-(1, 6),
-(1, 7),
+(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7),
 -- Computer and information sciences department
-(2, 8),
-(2, 9),
+(2, 8), (2, 9),
 -- Physics and astronomy department
-(3, 10),
-(3, 11),
-(3, 12),
-(3, 13),
-(3, 14),
+(3, 10), (3, 11), (3, 12), (3, 13), (3, 14),
 -- Industrial ecology and biotechnology department
-(4, 15),
-(4, 16),
-(4, 17),
-(4, 18),
-(4, 19),
+(4, 15), (4, 16), (4, 17), (4, 18), (4, 19),
 -- Electrical and heat power engineering department
-(5, 20),
-(5, 21),
-(5, 22),
-(5, 23),
-(5, 24),
-(5, 25),
-(5, 26),
-(5, 27),
-(5, 28),
-(5, 29),
-(5, 30),
-(5, 31),
-(5, 32),
-(5, 33),
-(5, 34),
-(5, 35);
+(5, 20), (5, 21), (5, 22), (5, 23), (5, 24), (5, 25), (5, 26), (5, 27), (5, 28), (5, 29), (5, 30), (5, 31), (5, 32),
+(5, 33), (5, 34), (5, 35);
 
 INSERT INTO lessons (name, group_id, user_id, course_id, lesson_type_id, start_time)
 VALUES ('lesson 1', 1, 46, 1, 1, '2023-06-22 12:00:00'),
@@ -626,3 +435,28 @@ VALUES ('lesson 1', 1, 46, 1, 1, '2023-06-22 12:00:00'),
        ('lesson 54', 5, 46, 34, 4, '2023-07-05 10:00:00'),
        ('lesson 55', 6, 47, 35, 5, '2023-07-05 14:00:00');
 
+INSERT INTO roles (name)
+VALUES ('ROLE_ADMIN'),
+       ('ROLE_TEACHER'),
+       ('ROLE_STUDENT');
+
+INSERT INTO privileges (name)
+VALUES ('READ'),
+       ('WRITE'),
+       ('DELETE');
+
+INSERT INTO role_privileges (role_id, privilege_id)
+VALUES (1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (3, 1);
+
+INSERT INTO user_roles (user_id, role_id)
+SELECT id, 2
+FROM users
+WHERE user_type = 'teacher';
+
+INSERT INTO user_roles (user_id, role_id)
+SELECT id, 3
+FROM users
+WHERE user_type = 'student';
+
+-- Set ROLE_ADMIN for admin user
+UPDATE user_roles SET role_id = 1 WHERE user_id = 59;

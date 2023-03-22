@@ -1,11 +1,10 @@
 package com.mikhail.tarasevich.university.service.impl;
 
 import com.mikhail.tarasevich.university.dao.GroupDao;
+import com.mikhail.tarasevich.university.dao.RoleDao;
 import com.mikhail.tarasevich.university.dao.StudentDao;
-import com.mikhail.tarasevich.university.dto.CourseResponse;
 import com.mikhail.tarasevich.university.dto.StudentRequest;
 import com.mikhail.tarasevich.university.dto.StudentResponse;
-import com.mikhail.tarasevich.university.entity.Course;
 import com.mikhail.tarasevich.university.entity.Student;
 import com.mikhail.tarasevich.university.mapper.StudentMapper;
 import com.mikhail.tarasevich.university.service.StudentService;
@@ -31,11 +30,11 @@ public class StudentServiceImpl
     private final GroupDao groupDao;
 
     @Autowired
-    public StudentServiceImpl(StudentDao userDao, PasswordEncoder encoder,
+    public StudentServiceImpl(StudentDao userDao, RoleDao roleDao, PasswordEncoder encoder,
                               StudentMapper mapper,
                               UserValidator<StudentRequest> validator,
                               GroupDao groupDao) {
-        super(userDao, encoder, mapper, validator);
+        super(userDao, roleDao, encoder, mapper, validator);
         this.groupDao = groupDao;
     }
 
@@ -45,6 +44,7 @@ public class StudentServiceImpl
 
         if (optionalStudentEntity.isPresent()) {
             groupDao.unbindGroupsFromStudent(id);
+            roleDao.unbindRoleFromUser(id);
             return userDao.deleteById(id);
         } else {
             log.info("Delete was rejected. There is no student with specified id in the database. Id = {}",
@@ -56,6 +56,7 @@ public class StudentServiceImpl
     @Override
     public boolean deleteByIds(Set<Integer> ids) {
         ids.forEach(groupDao::unbindGroupsFromStudent);
+        ids.forEach(roleDao::unbindRoleFromUser);
 
         boolean result = userDao.deleteByIds(ids);
 

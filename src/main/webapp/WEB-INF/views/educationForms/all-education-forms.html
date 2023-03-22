@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/layout}">
+      layout:decorate="~{layouts/layout}"
+      xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8"/>
     <title>All education forms</title>
@@ -35,9 +36,11 @@
             </li>
         </ul>
     </nav>
-    <a href="/education-forms/new" class="btn btn-primary mt-3">
-        Add new education form
-    </a>
+    <div sec:authorize="hasAuthority('WRITE')">
+        <a href="/education-forms/new" class="btn btn-primary mt-3">
+            Add new education form
+        </a>
+    </div>
 </div>
 </body>
 </html>

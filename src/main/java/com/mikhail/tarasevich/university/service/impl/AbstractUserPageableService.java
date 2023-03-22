@@ -1,6 +1,9 @@
 package com.mikhail.tarasevich.university.service.impl;
 
+import com.mikhail.tarasevich.university.dao.RoleDao;
 import com.mikhail.tarasevich.university.dao.UserDao;
+import com.mikhail.tarasevich.university.dto.StudentRequest;
+import com.mikhail.tarasevich.university.dto.TeacherRequest;
 import com.mikhail.tarasevich.university.dto.UserRequest;
 import com.mikhail.tarasevich.university.dto.UserResponse;
 import com.mikhail.tarasevich.university.entity.User;
@@ -24,14 +27,16 @@ public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST 
         extends AbstractPageableService implements UserService<REQUEST, RESPONSE> {
 
     protected final D userDao;
+    protected final RoleDao roleDao;
     protected final PasswordEncoder passwordEncoder;
     protected final UserMapper<REQUEST, RESPONSE, U> userMapper;
     protected final UserValidator<REQUEST> validator;
 
-    protected AbstractUserPageableService(D userDao, PasswordEncoder passwordEncoder,
+    protected AbstractUserPageableService(D userDao, RoleDao roleDao, PasswordEncoder passwordEncoder,
                                           UserMapper<REQUEST, RESPONSE, U> userMapper,
                                           UserValidator<REQUEST> validator) {
         this.userDao = userDao;
+        this.roleDao = roleDao;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
         this.validator = validator;
@@ -45,6 +50,8 @@ public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST 
             validator.validatePassword(request);
             request.setPassword(passwordEncoder.encode(request.getPassword()));
             U userEntity = userDao.save(userMapper.toEntity(request));
+            if (request instanceof StudentRequest) roleDao.addRoleForUser(userEntity.getId(), 3);
+            if (request instanceof TeacherRequest) roleDao.addRoleForUser(userEntity.getId(), 2);
             return userMapper.toResponse(userEntity);
         } else {
             throw new EmailAlreadyExistsException("The user with the same email already in the database.");
@@ -157,14 +164,14 @@ public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST 
         return user.isPresent() && passwordEncoder.matches(password, user.get().getPassword());
     }
 
-    @Override
-    public int lastPageNumber(){
-        return (int) Math.ceil((double)userDao.count() / ITEMS_PER_PAGE);
-    }
-
     protected boolean checkEmail(REQUEST request) {
         Optional<U> user = userDao.findByName(request.getEmail());
         return !user.isPresent();
+    }
+
+    @Override
+    public int lastPageNumber() {
+        return (int) Math.ceil((double) userDao.count() / ITEMS_PER_PAGE);
     }
 
 }

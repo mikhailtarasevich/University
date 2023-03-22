@@ -22,8 +22,8 @@ public class TeacherDaoImpl extends AbstractUserDaoImpl<Teacher> implements Teac
                     "teacher_title_id, teacher_titles.name AS teacher_title_name, " +
                     "department_id, departments.name AS department_name, departments.description AS department_description " +
                     "FROM users " +
-                    "JOIN teacher_titles ON teacher_title_id = teacher_titles.id " +
-                    "JOIN departments ON department_id = departments.id ";
+                    "LEFT JOIN teacher_titles ON teacher_title_id = teacher_titles.id " +
+                    "LEFT JOIN departments ON department_id = departments.id ";
     private static final String FIND_ALL_QUERY =
             FIND_COMMON_PART_QUERY + "WHERE user_type = 'teacher' ORDER BY users.id";
     private static final String FIND_BY_ID_QUERY = FIND_COMMON_PART_QUERY + "WHERE user_type = 'teacher' AND users.id = ?";
