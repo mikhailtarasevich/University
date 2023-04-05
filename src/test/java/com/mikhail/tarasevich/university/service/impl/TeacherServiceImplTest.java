@@ -1,9 +1,6 @@
 package com.mikhail.tarasevich.university.service.impl;
 
-import com.mikhail.tarasevich.university.dao.CourseDao;
-import com.mikhail.tarasevich.university.dao.GroupDao;
-import com.mikhail.tarasevich.university.dao.LessonDao;
-import com.mikhail.tarasevich.university.dao.TeacherDao;
+import com.mikhail.tarasevich.university.dao.*;
 import com.mikhail.tarasevich.university.dto.GroupResponse;
 import com.mikhail.tarasevich.university.dto.TeacherRequest;
 import com.mikhail.tarasevich.university.dto.TeacherResponse;
@@ -42,6 +39,8 @@ class TeacherServiceImplTest {
     CourseDao courseDao;
     @Mock
     GroupDao groupDao;
+    @Mock
+    RoleDao roleDao;
     @Mock
     PasswordEncoder passwordEncoder;
     @Mock
@@ -124,6 +123,7 @@ class TeacherServiceImplTest {
         when(teacherDao.save(TEACHER_ENTITY_1)).thenReturn(TEACHER_ENTITY_WITH_ID_1);
         when(mapper.toResponse(TEACHER_ENTITY_WITH_ID_1)).thenReturn(TEACHER_RESPONSE_WITH_ID_1);
         doNothing().when(validator).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_1);
+        doNothing().when(roleDao).addRoleForUser(1, 2);
 
         TeacherResponse teacherResponse = teacherService.register(TEACHER_REQUEST_1);
 
@@ -132,6 +132,7 @@ class TeacherServiceImplTest {
         verify(teacherDao, times(1)).save(TEACHER_ENTITY_1);
         verify(mapper, times(1)).toResponse(TEACHER_ENTITY_WITH_ID_1);
         verify(validator, times(1)).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_1);
+        verify(roleDao, times(1)).addRoleForUser(1, 2);
     }
 
     @Test
@@ -382,6 +383,7 @@ class TeacherServiceImplTest {
         doNothing().when(groupDao).unbindGroupsFromTeacher(id);
         doNothing().when(lessonDao).unbindLessonsFromTeacher(id);
         doNothing().when(courseDao).unbindCoursesFromTeacher(id);
+        doNothing().when(roleDao).unbindRoleFromUser(id);
         when(teacherDao.deleteById(id)).thenReturn(true);
 
         boolean result = teacherService.deleteById(1);
@@ -392,6 +394,7 @@ class TeacherServiceImplTest {
         verify(groupDao, times(1)).unbindGroupsFromTeacher(id);
         verify(lessonDao, times(1)).unbindLessonsFromTeacher(id);
         verify(courseDao, times(1)).unbindCoursesFromTeacher(id);
+        verify(roleDao, times(1)).unbindRoleFromUser(id);
     }
 
     @Test
@@ -419,9 +422,11 @@ class TeacherServiceImplTest {
         doNothing().when(groupDao).unbindGroupsFromTeacher(1);
         doNothing().when(lessonDao).unbindLessonsFromTeacher(1);
         doNothing().when(courseDao).unbindCoursesFromTeacher(1);
+        doNothing().when(roleDao).unbindRoleFromUser(1);
         doNothing().when(groupDao).unbindGroupsFromTeacher(2);
         doNothing().when(lessonDao).unbindLessonsFromTeacher(2);
         doNothing().when(courseDao).unbindCoursesFromTeacher(2);
+        doNothing().when(roleDao).unbindRoleFromUser(2);
         when(teacherDao.deleteByIds(ids)).thenReturn(true);
 
         boolean result = teacherService.deleteByIds(ids);
@@ -431,9 +436,11 @@ class TeacherServiceImplTest {
         verify(groupDao, times(1)).unbindGroupsFromTeacher(1);
         verify(lessonDao, times(1)).unbindLessonsFromTeacher(1);
         verify(courseDao, times(1)).unbindCoursesFromTeacher(1);
+        verify(roleDao, times(1)).unbindRoleFromUser(1);
         verify(groupDao, times(1)).unbindGroupsFromTeacher(2);
         verify(lessonDao, times(1)).unbindLessonsFromTeacher(2);
         verify(courseDao, times(1)).unbindCoursesFromTeacher(2);
+        verify(roleDao, times(1)).unbindRoleFromUser(2);
     }
 
     @Test
@@ -445,9 +452,11 @@ class TeacherServiceImplTest {
         doNothing().when(groupDao).unbindGroupsFromTeacher(1);
         doNothing().when(lessonDao).unbindLessonsFromTeacher(1);
         doNothing().when(courseDao).unbindCoursesFromTeacher(1);
+        doNothing().when(roleDao).unbindRoleFromUser(1);
         doNothing().when(groupDao).unbindGroupsFromTeacher(2);
         doNothing().when(lessonDao).unbindLessonsFromTeacher(2);
         doNothing().when(courseDao).unbindCoursesFromTeacher(2);
+        doNothing().when(roleDao).unbindRoleFromUser(2);
         when(teacherDao.deleteByIds(ids)).thenReturn(false);
 
         boolean result = teacherService.deleteByIds(ids);
@@ -456,9 +465,11 @@ class TeacherServiceImplTest {
         verify(groupDao, times(1)).unbindGroupsFromTeacher(1);
         verify(lessonDao, times(1)).unbindLessonsFromTeacher(1);
         verify(courseDao, times(1)).unbindCoursesFromTeacher(1);
+        verify(roleDao, times(1)).unbindRoleFromUser(1);
         verify(groupDao, times(1)).unbindGroupsFromTeacher(2);
         verify(lessonDao, times(1)).unbindLessonsFromTeacher(2);
         verify(courseDao, times(1)).unbindCoursesFromTeacher(2);
+        verify(roleDao, times(1)).unbindRoleFromUser(2);
     }
 
     @Test

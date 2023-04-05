@@ -1,9 +1,6 @@
 package com.mikhail.tarasevich.university.service.impl;
 
-import com.mikhail.tarasevich.university.dao.CourseDao;
-import com.mikhail.tarasevich.university.dao.GroupDao;
-import com.mikhail.tarasevich.university.dao.LessonDao;
-import com.mikhail.tarasevich.university.dao.TeacherDao;
+import com.mikhail.tarasevich.university.dao.*;
 import com.mikhail.tarasevich.university.dto.GroupResponse;
 import com.mikhail.tarasevich.university.dto.TeacherRequest;
 import com.mikhail.tarasevich.university.dto.TeacherResponse;
@@ -34,10 +31,10 @@ public class TeacherServiceImpl
     private final GroupDao groupDao;
 
     @Autowired
-    public TeacherServiceImpl(TeacherDao userDao, PasswordEncoder passwordEncoder, TeacherMapper userMapper,
+    public TeacherServiceImpl(TeacherDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder, TeacherMapper userMapper,
                               UserValidator<TeacherRequest> validator,
                               LessonDao lessonDao, CourseDao courseDao, GroupDao groupDao) {
-        super(userDao, passwordEncoder, userMapper, validator);
+        super(userDao, roleDao, passwordEncoder, userMapper, validator);
         this.lessonDao = lessonDao;
         this.courseDao = courseDao;
         this.groupDao = groupDao;
@@ -51,6 +48,7 @@ public class TeacherServiceImpl
             lessonDao.unbindLessonsFromTeacher(id);
             courseDao.unbindCoursesFromTeacher(id);
             groupDao.unbindGroupsFromTeacher(id);
+            roleDao.unbindRoleFromUser(id);
             return userDao.deleteById(id);
         } else {
             log.info("Delete was rejected. There is no teacher with specified id in the database. Id = {}", id);
@@ -63,6 +61,7 @@ public class TeacherServiceImpl
         ids.forEach(lessonDao::unbindLessonsFromTeacher);
         ids.forEach(courseDao::unbindCoursesFromTeacher);
         ids.forEach(groupDao::unbindGroupsFromTeacher);
+        ids.forEach(roleDao::unbindRoleFromUser);
 
         boolean result = userDao.deleteByIds(ids);
 
@@ -154,7 +153,7 @@ public class TeacherServiceImpl
     @Override
     public List<TeacherResponse> findTeachersRelateToTeacherTitle(int teacherTitleId) {
         return userDao.findAll().stream()
-                .filter(t-> t.getTeacherTitle().getId() == teacherTitleId)
+                .filter(t -> t.getTeacherTitle().getId() == teacherTitleId)
                 .map(userMapper::toResponse)
                 .collect(Collectors.toList());
     }

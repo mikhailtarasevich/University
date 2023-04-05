@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Registration</title>
+</head>
+<body>
+<div layout:fragment="content" class="w-90 p-2 mx-auto">
+    <h4 class="mb-5">Register a new user</h4>
+    <div class="container text-center">
+        <div class="row align-items-start">
+            <div class="col">
+                <div class="card mx-auto" style="width: 20rem;">
+                    <img src="/resources/img/teacher.png" class="card-img-top" alt="teacher image">
+                    <div class="card-body">
+                        <h5 class="card-title">Teacher</h5>
+                        <p class="card-text">A user with the ROLE_TEACHER permission is able to create new entities and
+                            access information from all directories. This permission is granted to teachers, allowing
+                            them to manage content for their classes and access relevant information.</p>
+                        <a href="/auth/new/teacher" class="btn btn-primary">Register teacher</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card mx-auto" style="width: 20rem;">
+                    <img src="/resources/img/student.png" class="card-img-top" alt="student image">
+                    <div class="card-body">
+                        <h5 class="card-title">Student</h5>
+                        <p class="card-text">A user with the ROLE_STUDENT permission is only able to read information
+                            from all directories. This permission is granted to students, allowing them to access
+                            course materials and other relevant information, but not make any modifications or create
+                            new entities.</p>
+                        <a href="/auth/new/student" class="btn btn-primary">Register student</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

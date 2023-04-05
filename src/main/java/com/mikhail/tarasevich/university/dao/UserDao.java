@@ -2,6 +2,8 @@ package com.mikhail.tarasevich.university.dao;
 
 import com.mikhail.tarasevich.university.entity.User;
 
+import java.util.List;
+
 public interface UserDao<E extends User> extends CrudPageableDao<E> {
 
     void updateGeneralUserInfo (E entity);

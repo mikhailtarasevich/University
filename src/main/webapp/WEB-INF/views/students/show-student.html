@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/layout}"
->
+      xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8"/>
     <title>Student's info</title>
@@ -15,42 +15,42 @@
         <label for="firstName" class="col col-form-label">First name:</label>
         <div class="col">
             <input type="text" readonly class="form-control-plaintext text-center" id="firstName"
-                   th:value="${student.FirstName}"/>
+                   th:value="${student.firstName}"/>
         </div>
     </div>
     <div class="mb-2 row">
         <label for="lastName" class="col col-form-label">Last name:</label>
         <div class="col">
             <input type="text" readonly class="form-control-plaintext text-center" id="lastName"
-                   th:value="${student.LastName}"/>
+                   th:value="${student.lastName}"/>
         </div>
     </div>
     <div class="mb-2 row">
         <label for="email" class="col col-form-label">Email:</label>
         <div class="col">
             <input type="text" readonly class="form-control-plaintext text-center" id="email"
-                   th:value="${student.Email}"/>
+                   th:value="${student.email}"/>
         </div>
     </div>
     <div class="mb-2 row">
         <label for="gender" class="col col-form-label">Gender:</label>
         <div class="col">
             <input type="text" readonly class="form-control-plaintext text-center" id="gender"
-                   th:value="${student.Gender}"/>
+                   th:value="${student.gender}"/>
         </div>
     </div>
     <div class="mb-4 row">
         <label for="groupName" class="col col-form-label">Group name:</label>
         <div class="col">
-            <a th:href="${student.Group.Id == 0} ? '#' : @{/groups/{id}(id=${student.Group.Id})}">
+            <a th:href="${student.Group.Id == 0} ? '#' : @{/groups/{id}(id=${student.group.id})}">
                 <input type="text" readonly class="form-control-plaintext text-center" id="groupName"
-                       th:value="${student.Group.Id == 0} ? 'group not selected' : ${student.Group.Name}"/>
+                       th:value="${student.group.id == 0} ? 'group not selected' : ${student.group.name}"/>
             </a>
         </div>
     </div>
     <br><br>
-    <div class="mb-4 row">
-        <a th:href="@{/students/{id}/edit(id=${student.Id})}">
+    <div sec:authorize="hasAuthority('WRITE')" class="mb-4 row">
+        <a th:href="@{/students/{id}/edit(id=${student.id})}">
             <button class="btn btn-primary">Edit student information</button>
         </a>
     </div>
@@ -59,8 +59,8 @@
             <button class="btn btn-primary">Back to all students page</button>
         </a>
     </div>
-    <div class="mb-4 row">
-        <form th:method="DELETE" th:action="@{/students/{id}(id=${student.Id})}" th:object="${student}">
+    <div sec:authorize="hasAuthority('DELETE')" class="mb-4 row">
+        <form th:method="DELETE" th:action="@{/students/{id}(id=${student.id})}" th:object="${student}">
             <input class="btn btn-danger" type="submit" value="Delete student"/>
         </form>
     </div>
