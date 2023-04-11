@@ -7,18 +7,29 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>university-client</artifactId>
+    <artifactId>coverage</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
     <dependencies>
+        <dependency>
+            <groupId>com.mikhail.tarasevich</groupId>
+            <artifactId>university-client</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.mikhail.tarasevich</groupId>
             <artifactId>university-data</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
+            <groupId>com.mikhail.tarasevich</groupId>
+            <artifactId>university-service</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mikhail.tarasevich</groupId>
+            <artifactId>university-ui</artifactId>
         </dependency>
     </dependencies>
 
@@ -27,18 +38,21 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco-maven-plugin.version}</version>
+                <version>0.8.5</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/entity/**</exclude>
+                        <exclude>**/config/**</exclude>
+                        <exclude>**/mapper/**</exclude>
+                        <exclude>**/dto/**</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
+                        <id>report-aggregate</id>
+                        <phase>verify</phase>
                         <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
+                            <goal>report-aggregate</goal>
                         </goals>
                     </execution>
                 </executions>

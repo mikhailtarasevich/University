@@ -14,6 +14,7 @@
         <module>university-data</module>
         <module>university-service</module>
         <module>university-ui</module>
+        <module>coverage</module>
     </modules>
 
     <name>university</name>
@@ -60,6 +61,11 @@
             <dependency>
                 <groupId>com.mikhail.tarasevich</groupId>
                 <artifactId>university-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mikhail.tarasevich</groupId>
+                <artifactId>university-ui</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
