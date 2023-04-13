@@ -112,4 +112,4 @@ VALUES
 
 INSERT INTO lessons (name, group_id, user_id, course_id, lesson_type_id, start_time)
 VALUES ('lesson 1', 1, 5, 1, 1, '2023-06-22 12:00:00'),
-       ('lesson 2', 2, 6, 5, 2, '2023-06-22 12:00:00');
+       ('lesson 2', 2, 6, 5, 2, '2023-06-22 13:00:00');

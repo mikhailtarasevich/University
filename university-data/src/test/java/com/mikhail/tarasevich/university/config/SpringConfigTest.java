@@ -3,80 +3,115 @@ package com.mikhail.tarasevich.university.config;
 import com.mikhail.tarasevich.university.dao.*;
 import com.mikhail.tarasevich.university.dao.impl.*;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.orm.hibernate5.HibernateTransactionManager;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
+
+import java.util.Properties;
 
 import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.H2;
 
 @Configuration
+@ComponentScan(basePackages = "com.mikhail.tarasevich.university",
+        excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
+                value = {PersistenceConfig.class}))
+@EnableTransactionManagement
 public class SpringConfigTest {
 
     @Bean
-    public DataSource dataSource(){
+    public DataSource dataSource() {
         return new EmbeddedDatabaseBuilder()
                 .setType(H2)
-                .setScriptEncoding("UTF-8")
                 .addScript("classpath:sql/schema.sql")
                 .addScripts("classpath:sql/data.sql")
                 .build();
     }
 
     @Bean
-    public JdbcTemplate jdbcTemplate(DataSource dataSource){
+    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
         return new JdbcTemplate(dataSource);
     }
 
     @Bean
-    public CourseDao courseDao(JdbcTemplate jdbcTemplate){
-        return new CourseDaoImpl(jdbcTemplate);
+    public LocalSessionFactoryBean sessionFactory() {
+        LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
+        sessionFactory.setDataSource(dataSource());
+        sessionFactory.setPackagesToScan("com.mikhail.tarasevich.university.entity");
+        sessionFactory.setHibernateProperties(hibernateProperties());
+        return sessionFactory;
     }
 
     @Bean
-    public DepartmentDao departmentDao(JdbcTemplate jdbcTemplate){
-        return new DepartmentDaoImpl(jdbcTemplate);
+    public PlatformTransactionManager transactionManager() {
+        HibernateTransactionManager transactionManager = new HibernateTransactionManager();
+        transactionManager.setSessionFactory(sessionFactory().getObject());
+        return transactionManager;
+    }
+
+    private Properties hibernateProperties() {
+        Properties properties = new Properties();
+        properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQL82Dialect");
+        properties.put("hibernate.show_sql", true);
+
+        return properties;
     }
 
     @Bean
-    public EducationFormDao educationFormDao(JdbcTemplate jdbcTemplate){
-        return new EducationFormDaoImpl(jdbcTemplate);
+    CourseDao courseDaoTest() {
+        return new CourseDaoImpl(sessionFactory().getObject());
     }
 
     @Bean
-    public FacultyDao facultyDao(JdbcTemplate jdbcTemplate){
-        return new FacultyDaoImpl(jdbcTemplate);
+    DepartmentDao departmentDaoTest() {
+        return new DepartmentDaoImpl(sessionFactory().getObject());
     }
 
     @Bean
-    public GroupDao groupDao(JdbcTemplate jdbcTemplate){
-        return new GroupDaoImpl(jdbcTemplate);
+    EducationFormDao educationFormDaoTest() {
+        return new EducationFormDaoImpl(sessionFactory().getObject());
     }
 
     @Bean
-    public LessonDao lessonDao(JdbcTemplate jdbcTemplate){
-        return new LessonDaoImpl(jdbcTemplate);
+    FacultyDao facultyDaoTest() {
+        return new FacultyDaoImpl(sessionFactory().getObject());
     }
 
     @Bean
-    public LessonTypeDao lessonTypeDao(JdbcTemplate jdbcTemplate){
-        return new LessonTypeDaoImpl(jdbcTemplate);
+    GroupDao groupDaoTest() {
+        return new GroupDaoImpl(sessionFactory().getObject());
     }
 
     @Bean
-    public StudentDao studentDao(JdbcTemplate jdbcTemplate){
-        return new StudentDaoImpl(jdbcTemplate);
+    LessonDao lessonDaoTest() {
+        return new LessonDaoImpl(sessionFactory().getObject());
     }
 
     @Bean
-    public TeacherDao teacherDao(JdbcTemplate jdbcTemplate){
-        return new TeacherDaoImpl(jdbcTemplate);
+    LessonTypeDao lessonTypeDaoTest() {
+        return new LessonTypeDaoImpl(sessionFactory().getObject());
     }
 
     @Bean
-    public TeacherTitleDao teacherTitleDao(JdbcTemplate jdbcTemplate){
-        return new TeacherTitleDaoImpl(jdbcTemplate);
+    TeacherTitleDao teacherTitleDaoTest() {
+        return new TeacherTitleDaoImpl(sessionFactory().getObject());
+    }
+
+    @Bean
+    TeacherDao teacherDaoTest() {
+        return new TeacherDaoImpl(sessionFactory().getObject());
+    }
+
+    @Bean
+    StudentDao studentDaoTest() {
+        return new StudentDaoImpl(sessionFactory().getObject());
     }
 
 }

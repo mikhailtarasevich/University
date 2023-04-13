@@ -20,18 +20,18 @@
     <div class="mb-4 row">
         <label for="facultyName" class="col col-form-label">Faculty:</label>
         <div class="col">
-            <a th:href="${group.faculty.id == 0} ? '#' : @{/faculties/{id}(id=${group.faculty.id})}">
+            <a th:href="${group.faculty == null} ? '#' : @{/faculties/{id}(id=${group.faculty.id})}">
                 <input type="text" readonly class="form-control-plaintext text-center" id="facultyName"
-                       th:value="${group.faculty.id == 0} ? 'faculty not selected' : ${group.faculty.name}"/>
+                       th:value="${group.faculty == null} ? 'faculty not selected' : ${group.faculty.name}"/>
             </a>
         </div>
     </div>
     <div class="mb-4 row">
         <label for="headStudent" class="col col-form-label">Head Student:</label>
         <div class="col">
-            <a th:href="${group.headStudent.id == 0} ? '#' : @{/students/{id}(id=${group.headStudent.id})}">
+            <a th:href="${group.headStudent == null} ? '#' : @{/students/{id}(id=${group.headStudent.id})}">
                 <input type="text" readonly class="form-control-plaintext text-center" id="headStudent"
-                       th:value="${group.headStudent.id == 0} ? 'student not selected' :
+                       th:value="${group.headStudent == null} ? 'student not selected' :
                        ${group.headStudent.firstName + ' ' + group.headStudent.lastName}"/>
             </a>
         </div>
@@ -39,9 +39,9 @@
     <div class="mb-4 row">
         <label for="educationFormName" class="col col-form-label">Education form:</label>
         <div class="col">
-            <a th:href="${group.educationForm.id == 0} ? '#' : @{/education-forms/{id}(id=${group.educationForm.id})}">
+            <a th:href="${group.educationForm == null} ? '#' : @{/education-forms/{id}(id=${group.educationForm.id})}">
                 <input type="text" readonly class="form-control-plaintext text-center" id="educationFormName"
-                       th:value="${group.educationForm.id == 0} ? 'faculty not selected' : ${group.educationForm.name}"/>
+                       th:value="${group.educationForm == null} ? 'faculty not selected' : ${group.educationForm.name}"/>
             </a>
         </div>
     </div>

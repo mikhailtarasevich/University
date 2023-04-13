@@ -1,21 +1,40 @@
 package com.mikhail.tarasevich.university.entity;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import javax.persistence.*;
+
 @SuperBuilder(setterPrefix = "with")
+@NoArgsConstructor
 @Getter
+@Setter
 @EqualsAndHashCode
 @ToString
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING)
+@Table(name = "users")
 public abstract class User {
 
-    protected int id;
-    protected String firstName;
-    protected String lastName;
-    protected Gender gender;
-    protected String email;
-    protected String password;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    int id;
+
+    @Column(name = "first_name")
+    String firstName;
+
+    @Column(name = "last_name")
+    String lastName;
+
+    @Enumerated
+    Gender gender;
+
+    @Column(name = "email")
+    String email;
+
+    @Column(name = "password")
+    String password;
 
 }

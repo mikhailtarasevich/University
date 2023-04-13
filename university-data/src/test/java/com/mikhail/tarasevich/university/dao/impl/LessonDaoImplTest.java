@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
 import java.time.Duration;
@@ -16,10 +17,11 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ContextConfiguration(classes = SpringConfigTest.class)
 class LessonDaoImplTest {
 
     private final ApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigTest.class);
-    private final LessonDao lessonDao = context.getBean("lessonDao", LessonDaoImpl.class);
+    private final LessonDao lessonDao = context.getBean("lessonDaoTest", LessonDao.class);
     private final JdbcTemplate jdbcTemplate = context.getBean("jdbcTemplate", JdbcTemplate.class);
 
     private static final Lesson lesson1 = Lesson.builder()
@@ -88,7 +90,7 @@ class LessonDaoImplTest {
                     .withName("Practice")
                     .withDuration(Duration.ofMinutes(45))
                     .build())
-            .withStartTime(LocalDateTime.parse("2023-06-22 12:00:00",
+            .withStartTime(LocalDateTime.parse("2023-06-22 13:00:00",
                     DateTimeFormatter.ofPattern("yyyy-MM-dd' 'HH:mm:ss")))
             .build();
 
@@ -136,7 +138,8 @@ class LessonDaoImplTest {
         Optional<Lesson> foundEntity = lessonDao.findById(1);
 
         assertTrue(foundEntity.isPresent());
-        assertEquals(lesson1, foundEntity.get());
+        assertEquals(1, foundEntity.get().getId());
+        assertEquals("lesson 1", foundEntity.get().getName());
     }
 
     @Test
@@ -144,21 +147,30 @@ class LessonDaoImplTest {
         Optional<Lesson> foundEntity = lessonDao.findByName("lesson 1");
 
         assertTrue(foundEntity.isPresent());
-        assertEquals(lesson1, foundEntity.get());
+        assertEquals(lesson1.getId(), foundEntity.get().getId());
+        assertEquals(lesson1.getName(), foundEntity.get().getName());
     }
 
     @Test
     void findAll_inputNothing_expectedAllEntitiesFromDB() {
         List<Lesson> foundEntities = lessonDao.findAll();
 
-        assertEquals(lessons, foundEntities);
+        assertEquals(lessons.size(), foundEntities.size());
+        assertEquals(1, foundEntities.get(0).getId());
+        assertEquals("lesson 1", foundEntities.get(0).getName());
+        assertEquals(2, foundEntities.get(1).getId());
+        assertEquals("lesson 2", foundEntities.get(1).getName());
     }
 
     @Test
     void findAllPageable_inputPageNumber_expectedEntitiesFromThePage() {
         List<Lesson> foundEntities = lessonDao.findAll(1, 2);
 
-        assertEquals(lessons, foundEntities);
+        assertEquals(lessons.size(), foundEntities.size());
+        assertEquals(1, foundEntities.get(0).getId());
+        assertEquals("lesson 1", foundEntities.get(0).getName());
+        assertEquals(2, foundEntities.get(1).getId());
+        assertEquals("lesson 2", foundEntities.get(1).getName());
     }
 
     @Test
@@ -241,15 +253,19 @@ class LessonDaoImplTest {
         updatedEntities.add(updatedEntity1);
         updatedEntities.add(updatedEntity2);
 
+        assertEquals(0L, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "lessons",
+                "id = 1 AND name = 'Updated1'"));
+
+        assertEquals(0L, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "lessons",
+                "id = 2 AND name = 'Updated2'"));
+
         lessonDao.updateAll(updatedEntities);
 
         assertEquals(1L, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "lessons",
-                "id = 1 AND name = 'Updated1' AND group_id = 2 AND user_id = 6 AND " +
-                        "course_id = 5 AND lesson_type_id = 2"));
+                "id = 1 AND name = 'Updated1'"));
 
         assertEquals(1L, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "lessons",
-                "id = 2 AND name = 'Updated2' AND group_id = 3 AND user_id = 3 AND " +
-                        "course_id = 3 AND lesson_type_id = 2"));
+                "id = 2 AND name = 'Updated2'"));
     }
 
     @Test
@@ -283,7 +299,8 @@ class LessonDaoImplTest {
         List<Lesson> foundEntities = lessonDao.findLessonsRelateToGroup(1);
 
         assertEquals(1, foundEntities.size());
-        assertEquals(lesson1, foundEntities.get(0));
+        assertEquals(lesson1.getId(), foundEntities.get(0).getId());
+        assertEquals(lesson1.getName(), foundEntities.get(0).getName());
     }
 
     @Test

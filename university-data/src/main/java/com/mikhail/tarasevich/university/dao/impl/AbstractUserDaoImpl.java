@@ -2,41 +2,34 @@ package com.mikhail.tarasevich.university.dao.impl;
 
 import com.mikhail.tarasevich.university.dao.UserDao;
 import com.mikhail.tarasevich.university.entity.User;
-import org.springframework.jdbc.core.JdbcOperations;
-import org.springframework.jdbc.core.RowMapper;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 
-public abstract class AbstractUserDaoImpl<E extends User> extends AbstractPageableCrudDaoImpl<E> implements UserDao<E> {
+public abstract class AbstractUserDaoImpl<E extends User> extends AbstractPageableCrudDaoImpl<E>
+        implements UserDao<E> {
 
-    protected final String updateGeneralUserInfoQuery;
-    protected final String updatePasswordQuery;
-    protected final String addUserToGroupQuery;
+    private static final String UNIQUE_NAME_PARAMETER = "email";
 
-    protected AbstractUserDaoImpl(JdbcOperations jdbcTemplate, RowMapper<E> mapper,
-                                  String saveQuery, String findByIdQuery, String findAllQuery, String findByNameQuery,
-                                  String findAllPageableQuery, String updateQuery, String deleteByIdQuery,
-                                  String countTableRowsQuery, String updateGeneralUserInfoQuery,
-                                  String updatePasswordQuery, String addUserToGroupQuery) {
-        super(jdbcTemplate, mapper, saveQuery, findByIdQuery, findAllQuery, findByNameQuery, findAllPageableQuery,
-                updateQuery, deleteByIdQuery, countTableRowsQuery);
-        this.updateGeneralUserInfoQuery = updateGeneralUserInfoQuery;
-        this.updatePasswordQuery = updatePasswordQuery;
-        this.addUserToGroupQuery = addUserToGroupQuery;
+    protected AbstractUserDaoImpl(SessionFactory sessionFactory, Class<E> clazz) {
+        super(sessionFactory, clazz, UNIQUE_NAME_PARAMETER);
     }
+
 
     @Override
     public void updateGeneralUserInfo(E entity) {
-        jdbcTemplate.update(updateGeneralUserInfoQuery, entity.getFirstName(), entity.getLastName(),
-                entity.getGender().ordinal(), entity.getEmail(), entity.getId());
+        Session session = sessionFactory.getCurrentSession();
+        User userForUpdate = session.get(clazz, entity.getId());
+        userForUpdate.setFirstName(entity.getFirstName());
+        userForUpdate.setLastName(entity.getLastName());
+        userForUpdate.setGender(entity.getGender());
+        userForUpdate.setEmail(entity.getEmail());
     }
 
     @Override
     public void updateUserPassword(int id, String password) {
-        jdbcTemplate.update(updatePasswordQuery, password, id);
-    }
-
-    @Override
-    public void addUserToGroup(int userId, int groupId) {
-        jdbcTemplate.update(addUserToGroupQuery, groupId, userId);
+        Session session = sessionFactory.getCurrentSession();
+        User userForUpdate = session.get(clazz, id);
+        userForUpdate.setPassword(password);
     }
 
 }

@@ -72,9 +72,9 @@ public class GroupsController {
         GroupRequest groupForUpdate = new GroupRequest();
         groupForUpdate.setId(id);
         groupForUpdate.setName(groupResponse.getName());
-        groupForUpdate.setFacultyId(groupResponse.getFaculty().getId());
-        groupForUpdate.setHeadStudentId(groupResponse.getHeadStudent().getId());
-        groupForUpdate.setEducationFormId(groupResponse.getEducationForm().getId());
+        groupForUpdate.setFacultyId(groupResponse.getFaculty() == null ? 0 : groupResponse.getFaculty().getId());
+        groupForUpdate.setHeadStudentId(groupResponse.getHeadStudent() == null ? 0 : groupResponse.getHeadStudent().getId());
+        groupForUpdate.setEducationFormId(groupResponse.getEducationForm() == null ? 0 : groupResponse.getEducationForm().getId());
 
         model.addAttribute("group", groupForUpdate);
         model.addAttribute("faculties", facultyService.findAll());

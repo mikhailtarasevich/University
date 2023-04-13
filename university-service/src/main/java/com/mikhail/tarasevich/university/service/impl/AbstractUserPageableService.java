@@ -15,12 +15,14 @@ import com.mikhail.tarasevich.university.service.UserService;
 import com.mikhail.tarasevich.university.service.validator.UserValidator;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Transactional
 @Log4j2
 public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST extends UserRequest,
         RESPONSE extends UserResponse, U extends User>

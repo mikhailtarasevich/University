@@ -84,10 +84,10 @@ public class LessonsController {
         LessonRequest lessonForUpdate = new LessonRequest();
         lessonForUpdate.setId(id);
         lessonForUpdate.setName(lessonResponse.getName());
-        lessonForUpdate.setGroupId(lessonResponse.getGroup().getId());
-        lessonForUpdate.setTeacherId(lessonResponse.getTeacher().getId());
-        lessonForUpdate.setCourseId(lessonResponse.getCourse().getId());
-        lessonForUpdate.setLessonTypeId(lessonResponse.getLessonType().getId());
+        lessonForUpdate.setGroupId(lessonResponse.getGroup() == null ? 0 : lessonResponse.getGroup().getId());
+        lessonForUpdate.setTeacherId(lessonResponse.getTeacher() == null ? 0 : lessonResponse.getTeacher().getId());
+        lessonForUpdate.setCourseId(lessonResponse.getCourse() == null ? 0 : lessonResponse.getCourse().getId());
+        lessonForUpdate.setLessonTypeId(lessonResponse.getLessonType() == null ? 0 : lessonResponse.getLessonType().getId());
         lessonForUpdate.setStartTime(lessonResponse.getStartTime());
 
         model.addAttribute("lesson", lessonForUpdate);
