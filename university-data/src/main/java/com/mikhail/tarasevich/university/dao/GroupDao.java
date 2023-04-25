@@ -4,7 +4,7 @@ import com.mikhail.tarasevich.university.entity.Group;
 
 import java.util.List;
 
-public interface GroupDao extends CrudPageableDao<Group>{
+public interface GroupDao extends CrudPageableDao<Group> {
 
     void changeFaculty(int groupId, int newFacultyId);
     void changeHeadUser(int groupId, int newUserId);

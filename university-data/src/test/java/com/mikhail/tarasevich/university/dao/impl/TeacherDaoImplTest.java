@@ -1,26 +1,38 @@
 package com.mikhail.tarasevich.university.dao.impl;
 
-import com.mikhail.tarasevich.university.config.SpringConfigTest;
 import com.mikhail.tarasevich.university.dao.TeacherDao;
-import com.mikhail.tarasevich.university.entity.*;
+import com.mikhail.tarasevich.university.dao.config.SpringTestConfig;
+import com.mikhail.tarasevich.university.entity.Department;
+import com.mikhail.tarasevich.university.entity.Gender;
+import com.mikhail.tarasevich.university.entity.Teacher;
+import com.mikhail.tarasevich.university.entity.TeacherTitle;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ContextConfiguration(classes = SpringConfigTest.class)
+@SpringBootTest
+@ContextConfiguration(classes = SpringTestConfig.class)
+@ActiveProfiles("test")
 class TeacherDaoImplTest {
 
-    private final ApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigTest.class);
-    private final TeacherDao teacherDao = context.getBean("teacherDaoTest", TeacherDao.class);
-    private final JdbcTemplate jdbcTemplate = context.getBean("jdbcTemplate", JdbcTemplate.class);
+    @Autowired
+    private TeacherDao teacherDao;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private static final Teacher teacher1 = Teacher.builder()
             .withId(5)
@@ -112,6 +124,8 @@ class TeacherDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void save_inputEntity_expectedEntityWithId() {
         final Teacher entityForSave = Teacher.builder()
                 .withFirstName("testName3")
@@ -148,6 +162,8 @@ class TeacherDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void saveAll_inputEntities_expectedEntitiesAddedToDb() {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "(id = 11 OR id = 12) AND user_type = 'teacher'"));
@@ -236,6 +252,8 @@ class TeacherDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void update_inputUpdatedEntity_expectedEntityInDBWasUpdated() {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "id = 5 AND first_name = 'Updated' AND last_name = 'Updated' AND email = 'Updated' AND " +
@@ -260,6 +278,8 @@ class TeacherDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateGeneralUserInfo_inputUpdatedEntity_expectedEntityInDBWasUpdated() {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "id = 5 AND first_name = 'Updated' AND last_name = 'Updated' AND email = 'Updated'"));
@@ -291,6 +311,8 @@ class TeacherDaoImplTest {
 
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateAll_inputUpdatedEntities_expectedEntitiesInDBWereUpdated() {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "id = 5 AND first_name = 'Updated' AND last_name = 'Updated' AND email = 'Updated' AND " +
@@ -336,6 +358,8 @@ class TeacherDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void deleteById_inputIdOfDeletedEntity_expectedDeletedEntityIsAbsentInDB() {
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "id = 9"));
@@ -351,6 +375,8 @@ class TeacherDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void deleteByIds_inputIdsOfDeletedEntities_expectedDeletedEntitiesAreAbsentInDB() {
         assertEquals(2, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "id = 9 OR id = 10"));
@@ -370,6 +396,8 @@ class TeacherDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void addUserToGroup_inputUserIdGroupId_expectedRowWasAddedToUserGroupsTable() {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "user_groups",
                 "user_id = 5 AND group_id = 4"));
@@ -381,6 +409,8 @@ class TeacherDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void addTeacherToCourse_inputTeacherIdCourseId_expectedRowAddedToUserCoursesTable() {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "user_courses",
                 "user_id = 5 AND course_id = 5"));
@@ -392,6 +422,8 @@ class TeacherDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void deleteTeacherFromCourse_inputTeacherIdCourseId_expectedRowDeletedFromUserCoursesTable() {
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "user_courses",
                 "user_id = 5 AND course_id = 1"));
@@ -403,6 +435,8 @@ class TeacherDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void changeDepartment_inputTeacherIdDepartmentId_expectedDepartmentIdWasChanged() {
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "id = 5 AND department_id = 1"));
@@ -414,6 +448,8 @@ class TeacherDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void changeTeacherTitle_inputTeacherIdTeacherTitleId_expectedTeacherTitleIdWasChanged() {
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "id = 5 AND teacher_title_id = 1"));
@@ -425,6 +461,8 @@ class TeacherDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void deleteTeacherFromGroup_inputTeacherIdGroupId_expectedRowDeletedFromUserGroupsTable() {
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "user_groups",
                 "user_id = 5 AND group_id = 1"));
@@ -473,6 +511,8 @@ class TeacherDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void unbindTeachersFromCourse_inputCourseId_expectedThereAreNoCourse() {
         assertEquals(1L, JdbcTestUtils.countRowsInTableWhere(
                 jdbcTemplate, "user_courses", "course_id = 3"));
@@ -484,6 +524,8 @@ class TeacherDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void unbindTeachersFromDepartment_inputDepartmentId_expectedThereAreNoDepartment() {
         assertEquals(2L, JdbcTestUtils.countRowsInTableWhere(
                 jdbcTemplate, "users", "department_id = 1"));
@@ -495,6 +537,8 @@ class TeacherDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void unbindTeachersFromGroup_inputGroupId_expectedTeacherWereUnbound() {
         assertEquals(1L, JdbcTestUtils.countRowsInTableWhere(
                 jdbcTemplate, "user_groups", "group_id = 1"));
@@ -506,6 +550,8 @@ class TeacherDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void unbindTeachersFromTeacherTitle_inputTeacherTitleId_expectedTeacherTitleWereUnbound() {
         assertEquals(2L, JdbcTestUtils.countRowsInTableWhere(
                 jdbcTemplate, "users", "teacher_title_id = 1"));

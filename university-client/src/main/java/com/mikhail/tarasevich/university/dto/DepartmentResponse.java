@@ -2,7 +2,7 @@ package com.mikhail.tarasevich.university.dto;
 
 import com.mikhail.tarasevich.university.entity.Course;
 import com.mikhail.tarasevich.university.entity.Teacher;
-import lombok.*;
+import lombok.Data;
 
 import java.util.List;
 

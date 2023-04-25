@@ -60,6 +60,7 @@ public class FacultyServiceImpl extends AbstractPageableService implements Facul
     }
 
     @Override
+    @Transactional(readOnly = true)
     public FacultyResponse findById(int id) {
         Optional<FacultyResponse> foundFaculty = facultyDao.findById(id).map(mapper::toResponse);
 
@@ -71,6 +72,7 @@ public class FacultyServiceImpl extends AbstractPageableService implements Facul
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<FacultyResponse> findAll(String page) {
         final long itemsCount = facultyDao.count();
         int pageNumber = parsePageNumber(page, itemsCount, 1);
@@ -81,6 +83,7 @@ public class FacultyServiceImpl extends AbstractPageableService implements Facul
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<FacultyResponse> findAll() {
         return facultyDao.findAll().stream()
                 .map(mapper::toResponse)
@@ -140,6 +143,7 @@ public class FacultyServiceImpl extends AbstractPageableService implements Facul
     }
 
     @Override
+    @Transactional(readOnly = true)
     public int lastPageNumber() {
         return (int) Math.ceil((double) facultyDao.count() / ITEMS_PER_PAGE);
     }

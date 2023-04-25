@@ -10,7 +10,6 @@ import com.mikhail.tarasevich.university.mapper.StudentMapper;
 import com.mikhail.tarasevich.university.service.StudentService;
 import com.mikhail.tarasevich.university.service.validator.UserValidator;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +28,6 @@ public class StudentServiceImpl
 
     private final GroupDao groupDao;
 
-    @Autowired
     public StudentServiceImpl(StudentDao userDao, RoleDao roleDao, PasswordEncoder encoder,
                               StudentMapper mapper,
                               UserValidator<StudentRequest> validator,

@@ -8,7 +8,6 @@ import com.mikhail.tarasevich.university.entity.Student;
 import com.mikhail.tarasevich.university.entity.Teacher;
 import com.mikhail.tarasevich.university.security.UserSecurityDetails;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -27,7 +26,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final TeacherDao teacherDao;
     private final PrivilegeDao privilegeDao;
 
-    @Autowired
     public UserDetailsServiceImpl(StudentDao studentDao, TeacherDao teacherDao, PrivilegeDao privilegeDao) {
         this.studentDao = studentDao;
         this.teacherDao = teacherDao;
@@ -35,6 +33,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Optional<Student> studentOptional = studentDao.findByName(email);
         Optional<Teacher> teacherOptional = teacherDao.findByName(email);

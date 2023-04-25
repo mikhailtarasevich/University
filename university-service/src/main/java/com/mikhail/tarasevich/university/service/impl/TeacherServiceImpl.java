@@ -8,7 +8,6 @@ import com.mikhail.tarasevich.university.mapper.TeacherMapper;
 import com.mikhail.tarasevich.university.service.TeacherService;
 import com.mikhail.tarasevich.university.service.validator.UserValidator;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +28,6 @@ public class TeacherServiceImpl
     private final CourseDao courseDao;
     private final GroupDao groupDao;
 
-    @Autowired
     public TeacherServiceImpl(TeacherDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder, TeacherMapper userMapper,
                               UserValidator<TeacherRequest> validator,
                               LessonDao lessonDao, CourseDao courseDao, GroupDao groupDao) {
@@ -129,6 +127,7 @@ public class TeacherServiceImpl
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TeacherResponse> findTeachersRelateToGroup(int groupId) {
         return userDao.findTeachersRelateToGroup(groupId).stream()
                 .map(userMapper::toResponse)
@@ -136,6 +135,7 @@ public class TeacherServiceImpl
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TeacherResponse> findTeachersRelateToCourse(int courseId) {
         return userDao.findTeachersRelateToCourse(courseId).stream()
                 .map(userMapper::toResponse)
@@ -143,6 +143,7 @@ public class TeacherServiceImpl
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TeacherResponse> findTeachersRelateToDepartment(int departmentId) {
         return userDao.findTeachersRelateToDepartment(departmentId).stream()
                 .map(userMapper::toResponse)
@@ -150,6 +151,7 @@ public class TeacherServiceImpl
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TeacherResponse> findTeachersRelateToTeacherTitle(int teacherTitleId) {
         return userDao.findAll().stream()
                 .filter(t -> t.getTeacherTitle() !=null && t.getTeacherTitle().getId() == teacherTitleId)

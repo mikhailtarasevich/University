@@ -1,11 +1,22 @@
 package com.mikhail.tarasevich.university.controller;
 
-import com.mikhail.tarasevich.university.dto.*;
-import com.mikhail.tarasevich.university.service.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.mikhail.tarasevich.university.dto.TeacherRequest;
+import com.mikhail.tarasevich.university.dto.TeacherResponse;
+import com.mikhail.tarasevich.university.service.CourseService;
+import com.mikhail.tarasevich.university.service.DepartmentService;
+import com.mikhail.tarasevich.university.service.GroupService;
+import com.mikhail.tarasevich.university.service.TeacherService;
+import com.mikhail.tarasevich.university.service.TeacherTitleService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 
@@ -19,7 +30,6 @@ public class TeachersController {
     private final GroupService groupService;
     private final CourseService courseService;
 
-    @Autowired
     public TeachersController(TeacherService teacherService, TeacherTitleService teacherTitleService,
                               DepartmentService departmentService, GroupService groupService,
                               CourseService courseService) {

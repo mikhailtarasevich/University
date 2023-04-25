@@ -86,6 +86,7 @@ public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public RESPONSE findById(int id) {
         Optional<RESPONSE> foundUser = userDao.findById(id).map(userMapper::toResponse);
 
@@ -97,6 +98,7 @@ public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<RESPONSE> findAll(String page) {
         final long itemsCount = userDao.count();
         int pageNumber = parsePageNumber(page, itemsCount, 1);
@@ -107,6 +109,7 @@ public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<RESPONSE> findAll() {
         return userDao.findAll().stream()
                 .map(userMapper::toResponse)
@@ -161,6 +164,7 @@ public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean login(String email, String password) {
         Optional<U> user = userDao.findByName(email);
         return user.isPresent() && passwordEncoder.matches(password, user.get().getPassword());
@@ -172,6 +176,7 @@ public abstract class AbstractUserPageableService<D extends UserDao<U>, REQUEST 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public int lastPageNumber() {
         return (int) Math.ceil((double) userDao.count() / ITEMS_PER_PAGE);
     }

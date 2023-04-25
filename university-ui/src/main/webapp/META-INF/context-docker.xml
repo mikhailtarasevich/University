@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<Context>
-    <Resource
-        name="jdbc/db" auth="Container" type="javax.sql.DataSource"
-        driverClassName="org.postgresql.Driver" url="jdbc:postgresql://postgres:5432/university_db"
-    	username="postgres" password="1111"/>
-</Context>

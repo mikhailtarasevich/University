@@ -4,7 +4,8 @@ services:
 
   tomcat-server:
     build: .
-    restart: always
+    environment:
+      - DATA_SOURCE_NAME=jdbc:postgresql://postgres:5432/university_db
     ports:
       - "8080:8080"
     networks:

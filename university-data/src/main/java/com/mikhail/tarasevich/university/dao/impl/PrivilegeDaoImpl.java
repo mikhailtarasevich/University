@@ -1,12 +1,11 @@
 package com.mikhail.tarasevich.university.dao.impl;
 
 import com.mikhail.tarasevich.university.dao.PrivilegeDao;
-import com.mikhail.tarasevich.university.entity.*;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.mikhail.tarasevich.university.entity.Privilege;
+import com.mikhail.tarasevich.university.entity.Role;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.util.List;
 
@@ -14,21 +13,20 @@ import java.util.List;
 public class PrivilegeDaoImpl extends AbstractPageableCrudDaoImpl<Privilege> implements PrivilegeDao {
 
     private static final String UNIQUE_NAME_PARAMETER = "name";
+    private static final String ORDER_BY_QUERY = "id";
     private static final String FIND_PRIVILEGES_RELATE_TO_ROLE_QUERY =
             "SELECT p FROM Privilege p LEFT JOIN p.roles r WHERE r.id = :roleId";
     private static final String FIND_PRIVILEGES_RELATE_TO_USER_QUERY =
             "SELECT p FROM Privilege p LEFT JOIN p.roles r LEFT JOIN r.users u WHERE u.email = :email";
 
-    @Autowired
-    public PrivilegeDaoImpl(SessionFactory sessionFactory) {
-        super(sessionFactory, Privilege.class, UNIQUE_NAME_PARAMETER);
+    public PrivilegeDaoImpl(EntityManager entityManager) {
+        super(entityManager, Privilege.class, UNIQUE_NAME_PARAMETER, ORDER_BY_QUERY);
     }
 
     @Override
     public void addPrivilegeToRole(int roleId, int privilegeId) {
-        Session session = sessionFactory.getCurrentSession();
-        Privilege privilege = session.get(clazz, privilegeId);
-        Role role = session.get(Role.class, roleId);
+        Privilege privilege = entityManager.find(clazz, privilegeId);
+        Role role = entityManager.find(Role.class, roleId);
         privilege.getRoles().add(role);
     }
 
@@ -42,8 +40,7 @@ public class PrivilegeDaoImpl extends AbstractPageableCrudDaoImpl<Privilege> imp
 
     @Override
     public List<Privilege> findPrivilegesRelateToRole(int roleId) {
-        Session session = sessionFactory.getCurrentSession();
-        Query query = session.createQuery(FIND_PRIVILEGES_RELATE_TO_ROLE_QUERY);
+        Query query = entityManager.createQuery(FIND_PRIVILEGES_RELATE_TO_ROLE_QUERY);
         query.setParameter("roleId", roleId);
 
         return query.getResultList();
@@ -51,8 +48,7 @@ public class PrivilegeDaoImpl extends AbstractPageableCrudDaoImpl<Privilege> imp
 
     @Override
     public List<Privilege> findPrivilegesRelateToUser(String email) {
-        Session session = sessionFactory.getCurrentSession();
-        Query query = session.createQuery(FIND_PRIVILEGES_RELATE_TO_USER_QUERY);
+        Query query = entityManager.createQuery(FIND_PRIVILEGES_RELATE_TO_USER_QUERY);
         query.setParameter("email", email);
 
         return query.getResultList();

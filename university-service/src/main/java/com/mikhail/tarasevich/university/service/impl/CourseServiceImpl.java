@@ -63,6 +63,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CourseResponse findById(int id) {
         Optional<CourseResponse> foundCourse = courseDao.findById(id).map(mapper::toResponse);
 
@@ -74,6 +75,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CourseResponse> findAll(String page) {
         final long itemsCount = courseDao.count();
         int pageNumber = parsePageNumber(page, itemsCount, 1);
@@ -84,6 +86,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CourseResponse> findAll() {
         return courseDao.findAll().stream()
                 .map(mapper::toResponse)
@@ -143,6 +146,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CourseResponse> findCoursesRelateToDepartment(int departmentId) {
         return courseDao.findCoursesRelateToDepartment(departmentId).stream()
                 .map(mapper::toResponse)
@@ -150,6 +154,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CourseResponse> findCoursesNotRelateToDepartment(int departmentId) {
         List<Course> allCourses = courseDao.findAll();
         List<Course> relateToDepartment = courseDao.findCoursesRelateToDepartment(departmentId);
@@ -161,6 +166,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CourseResponse> findCoursesRelateToTeacher(int teacherId) {
         return courseDao.findCoursesRelateToTeacher(teacherId).stream()
                 .map(mapper::toResponse)
@@ -168,6 +174,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CourseResponse> findCoursesRelateToDepartmentNotRelateToTeacher(int departmentId, int teacherId) {
         List<Course> coursesRelateToDepartment = courseDao.findCoursesRelateToDepartment(departmentId);
         List<Course> coursesRelateToTeacher = courseDao.findCoursesRelateToTeacher(teacherId);
@@ -193,6 +200,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     }
 
     @Override
+    @Transactional(readOnly = true)
     public int lastPageNumber() {
         return (int) Math.ceil((double) courseDao.count() / ITEMS_PER_PAGE);
     }

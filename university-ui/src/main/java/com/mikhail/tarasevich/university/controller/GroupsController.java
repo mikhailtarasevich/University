@@ -2,12 +2,21 @@ package com.mikhail.tarasevich.university.controller;
 
 import com.mikhail.tarasevich.university.dto.GroupRequest;
 import com.mikhail.tarasevich.university.dto.GroupResponse;
-import com.mikhail.tarasevich.university.service.*;
+import com.mikhail.tarasevich.university.service.EducationFormService;
+import com.mikhail.tarasevich.university.service.FacultyService;
 import com.mikhail.tarasevich.university.service.GroupService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.mikhail.tarasevich.university.service.StudentService;
+import com.mikhail.tarasevich.university.service.TeacherService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("groups")
@@ -19,7 +28,6 @@ public class GroupsController {
     private final TeacherService teacherService;
     private final EducationFormService educationFormService;
 
-    @Autowired
     public GroupsController(GroupService groupService, FacultyService facultyService, StudentService studentService,
                             TeacherService teacherService, EducationFormService educationFormService) {
         this.groupService = groupService;

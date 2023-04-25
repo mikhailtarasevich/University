@@ -62,6 +62,7 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EducationFormResponse findById(int id) {
         Optional<EducationFormResponse> foundEducationForm = educationFormDao.findById(id).map(mapper::toResponse);
 
@@ -73,6 +74,7 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EducationFormResponse> findAll(String page) {
         final long itemsCount = educationFormDao.count();
         int pageNumber = parsePageNumber(page, itemsCount, 1);
@@ -83,6 +85,7 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EducationFormResponse> findAll() {
         return educationFormDao.findAll().stream()
                 .map(mapper::toResponse)
@@ -143,6 +146,7 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
     }
 
     @Override
+    @Transactional(readOnly = true)
     public int lastPageNumber() {
         return (int) Math.ceil((double) educationFormDao.count() / ITEMS_PER_PAGE);
     }

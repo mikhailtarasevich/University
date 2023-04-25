@@ -2,8 +2,11 @@ package com.mikhail.tarasevich.university.controller;
 
 import com.mikhail.tarasevich.university.dto.StudentRequest;
 import com.mikhail.tarasevich.university.dto.TeacherRequest;
-import com.mikhail.tarasevich.university.service.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.mikhail.tarasevich.university.service.DepartmentService;
+import com.mikhail.tarasevich.university.service.GroupService;
+import com.mikhail.tarasevich.university.service.StudentService;
+import com.mikhail.tarasevich.university.service.TeacherService;
+import com.mikhail.tarasevich.university.service.TeacherTitleService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +24,6 @@ public class AuthController {
     private final TeacherTitleService teacherTitleService;
     private final DepartmentService departmentService;
 
-    @Autowired
     public AuthController(StudentService studentService, TeacherService teacherService, GroupService groupService,
                           TeacherTitleService teacherTitleService, DepartmentService departmentService) {
         this.studentService = studentService;

@@ -62,6 +62,7 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TeacherTitleResponse findById(int id) {
         Optional<TeacherTitleResponse> foundTeacherTitle = teacherTitleDao.findById(id).map(mapper::toResponse);
 
@@ -73,6 +74,7 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TeacherTitleResponse> findAll(String page) {
         final long itemsCount = teacherTitleDao.count();
         int pageNumber = parsePageNumber(page, itemsCount, 1);
@@ -83,6 +85,7 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TeacherTitleResponse> findAll() {
         return teacherTitleDao.findAll().stream()
                 .map(mapper::toResponse)
