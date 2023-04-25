@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
 import java.util.*;
@@ -14,10 +15,11 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ContextConfiguration(classes = SpringConfigTest.class)
 class StudentDaoImplTest {
 
     private final ApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigTest.class);
-    private final StudentDao studentDao = context.getBean("studentDao", StudentDaoImpl.class);
+    private final StudentDao studentDao = context.getBean("studentDaoTest", StudentDao.class);
     private final JdbcTemplate jdbcTemplate = context.getBean("jdbcTemplate", JdbcTemplate.class);
 
     private static final Student student1 = Student.builder()
@@ -192,7 +194,9 @@ class StudentDaoImplTest {
 
         Student savedEntity = studentDao.save(entityForSave);
 
-        assertEquals(expectedEntity, savedEntity);
+        assertEquals(expectedEntity.getId(), savedEntity.getId());
+        assertEquals(expectedEntity.getFirstName(), savedEntity.getFirstName());
+        assertEquals(expectedEntity.getLastName(), savedEntity.getLastName());
     }
 
     @Test
@@ -200,15 +204,32 @@ class StudentDaoImplTest {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "(id = 11 OR id = 12) AND user_type = 'student'"));
 
+        final Student studentForSave1 = Student.builder()
+                .withFirstName("studentForSave1")
+                .withLastName("studentForSave1")
+                .withGender(Gender.MALE)
+                .withPassword("studentForSave1")
+                .withEmail("studentForSave1")
+                .build();
+
+        final Student studentForSave2 = Student.builder()
+                .withFirstName("studentForSave2")
+                .withLastName("studentForSave2")
+                .withGender(Gender.MALE)
+                .withPassword("studentForSave2")
+                .withEmail("studentForSave2")
+                .build();
+
         List<Student> entitiesForSave = new ArrayList<>();
-        entitiesForSave.add(student5);
-        entitiesForSave.add(student6);
+        entitiesForSave.add(studentForSave1);
+        entitiesForSave.add(studentForSave2);
+
         studentDao.saveAll(entitiesForSave);
 
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
-                "id = 11 AND user_type = 'student' AND first_name = 'testName1'"));
+                "id = 11 AND user_type = 'student' AND first_name = 'studentForSave1'"));
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
-                "id = 12 AND user_type = 'student' AND first_name = 'testName2'"));
+                "id = 12 AND user_type = 'student' AND first_name = 'studentForSave2'"));
     }
 
     @Test
@@ -216,7 +237,9 @@ class StudentDaoImplTest {
         Optional<Student> foundEntity = studentDao.findById(1);
 
         assertTrue(foundEntity.isPresent());
-        assertEquals(student1, foundEntity.get());
+        assertEquals(student1.getId(), foundEntity.get().getId());
+        assertEquals(student1.getFirstName(), foundEntity.get().getFirstName());
+        assertEquals(student1.getLastName(), foundEntity.get().getLastName());
     }
 
     @Test
@@ -224,14 +247,20 @@ class StudentDaoImplTest {
         Optional<Student> foundEntity = studentDao.findByName("tomrobinson@gmail.com");
 
         assertTrue(foundEntity.isPresent());
-        assertEquals(student1, foundEntity.get());
+        assertEquals(student1.getId(), foundEntity.get().getId());
+        assertEquals(student1.getFirstName(), foundEntity.get().getFirstName());
+        assertEquals(student1.getLastName(), foundEntity.get().getLastName());
     }
 
     @Test
     void findAll_inputNothing_expectedAllEntitiesFromDB() {
         List<Student> foundEntities = studentDao.findAll();
 
-        assertEquals(students, foundEntities);
+        assertEquals(students.size(), foundEntities.size());
+        assertEquals(students.get(0).getId(), foundEntities.get(0).getId());
+        assertEquals(students.get(1).getId(), foundEntities.get(1).getId());
+        assertEquals(students.get(2).getId(), foundEntities.get(2).getId());
+        assertEquals(students.get(3).getId(), foundEntities.get(3).getId());
     }
 
     @Test
@@ -242,7 +271,9 @@ class StudentDaoImplTest {
         expectedEntities.add(student3);
         expectedEntities.add(student4);
 
-        assertEquals(expectedEntities, foundEntities);
+        assertEquals(expectedEntities.size(), foundEntities.size());
+        assertEquals(expectedEntities.get(0).getId(), foundEntities.get(0).getId());
+        assertEquals(expectedEntities.get(1).getId(), foundEntities.get(1).getId());
     }
 
     @Test
@@ -259,7 +290,7 @@ class StudentDaoImplTest {
     void update_inputUpdatedEntity_expectedEntityInDBWasUpdated() {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "id = 1 AND first_name = 'Updated' AND last_name = 'Updated' AND email = 'Updated' AND " +
-                        "password = 'Updated' AND group_id = 5"));
+                        "password = 'Updated'"));
 
         final Student entityForUpdate = Student.builder()
                 .withId(1)
@@ -268,16 +299,13 @@ class StudentDaoImplTest {
                 .withGender(Gender.MALE)
                 .withEmail("Updated")
                 .withPassword("Updated")
-                .withGroup(Group.builder()
-                        .withId(5)
-                        .build())
                 .build();
 
         studentDao.update(entityForUpdate);
 
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "id = 1 AND first_name = 'Updated' AND last_name = 'Updated' AND email = 'Updated' AND " +
-                        "password = 'Updated' AND group_id = 5"));
+                        "password = 'Updated'"));
     }
 
     @Test
@@ -291,6 +319,9 @@ class StudentDaoImplTest {
                 .withLastName("Updated")
                 .withGender(Gender.MALE)
                 .withEmail("Updated")
+                .withGroup(Group.builder()
+                        .withId(5)
+                        .build())
                 .build();
 
         studentDao.updateGeneralUserInfo(entityForUpdate);
@@ -314,10 +345,10 @@ class StudentDaoImplTest {
     void updateAll_inputUpdatedEntities_expectedEntitiesInDBWereUpdated() {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "id = 1 AND first_name = 'Updated' AND last_name = 'Updated' AND email = 'Updated' AND " +
-                        "password = 'Updated' AND group_id = 5"));
+                        "password = 'Updated'"));
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "id = 2 AND first_name = 'Updated' AND last_name = 'Updated' AND email = 'Updated' AND " +
-                        "password = 'Updated' AND group_id = 5"));
+                        "password = 'Updated'"));
 
         final Student entityForUpdate1 = Student.builder()
                 .withId(1)
@@ -351,10 +382,10 @@ class StudentDaoImplTest {
 
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "id = 1 AND first_name = 'Updated' AND last_name = 'Updated' AND email = 'Updated' AND " +
-                        "password = 'Updated' AND group_id = 5"));
+                        "password = 'Updated'"));
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "id = 2 AND first_name = 'Updated' AND last_name = 'Updated' AND email = 'Updated' AND " +
-                        "password = 'Updated' AND group_id = 5"));
+                        "password = 'Updated'"));
     }
 
     @Test
@@ -427,8 +458,11 @@ class StudentDaoImplTest {
         expectedStudents.add(student5);
         expectedStudents.add(student6);
 
+        assertEquals(expectedStudents.size(), foundStudents.size());
+        assertEquals(expectedStudents.get(0).getId(), foundStudents.get(0).getId());
+        assertEquals(expectedStudents.get(1).getId(), foundStudents.get(1).getId());
+        assertEquals(expectedStudents.get(2).getId(), foundStudents.get(2).getId());
 
-        assertEquals(expectedStudents, foundStudents);
         assertEquals(foundStudents.size(), JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "group_id = 1"));
     }

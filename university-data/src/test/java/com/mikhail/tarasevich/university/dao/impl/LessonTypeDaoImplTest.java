@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
 import java.time.Duration;
@@ -14,10 +15,11 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ContextConfiguration(classes = SpringConfigTest.class)
 class LessonTypeDaoImplTest {
 
     private final ApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigTest.class);
-    private final LessonTypeDao lessonTypeDao = context.getBean("lessonTypeDao", LessonTypeDaoImpl.class);
+    private final LessonTypeDao lessonTypeDao = context.getBean("lessonTypeDaoTest", LessonTypeDao.class);
     private final JdbcTemplate jdbcTemplate = context.getBean("jdbcTemplate", JdbcTemplate.class);
 
     private static final LessonType lessonType1 = LessonType.builder()
@@ -58,7 +60,12 @@ class LessonTypeDaoImplTest {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "lesson_types",
                 "id = 5"));
 
-        LessonType savedEntity = lessonTypeDao.save(lessonType1);
+        final LessonType entityForSave = LessonType.builder()
+                .withName("Lecture")
+                .withDuration(Duration.ofMinutes(90))
+                .build();
+
+        LessonType savedEntity = lessonTypeDao.save(entityForSave);
 
         assertEquals(5, savedEntity.getId());
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "lesson_types",
@@ -70,9 +77,19 @@ class LessonTypeDaoImplTest {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "lesson_types",
                 "id = 5 OR id = 6"));
 
+        final LessonType entityForSave1 = LessonType.builder()
+                .withName("Lecture")
+                .withDuration(Duration.ofMinutes(90))
+                .build();
+
+        final LessonType entityForSave2 = LessonType.builder()
+                .withName("Practice")
+                .withDuration(Duration.ofMinutes(45))
+                .build();
+
         List<LessonType> entities = new ArrayList<>();
-        entities.add(lessonType1);
-        entities.add(lessonType2);
+        entities.add(entityForSave1);
+        entities.add(entityForSave2);
 
         lessonTypeDao.saveAll(entities);
 
@@ -85,6 +102,8 @@ class LessonTypeDaoImplTest {
     @Test
     void findById_inputEntityId_expectedEntityReturnedFromDB() {
         Optional<LessonType> foundEntity = lessonTypeDao.findById(1);
+
+        System.out.println(foundEntity);
 
         assertTrue(foundEntity.isPresent());
         assertEquals(lessonType1, foundEntity.get());

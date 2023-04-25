@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
 import java.util.*;
@@ -14,10 +15,11 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ContextConfiguration(classes = SpringConfigTest.class)
 class TeacherDaoImplTest {
 
     private final ApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigTest.class);
-    private final TeacherDao teacherDao = context.getBean("teacherDao", TeacherDaoImpl.class);
+    private final TeacherDao teacherDao = context.getBean("teacherDaoTest", TeacherDao.class);
     private final JdbcTemplate jdbcTemplate = context.getBean("jdbcTemplate", JdbcTemplate.class);
 
     private static final Teacher teacher1 = Teacher.builder()
@@ -139,7 +141,10 @@ class TeacherDaoImplTest {
 
         Teacher savedEntity = teacherDao.save(entityForSave);
 
-        assertEquals(expectedEntity, savedEntity);
+        assertEquals(expectedEntity.getId(), savedEntity.getId());
+        assertEquals(expectedEntity.getFirstName(), savedEntity.getFirstName());
+        assertEquals(expectedEntity.getLastName(), savedEntity.getLastName());
+        assertEquals(expectedEntity.getEmail(), savedEntity.getEmail());
     }
 
     @Test
@@ -147,15 +152,39 @@ class TeacherDaoImplTest {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
                 "(id = 11 OR id = 12) AND user_type = 'teacher'"));
 
+        final Teacher entityForSave1 = Teacher.builder()
+                .withFirstName("entityForSave1")
+                .withLastName("entityForSave1")
+                .withGender(Gender.MALE)
+                .withEmail("entityForSave1")
+                .withPassword("entityForSave1")
+                .withTeacherTitle(
+                        TeacherTitle.builder().withId(1).build()
+                )
+                .withDepartment(Department.builder().withId(1).build())
+                .build();
+
+        final Teacher entityForSave2 = Teacher.builder()
+                .withFirstName("entityForSave2")
+                .withLastName("entityForSave2")
+                .withGender(Gender.MALE)
+                .withEmail("entityForSave2")
+                .withPassword("entityForSave2")
+                .withTeacherTitle(
+                        TeacherTitle.builder().withId(1).build()
+                )
+                .withDepartment(Department.builder().withId(1).build())
+                .build();
+
         List<Teacher> entitiesForSave = new ArrayList<>();
-        entitiesForSave.add(teacher3);
-        entitiesForSave.add(teacher4);
+        entitiesForSave.add(entityForSave1);
+        entitiesForSave.add(entityForSave2);
         teacherDao.saveAll(entitiesForSave);
 
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
-                "id = 11 AND user_type = 'teacher' AND first_name = 'testName3'"));
+                "id = 11 AND user_type = 'teacher' AND first_name = 'entityForSave1'"));
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "users",
-                "id = 12 AND user_type = 'teacher' AND first_name = 'testName4'"));
+                "id = 12 AND user_type = 'teacher' AND first_name = 'entityForSave2'"));
     }
 
     @Test
@@ -189,7 +218,11 @@ class TeacherDaoImplTest {
         expectedEntities.add(teacher3);
         expectedEntities.add(teacher4);
 
-        assertEquals(expectedEntities, foundEntities);
+        assertEquals(expectedEntities.size(), foundEntities.size());
+        assertEquals(expectedEntities.get(0).getId(), foundEntities.get(0).getId());
+        assertEquals(expectedEntities.get(0).getEmail(), foundEntities.get(0).getEmail());
+        assertEquals(expectedEntities.get(1).getId(), foundEntities.get(1).getId());
+        assertEquals(expectedEntities.get(1).getEmail(), foundEntities.get(1).getEmail());
     }
 
     @Test

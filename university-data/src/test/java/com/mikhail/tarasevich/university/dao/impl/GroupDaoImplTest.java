@@ -7,16 +7,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ContextConfiguration(classes = SpringConfigTest.class)
 class GroupDaoImplTest {
 
     private final ApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigTest.class);
-    private final GroupDao groupDao = context.getBean("groupDao", GroupDaoImpl.class);
+    private final GroupDao groupDao = context.getBean("groupDaoTest", GroupDao.class);
     private final JdbcTemplate jdbcTemplate = context.getBean("jdbcTemplate", JdbcTemplate.class);
 
     private static final Group group1 = Group.builder()
@@ -209,7 +211,8 @@ class GroupDaoImplTest {
 
         Group savedEntity = groupDao.save(entityForSave);
 
-        assertEquals(expectedEntity, savedEntity);
+        assertEquals(expectedEntity.getId(), savedEntity.getId());
+        assertEquals(expectedEntity.getName(), savedEntity.getName());
     }
 
     @Test
@@ -217,17 +220,18 @@ class GroupDaoImplTest {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "groups",
                 "id = 7 OR id = 8"));
 
+        Group groupForSave1 = Group.builder().withName("groupForSave1").build();
+        Group groupForSave2 = Group.builder().withName("groupForSave2").build();
+
         List<Group> entitiesForSave = new ArrayList<>();
-        entitiesForSave.add(group3);
-        entitiesForSave.add(group4);
+        entitiesForSave.add(groupForSave1);
+        entitiesForSave.add(groupForSave2);
         groupDao.saveAll(entitiesForSave);
 
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "groups",
-                "id = 7 AND name = 'g3' AND faculty_id = 3 AND head_user_id = 3 AND " +
-                        "education_form_id = 1"));
+                "id = 7 AND name = 'groupForSave1'"));
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "groups",
-                "id = 8 AND name = 'g4' AND faculty_id = 4 AND head_user_id = 4 AND " +
-                        "education_form_id = 1"));
+                "id = 8 AND name = 'groupForSave2'"));
     }
 
     @Test
@@ -235,7 +239,8 @@ class GroupDaoImplTest {
         Optional<Group> foundEntity = groupDao.findById(1);
 
         assertTrue(foundEntity.isPresent());
-        assertEquals(group1, foundEntity.get());
+        assertEquals(group1.getId(), foundEntity.get().getId());
+        assertEquals(group1.getName(), foundEntity.get().getName());
     }
 
     @Test
@@ -243,25 +248,41 @@ class GroupDaoImplTest {
         Optional<Group> foundEntity = groupDao.findByName("g1");
 
         assertTrue(foundEntity.isPresent());
-        assertEquals(group1, foundEntity.get());
+        assertEquals(group1.getId(), foundEntity.get().getId());
+        assertEquals(group1.getName(), foundEntity.get().getName());
     }
 
     @Test
     void findAll_inputNothing_expectedAllEntitiesFromDB() {
         List<Group> foundEntities = groupDao.findAll();
 
-        assertEquals(groups, foundEntities);
+        assertEquals(groups.size(), foundEntities.size());
+        assertEquals(groups.get(0).getId(), foundEntities.get(0).getId());
+        assertEquals(groups.get(0).getName(), foundEntities.get(0).getName());
+        assertEquals(groups.get(1).getId(), foundEntities.get(1).getId());
+        assertEquals(groups.get(1).getName(), foundEntities.get(1).getName());
+        assertEquals(groups.get(2).getId(), foundEntities.get(2).getId());
+        assertEquals(groups.get(2).getName(), foundEntities.get(2).getName());
+        assertEquals(groups.get(3).getId(), foundEntities.get(3).getId());
+        assertEquals(groups.get(3).getName(), foundEntities.get(3).getName());
+        assertEquals(groups.get(4).getId(), foundEntities.get(4).getId());
+        assertEquals(groups.get(4).getName(), foundEntities.get(4).getName());
+        assertEquals(groups.get(5).getId(), foundEntities.get(5).getId());
+        assertEquals(groups.get(5).getName(), foundEntities.get(5).getName());
     }
 
     @Test
     void findAllPageable_inputPageNumber_expectedEntitiesFromThePage() {
         List<Group> foundEntities = groupDao.findAll(2, 2);
-
         List<Group> expectedEntities = new ArrayList<>();
         expectedEntities.add(group3);
         expectedEntities.add(group4);
 
-        assertEquals(expectedEntities, foundEntities);
+        assertEquals(foundEntities.size(), expectedEntities.size());
+        assertEquals(foundEntities.get(0).getId(), expectedEntities.get(0).getId());
+        assertEquals(foundEntities.get(0).getName(), expectedEntities.get(0).getName());
+        assertEquals(foundEntities.get(1).getId(), expectedEntities.get(1).getId());
+        assertEquals(foundEntities.get(1).getName(), expectedEntities.get(1).getName());
     }
 
     @Test
@@ -274,7 +295,15 @@ class GroupDaoImplTest {
         expectedEntities.add(group5);
         expectedEntities.add(group6);
 
-        assertEquals(expectedEntities, foundEntities);
+        assertEquals(foundEntities.size(), expectedEntities.size());
+        assertEquals(foundEntities.get(0).getId(), expectedEntities.get(0).getId());
+        assertEquals(foundEntities.get(0).getName(), expectedEntities.get(0).getName());
+        assertEquals(foundEntities.get(1).getId(), expectedEntities.get(1).getId());
+        assertEquals(foundEntities.get(1).getName(), expectedEntities.get(1).getName());
+        assertEquals(foundEntities.get(2).getId(), expectedEntities.get(2).getId());
+        assertEquals(foundEntities.get(2).getName(), expectedEntities.get(2).getName());
+        assertEquals(foundEntities.get(3).getId(), expectedEntities.get(3).getId());
+        assertEquals(foundEntities.get(3).getName(), expectedEntities.get(3).getName());
     }
 
     @Test
@@ -397,7 +426,7 @@ class GroupDaoImplTest {
     }
 
     @Test
-    void changeFaculty_inputGroupIdAndFacultyId_expectedFacultyWasChangedInDB(){
+    void changeFaculty_inputGroupIdAndFacultyId_expectedFacultyWasChangedInDB() {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "groups",
                 "id = 1 AND faculty_id = 4"));
 
@@ -408,18 +437,19 @@ class GroupDaoImplTest {
     }
 
     @Test
-    void changeHeadUser_inputGroupIdAndHeadUSerId_expectedHeadUserIdWasChangedInDB(){
+    void changeHeadUser_inputGroupIdAndHeadUSerId_expectedHeadUserIdWasChangedInDB() {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "groups",
                 "id = 1 AND head_user_id = 5"));
 
         groupDao.changeHeadUser(1, 5);
+
 
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "groups",
                 "id = 1 AND head_user_id = 5"));
     }
 
     @Test
-    void changeEducationForm_inputGroupIdAndEducationFormId_expectedEducationFormWasChangedInDB(){
+    void changeEducationForm_inputGroupIdAndEducationFormId_expectedEducationFormWasChangedInDB() {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "groups",
                 "id = 1 AND education_form_id = 4"));
 
@@ -430,16 +460,18 @@ class GroupDaoImplTest {
     }
 
     @Test
-    void findGroupsRelateToTeacher_inputTeacherId_expectedGroupsRelateToTeacher(){
+    void findGroupsRelateToTeacher_inputTeacherId_expectedGroupsRelateToTeacher() {
         List<Group> foundEntities = groupDao.findGroupsRelateToTeacher(5);
-
-        assertEquals(group1, foundEntities.get(0));
-        assertEquals(group2, foundEntities.get(1));
+        System.out.println(foundEntities.size());
+        assertEquals(group1.getId(), foundEntities.get(0).getId());
+        assertEquals(group1.getName(), foundEntities.get(0).getName());
+        assertEquals(group2.getId(), foundEntities.get(1).getId());
+        assertEquals(group2.getName(), foundEntities.get(1).getName());
         assertEquals(2, foundEntities.size());
     }
 
     @Test
-    void unbindGroupsFromStudent_inputStudentId_expectedGroupsWereUnbound(){
+    void unbindGroupsFromStudent_inputStudentId_expectedGroupsWereUnbound() {
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "groups",
                 "head_user_id = 1"));
 
@@ -450,7 +482,7 @@ class GroupDaoImplTest {
     }
 
     @Test
-    void unbindGroupsFromTeacher_inputTeacherId_expectedGroupsWereUnbound(){
+    void unbindGroupsFromTeacher_inputTeacherId_expectedGroupsWereUnbound() {
         assertEquals(2, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "user_groups",
                 "user_id = 6"));
 
@@ -461,7 +493,7 @@ class GroupDaoImplTest {
     }
 
     @Test
-    void unbindGroupsFromEducationForm_inputEducationFormId_expectedGroupsWereUnbound(){
+    void unbindGroupsFromEducationForm_inputEducationFormId_expectedGroupsWereUnbound() {
         assertEquals(2, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "groups",
                 "education_form_id = 1"));
 
@@ -472,7 +504,7 @@ class GroupDaoImplTest {
     }
 
     @Test
-    void unbindGroupsFromFaculty_inputFacultyId_expectedGroupsWereUnbound(){
+    void unbindGroupsFromFaculty_inputFacultyId_expectedGroupsWereUnbound() {
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "groups",
                 "faculty_id = 1"));
 

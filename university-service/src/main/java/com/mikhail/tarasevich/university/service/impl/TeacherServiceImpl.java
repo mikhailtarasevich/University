@@ -152,7 +152,7 @@ public class TeacherServiceImpl
     @Override
     public List<TeacherResponse> findTeachersRelateToTeacherTitle(int teacherTitleId) {
         return userDao.findAll().stream()
-                .filter(t -> t.getTeacherTitle().getId() == teacherTitleId)
+                .filter(t -> t.getTeacherTitle() !=null && t.getTeacherTitle().getId() == teacherTitleId)
                 .map(userMapper::toResponse)
                 .collect(Collectors.toList());
     }

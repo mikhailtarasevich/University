@@ -7,6 +7,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+
 @Controller
 @RequestMapping("teachers")
 public class TeachersController {
@@ -72,14 +74,16 @@ public class TeachersController {
         teacherRequest.setLastName(teacherResponse.getLastName());
         teacherRequest.setGender(teacherResponse.getGender());
         teacherRequest.setEmail(teacherResponse.getEmail());
-        teacherRequest.setTeacherTitleId(teacherResponse.getTeacherTitle().getId());
-        teacherRequest.setDepartmentId(teacherResponse.getDepartment().getId());
+        teacherRequest.setTeacherTitleId(teacherResponse.getTeacherTitle() == null ? 0 : teacherResponse.getTeacherTitle().getId());
+        teacherRequest.setDepartmentId(teacherResponse.getDepartment() == null ? 0 : teacherResponse.getDepartment().getId());
 
         model.addAttribute("teacher", teacherRequest);
         model.addAttribute("groupsRelateToTeacher", groupService.findGroupsRelateToTeacher(id));
         model.addAttribute("groupsNotRelateToTeacher", groupService.findGroupsNotRelateToTeacher(id));
         model.addAttribute("coursesRelateToTeacher", courseService.findCoursesRelateToTeacher(id));
-        model.addAttribute("coursesRelateToDepartmentNotRelateToTeacher", courseService.findCoursesRelateToDepartmentNotRelateToTeacher(teacherResponse.getDepartment().getId(), id));
+        model.addAttribute("coursesRelateToDepartmentNotRelateToTeacher",
+                teacherResponse.getDepartment() == null ? new ArrayList<>() :
+                        courseService.findCoursesRelateToDepartmentNotRelateToTeacher(teacherResponse.getDepartment().getId(), id));
         model.addAttribute("teacherTitles", teacherTitleService.findAll());
         model.addAttribute("departments", departmentService.findAll());
 

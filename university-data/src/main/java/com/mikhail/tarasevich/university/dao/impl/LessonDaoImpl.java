@@ -2,176 +2,125 @@ package com.mikhail.tarasevich.university.dao.impl;
 
 import com.mikhail.tarasevich.university.dao.LessonDao;
 import com.mikhail.tarasevich.university.entity.*;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcOperations;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.time.Duration;
+import javax.persistence.Query;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public class LessonDaoImpl extends AbstractPageableCrudDaoImpl<Lesson> implements LessonDao {
 
-    private static final String SAVE_QUERY =
-            "INSERT INTO lessons (name, group_id, user_id, course_id, lesson_type_id, start_time) " +
-                    "VALUES(?, ?, ?, ?, ?, ?)";
-    private static final String FIND_COMMON_PART_QUERY = "SELECT lessons.id AS lesson_id, " +
-            "lessons.name AS lesson_name, groups.id AS group_id, groups.name AS group_name, " +
-            "users.id AS user_id, first_name, last_name, gender, email, password, teacher_title_id, department_id, " +
-            "courses.id AS course_id, courses.name AS course_name, description, " +
-            "lesson_types.id AS lesson_type_id, lesson_types.name AS lesson_type_name, duration, start_time " +
-            "FROM lessons " +
-            "LEFT JOIN groups ON group_id = groups.id " +
-            "LEFT JOIN users ON user_id = users.id " +
-            "LEFT JOIN courses ON course_id = courses.id " +
-            "LEFT JOIN lesson_types ON lesson_type_id = lesson_types.id ";
-    private static final String FIND_ALL_QUERY = FIND_COMMON_PART_QUERY + "ORDER BY lessons.id";
-    private static final String FIND_BY_ID_QUERY = FIND_COMMON_PART_QUERY + "WHERE lessons.id = ?";
-    private static final String FIND_BY_NAME_QUERY =
-            FIND_COMMON_PART_QUERY + "WHERE lessons.name = ? ORDER BY lessons.id";
-    private static final String FIND_ALL_PAGEABLE_QUERY =
-            FIND_COMMON_PART_QUERY + "ORDER BY lessons.id LIMIT ? OFFSET ?";
-    private static final String UPDATE_QUERY = "UPDATE lessons SET name = ?, group_id = ?, user_id = ?, " +
-            "course_id = ?, lesson_type_id = ?, start_time = ? WHERE id = ?";
-    private static final String DELETE_BY_ID_QUERY = "DELETE FROM lessons WHERE id = ?";
-    private static final String COUNT_TABLE_ROWS_QUERY = "SELECT COUNT(*) FROM lessons";
+    private static final String UNIQUE_NAME_PARAMETER = "name";
     private static final String FIND_LESSONS_RELATE_TO_GROUP_QUERY =
-            FIND_COMMON_PART_QUERY + "WHERE lessons.group_id = ? ORDER BY start_time";
-    private static final String UPDATE_GROUP_QUERY = "UPDATE lessons SET group_id = ? WHERE id = ?";
-    private static final String UPDATE_TEACHER_QUERY = "UPDATE lessons SET user_id = ? WHERE id = ?";
-    private static final String UPDATE_COURSE_QUERY = "UPDATE lessons SET course_id = ? WHERE id = ?";
-    private static final String UPDATE_LESSON_TYPE_QUERY = "UPDATE lessons SET lesson_type_id = ? WHERE id = ?";
-    private static final String UPDATE_START_TIME_QUERY = "UPDATE lessons SET start_time = ? WHERE id = ?";
-    private static final String UNBIND_LESSONS_FROM_COURSE_QUERY =
-            "UPDATE lessons SET course_id = NULL WHERE course_id = ?";
-    private static final String UNBIND_LESSONS_FROM_TEACHER_QUERY =
-            "UPDATE lessons SET user_id = NULL WHERE user_id = ?";
-    private static final String UNBIND_LESSONS_FROM_GROUP_QUERY =
-            "UPDATE lessons SET group_id = NULL WHERE group_id = ?";
-    private static final String UNBIND_LESSONS_FROM_LESSON_TYPE_QUERY =
-            "UPDATE lessons SET lesson_type_id = NULL WHERE lesson_type_id = ?";
-    private static final RowMapper<Lesson> ROW_MAPPER = (resultSet, rowNum) ->
-            Lesson.builder()
-                    .withId(resultSet.getInt("lesson_id"))
-                    .withName(resultSet.getString("lesson_name"))
-                    .withGroup(Group.builder()
-                            .withId(resultSet.getInt("group_id"))
-                            .withName(resultSet.getString("group_name"))
-                            .build())
-                    .withTeacher(Teacher.builder()
-                            .withId(resultSet.getInt("user_id"))
-                            .withFirstName(resultSet.getString("first_name"))
-                            .withLastName(resultSet.getString("last_name"))
-                            .withGender(Gender.getById(resultSet.getInt("gender")))
-                            .withEmail(resultSet.getString("email"))
-                            .withPassword(resultSet.getString("password"))
-                            .withTeacherTitle(TeacherTitle.builder()
-                                    .withId(resultSet.getInt("teacher_title_id"))
-                                    .build())
-                            .withDepartment(Department.builder()
-                                    .withId(resultSet.getInt("department_id"))
-                                    .build())
-                            .build())
-                    .withCourse(Course.builder()
-                            .withId(resultSet.getInt("course_id"))
-                            .withName(resultSet.getString("course_name"))
-                            .withDescription(resultSet.getString("description"))
-                            .build())
-                    .withLessonType(LessonType.builder()
-                            .withId(resultSet.getInt("lesson_type_id"))
-                            .withName(resultSet.getString("lesson_type_name"))
-                            .withDuration(Duration.ofMinutes(resultSet.getLong("duration")))
-                            .build())
-                    .withStartTime(resultSet.getTimestamp("start_time").toLocalDateTime())
-                    .build();
+            "SELECT l FROM Lesson l LEFT JOIN l.group g WHERE g.id = :groupId";
+    private static final String UPDATE_GROUP_QUERY =
+            "UPDATE lessons SET group_id = :groupId WHERE id = :lessonId";
+    private static final String UPDATE_TEACHER_QUERY =
+            "UPDATE lessons SET user_id = :teacherId WHERE id = :lessonId";
+    private static final String UPDATE_COURSE_QUERY =
+            "UPDATE lessons SET course_id = :courseId WHERE id = :lessonId";
+    private static final String UPDATE_LESSON_TYPE_QUERY =
+            "UPDATE lessons SET lesson_type_id = :lessonTypeId WHERE id = :lessonId";
+    private static final String UNBIND_GROUP_QUERY =
+            "UPDATE lessons SET group_id = NULL WHERE group_id = :groupId";
+    private static final String UNBIND_TEACHER_QUERY =
+            "UPDATE lessons SET user_id = NULL WHERE user_id = :teacherId";
+    private static final String UNBIND_COURSE_QUERY =
+            "UPDATE lessons SET course_id = NULL WHERE course_id = :courseId";
+    private static final String UNBIND_LESSON_TYPE_QUERY =
+            "UPDATE lessons SET lesson_type_id = NULL WHERE lesson_type_id = :lessonTypeId";
 
     @Autowired
-    public LessonDaoImpl(JdbcOperations jdbcTemplate) {
-        super(jdbcTemplate, ROW_MAPPER, SAVE_QUERY, FIND_BY_ID_QUERY, FIND_ALL_QUERY, FIND_ALL_PAGEABLE_QUERY,
-                FIND_BY_NAME_QUERY, UPDATE_QUERY, DELETE_BY_ID_QUERY, COUNT_TABLE_ROWS_QUERY);
+    public LessonDaoImpl(SessionFactory sessionFactory) {
+        super(sessionFactory, Lesson.class, UNIQUE_NAME_PARAMETER);
     }
 
     @Override
     public List<Lesson> findLessonsRelateToGroup(int groupId) {
-        return jdbcTemplate.query(FIND_LESSONS_RELATE_TO_GROUP_QUERY, mapper, groupId);
+        Session session = sessionFactory.getCurrentSession();
+        Query query = session.createQuery(FIND_LESSONS_RELATE_TO_GROUP_QUERY);
+        query.setParameter("groupId", groupId);
+
+        return query.getResultList();
     }
 
     @Override
     public void changeGroup(int lessonId, int newGroupId) {
-        jdbcTemplate.update(UPDATE_GROUP_QUERY, newGroupId, lessonId);
+        Session session = sessionFactory.getCurrentSession();
+        session.createNativeQuery(UPDATE_GROUP_QUERY)
+                .setParameter("groupId", newGroupId)
+                .setParameter("lessonId", lessonId)
+                .executeUpdate();
     }
 
     @Override
     public void changeTeacher(int lessonId, int newTeacherId) {
-        jdbcTemplate.update(UPDATE_TEACHER_QUERY, newTeacherId, lessonId);
+        Session session = sessionFactory.getCurrentSession();
+        session.createNativeQuery(UPDATE_TEACHER_QUERY)
+                .setParameter("teacherId", newTeacherId)
+                .setParameter("lessonId", lessonId)
+                .executeUpdate();
     }
 
     @Override
     public void changeCourse(int lessonId, int newCourseId) {
-        jdbcTemplate.update(UPDATE_COURSE_QUERY, newCourseId, lessonId);
+        Session session = sessionFactory.getCurrentSession();
+        session.createNativeQuery(UPDATE_COURSE_QUERY)
+                .setParameter("courseId", newCourseId)
+                .setParameter("lessonId", lessonId)
+                .executeUpdate();
     }
 
     @Override
     public void changeLessonType(int lessonId, int newLessonTypeId) {
-        jdbcTemplate.update(UPDATE_LESSON_TYPE_QUERY, newLessonTypeId, lessonId);
+        Session session = sessionFactory.getCurrentSession();
+        session.createNativeQuery(UPDATE_LESSON_TYPE_QUERY)
+                .setParameter("lessonTypeId", newLessonTypeId)
+                .setParameter("lessonId", lessonId)
+                .executeUpdate();
     }
 
     @Override
     public void changeStartTime(int lessonId, LocalDateTime newStartTime) {
-        jdbcTemplate.update(UPDATE_START_TIME_QUERY, newStartTime, lessonId);
+        Session session = sessionFactory.getCurrentSession();
+        Lesson lesson = session.get(clazz, lessonId);
+        lesson.setStartTime(newStartTime);
     }
 
     @Override
     public void unbindLessonsFromCourse(int courseId) {
-        jdbcTemplate.update(UNBIND_LESSONS_FROM_COURSE_QUERY, courseId);
+        Session session = sessionFactory.getCurrentSession();
+        session.createNativeQuery(UNBIND_COURSE_QUERY)
+                .setParameter("courseId", courseId)
+                .executeUpdate();
     }
 
     @Override
-    public void unbindLessonsFromTeacher(int courseId) {
-        jdbcTemplate.update(UNBIND_LESSONS_FROM_TEACHER_QUERY, courseId);
+    public void unbindLessonsFromTeacher(int teacherId) {
+        Session session = sessionFactory.getCurrentSession();
+        session.createNativeQuery(UNBIND_TEACHER_QUERY)
+                .setParameter("teacherId", teacherId)
+                .executeUpdate();
     }
 
     @Override
     public void unbindLessonsFromGroup(int groupId) {
-        jdbcTemplate.update(UNBIND_LESSONS_FROM_GROUP_QUERY, groupId);
+        Session session = sessionFactory.getCurrentSession();
+        session.createNativeQuery(UNBIND_GROUP_QUERY)
+                .setParameter("groupId", groupId)
+                .executeUpdate();
     }
 
     @Override
     public void unbindLessonsFromLessonType(int lessonTypeId) {
-        jdbcTemplate.update(UNBIND_LESSONS_FROM_LESSON_TYPE_QUERY, lessonTypeId);
-    }
-
-    @Override
-    protected void setStatementForSave(PreparedStatement ps, Lesson entity) throws SQLException {
-        ps.setString(1, entity.getName());
-        ps.setInt(2, entity.getGroup().getId());
-        ps.setInt(3, entity.getTeacher().getId());
-        ps.setInt(4, entity.getCourse().getId());
-        ps.setInt(5, entity.getLessonType().getId());
-        ps.setObject(6, entity.getStartTime());
-    }
-
-    @Override
-    protected void setStatementForUpdate(PreparedStatement ps, Lesson entity) throws SQLException {
-        setStatementForSave(ps, entity);
-        ps.setInt(7, entity.getId());
-    }
-
-    @Override
-    protected Lesson makeEntityWithId(Lesson entity, int id) {
-        return Lesson.builder()
-                .withId(id)
-                .withName(entity.getName())
-                .withGroup(entity.getGroup())
-                .withTeacher(entity.getTeacher())
-                .withCourse(entity.getCourse())
-                .withLessonType(entity.getLessonType())
-                .withStartTime(entity.getStartTime())
-                .build();
+        Session session = sessionFactory.getCurrentSession();
+        session.createNativeQuery(UNBIND_LESSON_TYPE_QUERY)
+                .setParameter("lessonTypeId", lessonTypeId)
+                .executeUpdate();
     }
 
 }

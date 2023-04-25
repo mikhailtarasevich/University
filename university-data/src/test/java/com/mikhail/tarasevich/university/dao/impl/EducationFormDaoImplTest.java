@@ -7,17 +7,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ContextConfiguration(classes = SpringConfigTest.class)
 class EducationFormDaoImplTest {
 
     private final ApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigTest.class);
     private final EducationFormDao educationFormDao = context.getBean(
-            "educationFormDao", EducationFormDaoImpl.class);
+            "educationFormDaoTest", EducationFormDao.class);
     private final JdbcTemplate jdbcTemplate = context.getBean("jdbcTemplate", JdbcTemplate.class);
 
     private static final EducationForm educationForm1 = EducationForm.builder()

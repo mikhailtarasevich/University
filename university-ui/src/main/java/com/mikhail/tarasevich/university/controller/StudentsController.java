@@ -64,7 +64,7 @@ public class StudentsController {
         studentForUpdate.setLastName(studentResponse.getLastName());
         studentForUpdate.setGender(studentResponse.getGender());
         studentForUpdate.setEmail(studentResponse.getEmail());
-        studentForUpdate.setGroupId(studentResponse.getGroup().getId());
+        studentForUpdate.setGroupId(studentResponse.getGroup() == null ? 0 : studentResponse.getGroup().getId());
 
         model.addAttribute("student", studentForUpdate);
         model.addAttribute("groups", groupService.findAll());

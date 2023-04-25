@@ -7,16 +7,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ContextConfiguration(classes = SpringConfigTest.class)
 class FacultyDaoImplTest {
 
     private final ApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigTest.class);
-    private final FacultyDao facultyDao = context.getBean("facultyDao", FacultyDaoImpl.class);
+    private final FacultyDao facultyDao = context.getBean("facultyDaoTest", FacultyDao.class);
     private final JdbcTemplate jdbcTemplate = context.getBean("jdbcTemplate", JdbcTemplate.class);
 
     private static final Faculty faculty1 = Faculty.builder()

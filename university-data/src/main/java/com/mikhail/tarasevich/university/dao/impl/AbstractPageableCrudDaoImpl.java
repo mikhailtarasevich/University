@@ -1,37 +1,54 @@
 package com.mikhail.tarasevich.university.dao.impl;
 
 import com.mikhail.tarasevich.university.dao.CrudPageableDao;
-import org.springframework.jdbc.core.JdbcOperations;
-import org.springframework.jdbc.core.RowMapper;
+import com.mikhail.tarasevich.university.entity.Lesson;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
-import java.util.Optional;
 
-public abstract class AbstractPageableCrudDaoImpl<E> extends AbstractCrudDaoImpl<E> implements CrudPageableDao<E> {
+public abstract class AbstractPageableCrudDaoImpl<E> extends AbstractCrudDaoImpl<E>
+        implements CrudPageableDao<E> {
 
-    private final String findAllPageableQuery;
-    private final String countTableRowsQuery;
-
-    protected AbstractPageableCrudDaoImpl(JdbcOperations jdbcTemplate, RowMapper<E> mapper,
-                                          String saveQuery, String findByIdQuery,
-                                          String findAllQuery, String findAllPageableQuery, String findByNameQuery,
-                                          String updateQuery, String deleteByIdQuery, String countTableRowsQuery) {
-        super(jdbcTemplate, mapper, saveQuery, findByIdQuery, findAllQuery, findByNameQuery,
-                updateQuery, deleteByIdQuery);
-        this.findAllPageableQuery = findAllPageableQuery;
-        this.countTableRowsQuery = countTableRowsQuery;
+    protected AbstractPageableCrudDaoImpl(SessionFactory sessionFactory, Class<E> clazz,
+                                          String uniqueNameParameter) {
+        super(sessionFactory, clazz, uniqueNameParameter);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<E> findAll(int page, int itemsPerPage) {
-        int offsetToPage = (page-1) * itemsPerPage;
-        return jdbcTemplate.query(findAllPageableQuery, mapper, itemsPerPage, offsetToPage);
+        Session session = sessionFactory.getCurrentSession();
+        CriteriaBuilder criteriaBuilder = sessionFactory.getCriteriaBuilder();
+        CriteriaQuery<E> query = criteriaBuilder.createQuery(clazz);
+        Root<E> root = query.from(clazz);
+        CriteriaQuery<E> select = query.select(root);
+        if (clazz.equals(Lesson.class)) {
+            select.orderBy(criteriaBuilder.asc(root.get("startTime")));
+        } else {
+            select.orderBy(criteriaBuilder.asc(root.get("id")));
+        }
+
+        TypedQuery<E> typedQuery = session.createQuery(select);
+        typedQuery.setFirstResult((page-1)*itemsPerPage);
+        typedQuery.setMaxResults(itemsPerPage);
+        return typedQuery.getResultList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public long count() {
-        Optional<Long> count = Optional.ofNullable(jdbcTemplate.queryForObject(countTableRowsQuery, Long.class));
-        return count.orElse(0L);
+        Session session = sessionFactory.getCurrentSession();
+        CriteriaBuilder criteriaBuilder = sessionFactory.getCriteriaBuilder();
+        CriteriaQuery<Long> query = criteriaBuilder.createQuery(Long.class);
+        query.select(criteriaBuilder.count(query.from(clazz)));
+
+        return session.createQuery(query).getSingleResult();
     }
 
 }

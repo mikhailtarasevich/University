@@ -1,170 +1,121 @@
 package com.mikhail.tarasevich.university.dao.impl;
 
 import com.mikhail.tarasevich.university.dao.CrudDao;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.JdbcOperations;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import javax.persistence.criteria.*;
 import java.util.*;
 
+@Transactional
 public abstract class AbstractCrudDaoImpl<E> implements CrudDao<E> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractCrudDaoImpl.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(AbstractCrudDaoImpl.class);
 
-    protected final JdbcOperations jdbcTemplate;
-    protected RowMapper<E> mapper;
-    protected static final KeyHolder keyHolder = new GeneratedKeyHolder();
-    private final String saveQuery;
-    private final String findByIdQuery;
-    private final String findAllQuery;
-    private final String findByNameQuery;
-    private final String updateQuery;
-    private final String deleteByIdQuery;
+    protected final SessionFactory sessionFactory;
+    protected final Class<E> clazz;
+    protected final String uniqueNameParameter;
 
-    protected AbstractCrudDaoImpl(JdbcOperations jdbcTemplate, RowMapper<E> mapper,
-                                  String saveQuery, String findByIdQuery, String findAllQuery, String findByNameQuery,
-                                  String updateQuery, String deleteByIdQuery) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.mapper = mapper;
-        this.saveQuery = saveQuery;
-        this.findByIdQuery = findByIdQuery;
-        this.findAllQuery = findAllQuery;
-        this.findByNameQuery = findByNameQuery;
-        this.updateQuery = updateQuery;
-        this.deleteByIdQuery = deleteByIdQuery;
+    public AbstractCrudDaoImpl(SessionFactory sessionFactory, Class<E> clazz, String uniqueNameParameter) {
+        this.sessionFactory = sessionFactory;
+        this.clazz = clazz;
+        this.uniqueNameParameter = uniqueNameParameter;
     }
 
     @Override
     public E save(E entity) {
-        try {
-            jdbcTemplate.update(con -> {
-                PreparedStatement ps = con.prepareStatement(saveQuery, Statement.RETURN_GENERATED_KEYS);
-                setStatementForSave(ps, entity);
-                return ps;
-            }, keyHolder);
-            return makeEntityWithId(entity, (int) keyHolder.getKeys().get("id"));
-        } catch (NullPointerException e) {
-            LOG.error("KeyHolder is null, unable to save entity", e);
-            return null;
-        }
+        Session session = sessionFactory.getCurrentSession();
+        session.save(entity);
+
+        return entity;
     }
 
     @Override
     public void saveAll(List<E> entities) {
-        jdbcTemplate.batchUpdate(saveQuery, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                setStatementForSave(ps, entities.get(i));
-            }
-
-            @Override
-            public int getBatchSize() {
-                return entities.size();
-            }
-
-        });
+        Session session = sessionFactory.getCurrentSession();
+        entities.forEach(session::save);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<E> findById(int id) {
-        try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(findByIdQuery, mapper, id));
-        } catch (DataAccessException e) {
-            LOG.info("Entity with id = {} not found in DB. Query: {} ", id, findAllQuery);
-            return Optional.empty();
-        }
+        Session session = sessionFactory.getCurrentSession();
+        return Optional.of(session.get(clazz, id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<E> findAll() {
-        return jdbcTemplate.query(findAllQuery, mapper);
+        Session session = sessionFactory.getCurrentSession();
+        CriteriaBuilder criteriaBuilder = sessionFactory.getCriteriaBuilder();
+        CriteriaQuery<E> query = criteriaBuilder.createQuery(clazz);
+        Root<E> root = query.from(clazz);
+        query.select(root).orderBy(criteriaBuilder.asc(root.get("id")));
+
+        return session.createQuery(query).getResultList();
     }
 
     @Override
-    public Optional<E> findByName(String name){
-        try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(findByNameQuery, mapper, name));
-        } catch (DataAccessException e) {
-            LOG.info("Entity with name = {} not found in DB. Query: {} ", name, findByNameQuery);
-            return Optional.empty();
-        }
+    @Transactional(readOnly = true)
+    public Optional<E> findByName(String name) {
+        Session session = sessionFactory.getCurrentSession();
+        CriteriaBuilder criteriaBuilder = sessionFactory.getCriteriaBuilder();
+        CriteriaQuery<E> query = criteriaBuilder.createQuery(clazz);
+        Root<E> root = query.from(clazz);
+        Predicate emailPredicate = criteriaBuilder.equal(root.get(uniqueNameParameter), name);
+        query.select(root).where(emailPredicate);
+        session.createQuery(query).uniqueResultOptional();
+
+        return session.createQuery(query).uniqueResultOptional();
     }
 
     @Override
     public void update(E entity) {
-        jdbcTemplate.update(con -> {
-            PreparedStatement ps = con.prepareStatement(updateQuery);
-            setStatementForUpdate(ps, entity);
-            return ps;
-        });
+        Session session = sessionFactory.getCurrentSession();
+        session.update(entity);
     }
 
 
     @Override
     public void updateAll(List<E> entities) {
-        jdbcTemplate.batchUpdate(updateQuery,
-                new BatchPreparedStatementSetter() {
-                    @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        setStatementForUpdate(ps, entities.get(i));
-                    }
-
-                    @Override
-                    public int getBatchSize() {
-                        return entities.size();
-                    }
-                });
+        Session session = sessionFactory.getCurrentSession();
+        entities.forEach(session::update);
     }
 
     @Override
     public boolean deleteById(int id) {
-        int result = jdbcTemplate.update(deleteByIdQuery, id);
-        if (result == 1) {
-            LOG.info("Entity with id = {} was deleted from DB. Query: {}", id, deleteByIdQuery);
+        Session session = sessionFactory.getCurrentSession();
+        try {
+            session.delete(session.get(clazz, id));
             return true;
-        } else {
-            LOG.info("Entity with id = {} wasn't deleted from DB. Query: {}", id, deleteByIdQuery);
+        } catch (HibernateException e) {
+            LOG.info("Entity with id = {} wasn't deleted from DB.", id);
             return false;
         }
     }
 
     @Override
     public boolean deleteByIds(Set<Integer> ids) {
-        List<Integer> listIds = new ArrayList<>(ids);
+        Session session = sessionFactory.getCurrentSession();
+        CriteriaBuilder criteriaBuilder = sessionFactory.getCriteriaBuilder();
         boolean status = true;
-        int[] result = jdbcTemplate.batchUpdate(deleteByIdQuery,
-                new BatchPreparedStatementSetter() {
-                    @Override
-                    public void setValues(PreparedStatement preparedStatement, int numberOfElement)
-                            throws SQLException {
-                        int id = listIds.get(numberOfElement);
-                        preparedStatement.setLong(1, id);
-                    }
 
-                    @Override
-                    public int getBatchSize() {
-                        return ids.size();
-                    }
-                });
-        if (Arrays.stream(result).anyMatch(a -> a == 0)) {
+        CriteriaDelete<E> criteria = criteriaBuilder.createCriteriaDelete(clazz);
+        Root<E> root = criteria.from(clazz);
+        criteria.where(root.get("id").in(ids));
+        int count = session.createQuery(criteria).executeUpdate();
+        if (count != ids.size()) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             status = false;
+            LOG.info("Entities with ids = {} wasn't deleted from DB. Transaction was rolled back.", ids);
         }
 
         return status;
     }
-
-    protected abstract void setStatementForSave(PreparedStatement ps, E entity) throws SQLException;
-
-    protected abstract void setStatementForUpdate(PreparedStatement ps, E entity) throws SQLException;
-
-    protected abstract E makeEntityWithId(E entity, int id);
 
 }

@@ -42,18 +42,18 @@
     <div class="mb-2 row">
         <label for="teacherTitle" class="col col-form-label">Teacher title:</label>
         <div class="col">
-            <a th:href="@{/teacher-titles/{id}(id=${teacher.teacherTitle.id})}">
+            <a th:href="${teacher.teacherTitle == null} ? '#' : @{/teacher-titles/{id}(id=${teacher.teacherTitle.id})}">
                 <input type="text" readonly class="form-control-plaintext text-center" id="teacherTitle"
-                       th:value="${teacher.teacherTitle.name}"/>
+                       th:value="${teacher.teacherTitle == null ? 'teacher title not selected' : teacher.teacherTitle.name}"/>
             </a>
         </div>
     </div>
     <div class="mb-2 row">
         <label for="department" class="col col-form-label">Department:</label>
         <div class="col">
-            <a th:href="@{/departments/{id}(id=${teacher.department.id})}">
+            <a th:href="${teacher.department == null} ? '#' : @{/departments/{id}(id=${teacher.department.id})}">
                 <input type="text" readonly class="form-control-plaintext text-center" id="department"
-                       th:value="${teacher.department.name}"/>
+                       th:value="${teacher.department == null ? 'department not selected' : teacher.department.name}"/>
             </a>
         </div>
     </div>
