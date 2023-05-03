@@ -4,7 +4,7 @@ import com.mikhail.tarasevich.university.entity.Course;
 import com.mikhail.tarasevich.university.entity.Group;
 import com.mikhail.tarasevich.university.entity.LessonType;
 import com.mikhail.tarasevich.university.entity.Teacher;
-import lombok.*;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 

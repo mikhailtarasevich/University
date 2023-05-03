@@ -1,7 +1,7 @@
 package com.mikhail.tarasevich.university.dto;
 
 import com.mikhail.tarasevich.university.entity.Gender;
-import lombok.*;
+import lombok.Data;
 
 @Data
 public abstract class UserResponse {

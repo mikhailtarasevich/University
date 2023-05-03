@@ -1,12 +1,11 @@
 package com.mikhail.tarasevich.university.dao.impl;
 
 import com.mikhail.tarasevich.university.dao.StudentDao;
-import com.mikhail.tarasevich.university.entity.*;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.mikhail.tarasevich.university.entity.Group;
+import com.mikhail.tarasevich.university.entity.Student;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.util.List;
 
@@ -18,15 +17,13 @@ public class StudentDaoImpl extends AbstractUserDaoImpl<Student>
     private static final String FIND_STUDENTS_RELATE_TO_GROUP_QUERY =
             "SELECT s FROM Student s LEFT JOIN s.group g WHERE g.id = :groupId";
 
-    @Autowired
-    public StudentDaoImpl(SessionFactory sessionFactory) {
-        super(sessionFactory, Student.class);
+    public StudentDaoImpl(EntityManager entityManager) {
+        super(entityManager, Student.class);
     }
 
     @Override
     public List<Student> findStudentsRelateToGroup(int groupId) {
-        Session session = sessionFactory.getCurrentSession();
-        Query query = session.createQuery(FIND_STUDENTS_RELATE_TO_GROUP_QUERY);
+        Query query = entityManager.createQuery(FIND_STUDENTS_RELATE_TO_GROUP_QUERY);
         query.setParameter("groupId", groupId);
 
         return query.getResultList();
@@ -34,8 +31,7 @@ public class StudentDaoImpl extends AbstractUserDaoImpl<Student>
 
     @Override
     public void deleteStudentFromGroup(int userId) {
-        Session session = sessionFactory.getCurrentSession();
-        Student student = session.get(clazz, userId);
+        Student student = entityManager.find(clazz, userId);
         student.setGroup(null);
     }
 
@@ -47,9 +43,8 @@ public class StudentDaoImpl extends AbstractUserDaoImpl<Student>
 
     @Override
     public void addUserToGroup(int userId, int groupId) {
-        Session session = sessionFactory.getCurrentSession();
-        Student student = session.get(clazz, userId);
-        Group group = session.get(Group.class, groupId);
+        Student student = entityManager.find(clazz, userId);
+        Group group = entityManager.find(Group.class, groupId);
         student.setGroup(group);
     }
 

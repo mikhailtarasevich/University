@@ -2,19 +2,19 @@ package com.mikhail.tarasevich.university.dao.impl;
 
 import com.mikhail.tarasevich.university.dao.EducationFormDao;
 import com.mikhail.tarasevich.university.entity.EducationForm;
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import javax.persistence.EntityManager;
 
 @Repository
 public class EducationFormDaoImpl extends AbstractPageableCrudDaoImpl<EducationForm>
         implements EducationFormDao {
 
     private static final String UNIQUE_NAME_PARAMETER = "name";
+    private static final String ORDER_BY_QUERY = "id";
 
-    @Autowired
-    public EducationFormDaoImpl(SessionFactory sessionFactory) {
-        super(sessionFactory, EducationForm.class, UNIQUE_NAME_PARAMETER);
+    public EducationFormDaoImpl(EntityManager entityManager) {
+        super(entityManager, EducationForm.class, UNIQUE_NAME_PARAMETER, ORDER_BY_QUERY);
     }
 
 }

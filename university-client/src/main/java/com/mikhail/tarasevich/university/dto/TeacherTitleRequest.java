@@ -1,6 +1,6 @@
 package com.mikhail.tarasevich.university.dto;
 
-import lombok.*;
+import lombok.Data;
 
 @Data
 public class TeacherTitleRequest {

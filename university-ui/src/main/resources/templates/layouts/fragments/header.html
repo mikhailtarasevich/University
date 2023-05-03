@@ -8,7 +8,7 @@
 <nav th:fragment="header" class="navbar navbar-expand navbar-dark bg-dark border-bottom">
   <div class="container">
     <a class="navbar-brand" href="/">
-      <img class="logo" src="/resources/img/logo.png" alt="Logo" height="50px"/>
+      <img class="logo" th:src="@{/img/logo.png}" alt="Logo" height="50px"/>
       University
     </a>
     <button

@@ -1,25 +1,35 @@
 package com.mikhail.tarasevich.university.dao.impl;
 
-import com.mikhail.tarasevich.university.config.SpringConfigTest;
 import com.mikhail.tarasevich.university.dao.FacultyDao;
+import com.mikhail.tarasevich.university.dao.config.SpringTestConfig;
 import com.mikhail.tarasevich.university.entity.Faculty;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ContextConfiguration(classes = SpringConfigTest.class)
+@SpringBootTest
+@ContextConfiguration(classes = SpringTestConfig.class)
+@ActiveProfiles("test")
 class FacultyDaoImplTest {
 
-    private final ApplicationContext context = new AnnotationConfigApplicationContext(SpringConfigTest.class);
-    private final FacultyDao facultyDao = context.getBean("facultyDaoTest", FacultyDao.class);
-    private final JdbcTemplate jdbcTemplate = context.getBean("jdbcTemplate", JdbcTemplate.class);
+    @Autowired
+    private FacultyDao facultyDao;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private static final Faculty faculty1 = Faculty.builder()
             .withId(1)
@@ -76,6 +86,8 @@ class FacultyDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void save_inputEntity_expectedEntityWithId() {
         final Faculty entityForSave = Faculty.builder().withName("test").withDescription("test").build();
         final Faculty expectedEntity = Faculty.builder().withId(8).withName("test").withDescription("test").build();
@@ -86,6 +98,8 @@ class FacultyDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void saveAll_inputEntities_expectedEntitiesAddedToDb() {
         assertEquals(0L, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "faculties",
                 "id = 8 OR id = 9"));
@@ -158,6 +172,8 @@ class FacultyDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void update_inputUpdatedEntity_expectedEntityInDBWasUpdated() {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "faculties",
                 "id = 1 AND name = 'Updated' AND description = 'Updated'"));
@@ -175,6 +191,8 @@ class FacultyDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void updateAll_inputUpdatedEntities_expectedEntitiesInDBWereUpdated() {
         assertEquals(0, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "faculties",
                 "(id = 1 OR id = 2) AND name = 'Updated' AND description = 'Updated'"));
@@ -202,6 +220,8 @@ class FacultyDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void deleteById_inputIdOfDeletedEntity_expectedDeletedEntityIsAbsentInDB() {
         assertEquals(1, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "faculties",
                 "id = 7"));
@@ -216,6 +236,8 @@ class FacultyDaoImplTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/schema.sql", "classpath:sql/data.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void deleteByIds_inputIdsOfDeletedEntities_expectedDeletedEntitiesAreAbsentInDB() {
         assertEquals(2, JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, "faculties",
                 "id = 1 OR id = 2"));

@@ -63,6 +63,7 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
     }
 
     @Override
+    @Transactional(readOnly = true)
     public DepartmentResponse findById(int id) {
         Optional<DepartmentResponse> foundDepartment = departmentDao.findById(id).map(mapper::toResponse);
 
@@ -74,6 +75,7 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DepartmentResponse> findAll(String page) {
         final long itemsCount = departmentDao.count();
         int pageNumber = parsePageNumber(page, itemsCount, 1);
@@ -84,6 +86,7 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DepartmentResponse> findAll() {
         return departmentDao.findAll().stream()
                 .map(mapper::toResponse)
@@ -156,6 +159,7 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
     }
 
     @Override
+    @Transactional(readOnly = true)
     public int lastPageNumber() {
         return (int) Math.ceil((double) departmentDao.count() / ITEMS_PER_PAGE);
     }

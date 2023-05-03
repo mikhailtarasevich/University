@@ -1,6 +1,8 @@
 package com.mikhail.tarasevich.university.dto;
 
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

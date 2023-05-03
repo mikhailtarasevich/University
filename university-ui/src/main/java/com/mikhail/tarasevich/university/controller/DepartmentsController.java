@@ -2,11 +2,19 @@ package com.mikhail.tarasevich.university.controller;
 
 import com.mikhail.tarasevich.university.dto.DepartmentRequest;
 import com.mikhail.tarasevich.university.dto.DepartmentResponse;
-import com.mikhail.tarasevich.university.service.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.mikhail.tarasevich.university.service.CourseService;
+import com.mikhail.tarasevich.university.service.DepartmentService;
+import com.mikhail.tarasevich.university.service.TeacherService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("departments")
@@ -16,7 +24,6 @@ public class DepartmentsController {
     private final TeacherService teacherService;
     private final CourseService courseService;
 
-    @Autowired
     public DepartmentsController(DepartmentService departmentService, TeacherService teacherService,
                                  CourseService courseService) {
         this.departmentService = departmentService;

@@ -65,6 +65,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public GroupResponse findById(int id) {
         Optional<GroupResponse> foundGroup = groupDao.findById(id).map(mapper::toResponse);
 
@@ -76,6 +77,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<GroupResponse> findAll(String page) {
         final long itemsCount = groupDao.count();
         int pageNumber = parsePageNumber(page, itemsCount, 1);
@@ -86,6 +88,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<GroupResponse> findAll() {
         return groupDao.findAll().stream()
                 .map(mapper::toResponse)
@@ -145,6 +148,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<GroupResponse> findGroupsRelateToTeacher(int teacherId) {
         return groupDao.findGroupsRelateToTeacher(teacherId).stream()
                 .map(mapper::toResponse)
@@ -152,6 +156,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<GroupResponse> findGroupsNotRelateToTeacher(int teacherId) {
         return groupDao.findGroupsNotRelateToTeacher(teacherId).stream()
                 .map(mapper::toResponse)
@@ -159,6 +164,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<GroupResponse> findGroupsRelateToFaculty(int facultyId) {
         return groupDao.findAll().stream()
                 .filter(g -> g.getFaculty() != null && g.getFaculty().getId() == facultyId)
@@ -167,6 +173,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<GroupResponse> findGroupsRelateToEducationForm(int educationFormId) {
         return groupDao.findAll().stream()
                 .filter(g -> g.getEducationForm() != null && g.getEducationForm().getId() == educationFormId)
@@ -175,6 +182,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public int lastPageNumber() {
         return (int) Math.ceil((double) groupDao.count() / ITEMS_PER_PAGE);
     }

@@ -2,11 +2,21 @@ package com.mikhail.tarasevich.university.controller;
 
 import com.mikhail.tarasevich.university.dto.LessonRequest;
 import com.mikhail.tarasevich.university.dto.LessonResponse;
-import com.mikhail.tarasevich.university.service.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.mikhail.tarasevich.university.service.CourseService;
+import com.mikhail.tarasevich.university.service.GroupService;
+import com.mikhail.tarasevich.university.service.LessonService;
+import com.mikhail.tarasevich.university.service.LessonTypeService;
+import com.mikhail.tarasevich.university.service.TeacherService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
 
@@ -20,7 +30,6 @@ public class LessonsController {
     private final CourseService courseService;
     private final LessonTypeService lessonTypeService;
 
-    @Autowired
     public LessonsController(LessonService lessonService, GroupService groupService, TeacherService teacherService,
                              CourseService courseService, LessonTypeService lessonTypeService) {
         this.lessonService = lessonService;

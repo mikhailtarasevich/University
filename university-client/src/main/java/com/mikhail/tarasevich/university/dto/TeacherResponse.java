@@ -1,7 +1,9 @@
 package com.mikhail.tarasevich.university.dto;
 
 import com.mikhail.tarasevich.university.entity.*;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.util.List;
 

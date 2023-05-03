@@ -61,6 +61,7 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
     }
 
     @Override
+    @Transactional(readOnly = true)
     public LessonTypeResponse findById(int id) {
         Optional<LessonTypeResponse> foundLessonType = lessonTypeDao.findById(id).map(mapper::toResponse);
 
@@ -72,6 +73,7 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<LessonTypeResponse> findAll(String page) {
         final long itemsCount = lessonTypeDao.count();
         int pageNumber = parsePageNumber(page, itemsCount, 1);
@@ -82,6 +84,7 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<LessonTypeResponse> findAll() {
         return lessonTypeDao.findAll().stream()
                 .map(mapper::toResponse)
@@ -142,6 +145,7 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
     }
 
     @Override
+    @Transactional(readOnly = true)
     public int lastPageNumber() {
         return (int) Math.ceil((double) lessonTypeDao.count() / ITEMS_PER_PAGE);
     }

@@ -3,7 +3,7 @@ package com.mikhail.tarasevich.university.dto;
 import com.mikhail.tarasevich.university.entity.EducationForm;
 import com.mikhail.tarasevich.university.entity.Faculty;
 import com.mikhail.tarasevich.university.entity.Student;
-import lombok.*;
+import lombok.Data;
 
 @Data
 public class GroupResponse {
