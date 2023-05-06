@@ -1,8 +1,8 @@
 package com.mikhail.tarasevich.university.validator.impl;
 
-import com.mikhail.tarasevich.university.dao.DepartmentDao;
 import com.mikhail.tarasevich.university.dto.DepartmentRequest;
 import com.mikhail.tarasevich.university.entity.Department;
+import com.mikhail.tarasevich.university.repository.DepartmentRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.validator.impl.DepartmentValidatorImpl;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class DepartmentValidatorImplTest {
     @InjectMocks
     DepartmentValidatorImpl departmentValidator;
     @Mock
-    DepartmentDao departmentDao;
+    DepartmentRepository departmentRepository;
 
     private static final DepartmentRequest DEPARTMENT_REQUEST = new DepartmentRequest();
 
@@ -35,21 +35,21 @@ class DepartmentValidatorImplTest {
 
     @Test
     void validateUniqueNameInDB_inputWithUniqueName_expectedNothing() {
-        when(departmentDao.findByName(DEPARTMENT_REQUEST.getName())).thenReturn(Optional.empty());
+        when(departmentRepository.findByName(DEPARTMENT_REQUEST.getName())).thenReturn(Optional.empty());
 
         assertDoesNotThrow(() -> departmentValidator.validateUniqueNameInDB(DEPARTMENT_REQUEST));
 
-        verify(departmentDao, times(1)).findByName(DEPARTMENT_REQUEST.getName());
+        verify(departmentRepository, times(1)).findByName(DEPARTMENT_REQUEST.getName());
     }
 
     @Test
     void validateUniqueNameInDB_inputWithNotUniqueName_expectedException() {
-        when(departmentDao.findByName(DEPARTMENT_REQUEST.getName()))
+        when(departmentRepository.findByName(DEPARTMENT_REQUEST.getName()))
                 .thenReturn(Optional.of(Department.builder().build()));
 
         assertThrows(IncorrectRequestDataException.class, () -> departmentValidator.validateUniqueNameInDB(DEPARTMENT_REQUEST));
 
-        verify(departmentDao, times(1)).findByName(DEPARTMENT_REQUEST.getName());
+        verify(departmentRepository, times(1)).findByName(DEPARTMENT_REQUEST.getName());
     }
 
     @Test

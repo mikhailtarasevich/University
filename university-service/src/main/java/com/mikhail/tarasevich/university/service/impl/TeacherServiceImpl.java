@@ -1,10 +1,14 @@
 package com.mikhail.tarasevich.university.service.impl;
 
-import com.mikhail.tarasevich.university.dao.*;
 import com.mikhail.tarasevich.university.dto.TeacherRequest;
 import com.mikhail.tarasevich.university.dto.TeacherResponse;
 import com.mikhail.tarasevich.university.entity.Teacher;
 import com.mikhail.tarasevich.university.mapper.TeacherMapper;
+import com.mikhail.tarasevich.university.repository.CourseRepository;
+import com.mikhail.tarasevich.university.repository.GroupRepository;
+import com.mikhail.tarasevich.university.repository.LessonRepository;
+import com.mikhail.tarasevich.university.repository.RoleRepository;
+import com.mikhail.tarasevich.university.repository.TeacherRepository;
 import com.mikhail.tarasevich.university.service.TeacherService;
 import com.mikhail.tarasevich.university.service.validator.UserValidator;
 import lombok.extern.log4j.Log4j2;
@@ -21,32 +25,34 @@ import java.util.stream.Collectors;
 @Transactional
 @Log4j2
 public class TeacherServiceImpl
-        extends AbstractUserPageableService<TeacherDao, TeacherRequest, TeacherResponse, Teacher>
+        extends AbstractUserPageableService<TeacherRepository, TeacherRequest, TeacherResponse, Teacher>
         implements TeacherService {
 
-    private final LessonDao lessonDao;
-    private final CourseDao courseDao;
-    private final GroupDao groupDao;
+    private final LessonRepository lessonRepository;
+    private final CourseRepository courseRepository;
+    private final GroupRepository groupRepository;
 
-    public TeacherServiceImpl(TeacherDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder, TeacherMapper userMapper,
-                              UserValidator<TeacherRequest> validator,
-                              LessonDao lessonDao, CourseDao courseDao, GroupDao groupDao) {
-        super(userDao, roleDao, passwordEncoder, userMapper, validator);
-        this.lessonDao = lessonDao;
-        this.courseDao = courseDao;
-        this.groupDao = groupDao;
+    public TeacherServiceImpl(TeacherRepository userRepository, RoleRepository roleRepository,
+                              PasswordEncoder passwordEncoder, TeacherMapper teacherMapper,
+                              UserValidator<TeacherRequest> validator, LessonRepository lessonRepository,
+                              CourseRepository courseRepository, GroupRepository groupRepository) {
+        super(userRepository, roleRepository, passwordEncoder, teacherMapper, validator);
+        this.lessonRepository = lessonRepository;
+        this.courseRepository = courseRepository;
+        this.groupRepository = groupRepository;
     }
 
     @Override
     public boolean deleteById(int id) {
-        Optional<Teacher> optionalStudentEntity = userDao.findById(id);
+        Optional<Teacher> optionalStudentEntity = userRepository.findById(id);
 
         if (optionalStudentEntity.isPresent()) {
-            lessonDao.unbindLessonsFromTeacher(id);
-            courseDao.unbindCoursesFromTeacher(id);
-            groupDao.unbindGroupsFromTeacher(id);
-            roleDao.unbindRoleFromUser(id);
-            return userDao.deleteById(id);
+            lessonRepository.unbindLessonsFromTeacher(id);
+            courseRepository.unbindCoursesFromTeacher(id);
+            groupRepository.unbindGroupsFromTeacher(id);
+            roleRepository.unbindRoleFromUser(id);
+            userRepository.deleteById(id);
+            return true;
         } else {
             log.info("Delete was rejected. There is no teacher with specified id in the database. Id = {}", id);
             return false;
@@ -55,41 +61,38 @@ public class TeacherServiceImpl
 
     @Override
     public boolean deleteByIds(Set<Integer> ids) {
-        ids.forEach(lessonDao::unbindLessonsFromTeacher);
-        ids.forEach(courseDao::unbindCoursesFromTeacher);
-        ids.forEach(groupDao::unbindGroupsFromTeacher);
-        ids.forEach(roleDao::unbindRoleFromUser);
+        ids.forEach(lessonRepository::unbindLessonsFromTeacher);
+        ids.forEach(courseRepository::unbindCoursesFromTeacher);
+        ids.forEach(groupRepository::unbindGroupsFromTeacher);
+        ids.forEach(roleRepository::unbindRoleFromUser);
 
-        boolean result = userDao.deleteByIds(ids);
+        userRepository.deleteAllByIdInBatch(ids);
 
-        if (result) log.info("Teachers have been deleted. Deleted teachers: {}", ids);
-        else log.info("Teachers haven't been deleted. Teachers ids: {}", ids);
-
-        return result;
+        return true;
     }
 
     @Override
     public void changeTeacherTeacherTitle(int teacherId, int teacherTitleId) {
-        userDao.changeTeacherTitle(teacherId, teacherTitleId);
+        userRepository.changeTeacherTitle(teacherId, teacherTitleId);
         log.info("Teacher title with id = {} have been set to teacher with id = {}", teacherTitleId, teacherId);
     }
 
     @Override
     public void changeTeacherDepartment(int teacherId, int departmentId) {
-        userDao.changeDepartment(teacherId, departmentId);
+        userRepository.changeDepartment(teacherId, departmentId);
         log.info("Department with id = {} have been set to teacher with id = {}", departmentId, teacherId);
     }
 
     @Override
     public void subscribeUserToGroup(int teacherId, int groupId) {
-        userDao.addUserToGroup(teacherId, groupId);
+        userRepository.addUserToGroup(teacherId, groupId);
         log.info("Teacher with id = {} have been subscribed to group with id = {}", teacherId, groupId);
     }
 
     @Override
     public void subscribeTeacherToGroups(int teacherId, List<Integer> groupIds) {
         if (!groupIds.isEmpty()) {
-            groupIds.forEach(groupId -> userDao.addUserToGroup(teacherId, groupId));
+            groupIds.forEach(groupId -> userRepository.addUserToGroup(teacherId, groupId));
             log.info("Teacher with id = {} have been subscribed to groups with ids = {}", teacherId, groupIds);
         }
     }
@@ -97,39 +100,39 @@ public class TeacherServiceImpl
     @Override
     public void unsubscribeTeacherFromGroups(int teacherId, List<Integer> groupIds) {
         if (!groupIds.isEmpty()) {
-            groupIds.forEach(groupId -> userDao.deleteTeacherFromGroup(teacherId, groupId));
+            groupIds.forEach(groupId -> userRepository.deleteTeacherFromGroup(teacherId, groupId));
             log.info("Teacher with id = {} have been unsubscribed from groups with ids = {}", teacherId, groupIds);
         }
     }
 
     @Override
     public void subscribeTeacherToCourse(int teacherId, int courseId) {
-        userDao.addTeacherToCourse(teacherId, courseId);
+        userRepository.addTeacherToCourse(teacherId, courseId);
         log.info("Teacher with id = {} have been subscribed to course with id = {}", teacherId, courseId);
     }
 
     @Override
     public void unsubscribeTeacherFromCourse(int teacherId, int courseId) {
-        userDao.deleteTeacherFromCourse(teacherId, courseId);
+        userRepository.deleteTeacherFromCourse(teacherId, courseId);
         log.info("Teacher with id = {} have been unsubscribed from course with id = {}", teacherId, courseId);
     }
 
     @Override
     public void subscribeTeacherToCourses(int teacherId, List<Integer> courseIds) {
-        courseIds.forEach(courseId -> userDao.addTeacherToCourse(teacherId, courseId));
+        courseIds.forEach(courseId -> userRepository.addTeacherToCourse(teacherId, courseId));
         log.info("Teacher with id = {} have been subscribed to courses with id = {}", teacherId, courseIds);
     }
 
     @Override
     public void unsubscribeTeacherFromCourses(int teacherId, List<Integer> courseIds) {
-        courseIds.forEach(courseId -> userDao.deleteTeacherFromCourse(teacherId, courseId));
+        courseIds.forEach(courseId -> userRepository.deleteTeacherFromCourse(teacherId, courseId));
         log.info("Teacher with id = {} have been unsubscribed from courses with id = {}", teacherId, courseIds);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<TeacherResponse> findTeachersRelateToGroup(int groupId) {
-        return userDao.findTeachersRelateToGroup(groupId).stream()
+        return userRepository.findTeachersByGroupsId(groupId).stream()
                 .map(userMapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -137,7 +140,7 @@ public class TeacherServiceImpl
     @Override
     @Transactional(readOnly = true)
     public List<TeacherResponse> findTeachersRelateToCourse(int courseId) {
-        return userDao.findTeachersRelateToCourse(courseId).stream()
+        return userRepository.findTeachersByCoursesId(courseId).stream()
                 .map(userMapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -145,7 +148,7 @@ public class TeacherServiceImpl
     @Override
     @Transactional(readOnly = true)
     public List<TeacherResponse> findTeachersRelateToDepartment(int departmentId) {
-        return userDao.findTeachersRelateToDepartment(departmentId).stream()
+        return userRepository.findTeachersByDepartmentId(departmentId).stream()
                 .map(userMapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -153,8 +156,8 @@ public class TeacherServiceImpl
     @Override
     @Transactional(readOnly = true)
     public List<TeacherResponse> findTeachersRelateToTeacherTitle(int teacherTitleId) {
-        return userDao.findAll().stream()
-                .filter(t -> t.getTeacherTitle() !=null && t.getTeacherTitle().getId() == teacherTitleId)
+        return userRepository.findAll().stream()
+                .filter(t -> t.getTeacherTitle() != null && t.getTeacherTitle().getId() == teacherTitleId)
                 .map(userMapper::toResponse)
                 .collect(Collectors.toList());
     }

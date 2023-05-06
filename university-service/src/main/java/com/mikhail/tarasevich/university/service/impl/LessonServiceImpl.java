@@ -1,9 +1,9 @@
 package com.mikhail.tarasevich.university.service.impl;
 
-import com.mikhail.tarasevich.university.dao.LessonDao;
 import com.mikhail.tarasevich.university.dto.LessonRequest;
 import com.mikhail.tarasevich.university.dto.LessonResponse;
 import com.mikhail.tarasevich.university.entity.Lesson;
+import com.mikhail.tarasevich.university.repository.LessonRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.LessonMapper;
@@ -11,6 +11,8 @@ import com.mikhail.tarasevich.university.service.LessonService;
 import com.mikhail.tarasevich.university.service.validator.LessonValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +28,7 @@ import java.util.stream.Collectors;
 @Log4j2
 public class LessonServiceImpl extends AbstractPageableService implements LessonService {
 
-    private final LessonDao lessonDao;
+    private final LessonRepository lessonRepository;
     private final LessonMapper mapper;
     private final LessonValidator validator;
 
@@ -36,7 +38,7 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
         validator.validateNameNotNullOrEmpty(r);
         validator.validateStartTimeNotNull(r);
 
-        return mapper.toResponse(lessonDao.save(mapper.toEntity(r)));
+        return mapper.toResponse(lessonRepository.save(mapper.toEntity(r)));
     }
 
     @Override
@@ -54,7 +56,7 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
             }
         });
 
-        lessonDao.saveAll(acceptableRequests.stream()
+        lessonRepository.saveAll(acceptableRequests.stream()
                 .map(mapper::toEntity)
                 .collect(Collectors.toList()));
         log.info("The lessons were saved in the database. Saved lessons: {} .", acceptableRequests);
@@ -63,7 +65,7 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
     @Override
     @Transactional(readOnly = true)
     public LessonResponse findById(int id) {
-        Optional<LessonResponse> foundLesson = lessonDao.findById(id).map(mapper::toResponse);
+        Optional<LessonResponse> foundLesson = lessonRepository.findById(id).map(mapper::toResponse);
 
         if (foundLesson.isPresent()) {
             return foundLesson.get();
@@ -75,10 +77,10 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
     @Override
     @Transactional(readOnly = true)
     public List<LessonResponse> findAll(String page) {
-        final long itemsCount = lessonDao.count();
+        final long itemsCount = lessonRepository.count();
         int pageNumber = parsePageNumber(page, itemsCount, 1);
 
-        return lessonDao.findAll(pageNumber, ITEMS_PER_PAGE).stream()
+        return lessonRepository.findAll(PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("startTime"))).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -86,7 +88,7 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
     @Override
     @Transactional(readOnly = true)
     public List<LessonResponse> findAll() {
-        return lessonDao.findAll().stream()
+        return lessonRepository.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -95,7 +97,7 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
     public void edit(LessonRequest r) {
         validator.validateNameNotNullOrEmpty(r);
         validator.validateStartTimeNotNull(r);
-        lessonDao.update(mapper.toEntity(r));
+        lessonRepository.save(mapper.toEntity(r));
     }
 
     @Override
@@ -112,7 +114,7 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
             }
         });
 
-        lessonDao.updateAll(
+        lessonRepository.saveAll(
                 acceptableRequests.stream()
                         .map(mapper::toEntity)
                         .collect(Collectors.toList())
@@ -121,10 +123,11 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
 
     @Override
     public boolean deleteById(int id) {
-        Optional<Lesson> optionalCourseEntities = lessonDao.findById(id);
+        Optional<Lesson> optionalCourseEntities = lessonRepository.findById(id);
 
         if (optionalCourseEntities.isPresent()) {
-            return lessonDao.deleteById(id);
+            lessonRepository.deleteById(id);
+            return true;
         } else {
             log.info("Delete was rejected. There is no lesson with specified id in the database. Id = {}", id);
             return false;
@@ -133,17 +136,15 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
 
     @Override
     public boolean deleteByIds(Set<Integer> ids) {
-        boolean result = lessonDao.deleteByIds(ids);
+        lessonRepository.deleteAllByIdInBatch(ids);
 
-        if (result) log.info("The lesson have been deleted. Deleted lessons: {}", ids);
-
-        return result;
+        return true;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<LessonResponse> findLessonsRelateToGroup(int groupId) {
-        return lessonDao.findLessonsRelateToGroup(groupId).stream()
+        return lessonRepository.findLessonByGroupId(groupId).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -151,7 +152,7 @@ public class LessonServiceImpl extends AbstractPageableService implements Lesson
     @Override
     @Transactional(readOnly = true)
     public int lastPageNumber() {
-        return (int) Math.ceil((double) lessonDao.count() / ITEMS_PER_PAGE);
+        return (int) Math.ceil((double) lessonRepository.count() / ITEMS_PER_PAGE);
     }
 
 }

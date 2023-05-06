@@ -1,7 +1,7 @@
 package com.mikhail.tarasevich.university.service.validator.impl;
 
-import com.mikhail.tarasevich.university.dao.FacultyDao;
 import com.mikhail.tarasevich.university.dto.FacultyRequest;
+import com.mikhail.tarasevich.university.repository.FacultyRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.validator.FacultyValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class FacultyValidatorImpl implements FacultyValidator {
 
-    private final FacultyDao dao;
+    private final FacultyRepository dao;
 
     @Autowired
-    public FacultyValidatorImpl(FacultyDao dao) {
+    public FacultyValidatorImpl(FacultyRepository dao) {
         this.dao = dao;
     }
 

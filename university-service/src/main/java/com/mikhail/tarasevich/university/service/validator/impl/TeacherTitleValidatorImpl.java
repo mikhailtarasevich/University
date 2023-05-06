@@ -1,7 +1,7 @@
 package com.mikhail.tarasevich.university.service.validator.impl;
 
-import com.mikhail.tarasevich.university.dao.TeacherTitleDao;
 import com.mikhail.tarasevich.university.dto.TeacherTitleRequest;
+import com.mikhail.tarasevich.university.repository.TeacherTitleRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.validator.TeacherTitleValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class TeacherTitleValidatorImpl implements TeacherTitleValidator {
 
-    private final TeacherTitleDao dao;
+    private final TeacherTitleRepository dao;
 
     @Autowired
-    public TeacherTitleValidatorImpl(TeacherTitleDao dao) {
+    public TeacherTitleValidatorImpl(TeacherTitleRepository dao) {
         this.dao = dao;
     }
 

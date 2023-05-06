@@ -1,10 +1,10 @@
 package com.mikhail.tarasevich.university.service.impl;
 
-import com.mikhail.tarasevich.university.dao.EducationFormDao;
-import com.mikhail.tarasevich.university.dao.GroupDao;
 import com.mikhail.tarasevich.university.dto.EducationFormRequest;
 import com.mikhail.tarasevich.university.dto.EducationFormResponse;
 import com.mikhail.tarasevich.university.entity.EducationForm;
+import com.mikhail.tarasevich.university.repository.EducationFormRepository;
+import com.mikhail.tarasevich.university.repository.GroupRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.EducationFormMapper;
@@ -12,6 +12,8 @@ import com.mikhail.tarasevich.university.service.EducationFormService;
 import com.mikhail.tarasevich.university.service.validator.EducationFormValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,8 +29,8 @@ import java.util.stream.Collectors;
 @Log4j2
 public class EducationFormServiceImpl extends AbstractPageableService implements EducationFormService {
 
-    private final EducationFormDao educationFormDao;
-    private final GroupDao groupDao;
+    private final EducationFormRepository educationFormRepository;
+    private final GroupRepository groupRepository;
     private final EducationFormMapper mapper;
     private final EducationFormValidator validator;
 
@@ -37,7 +39,7 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
         validator.validateUniqueNameInDB(r);
         validator.validateNameNotNullOrEmpty(r);
 
-        return mapper.toResponse(educationFormDao.save(mapper.toEntity(r)));
+        return mapper.toResponse(educationFormRepository.save(mapper.toEntity(r)));
     }
 
     @Override
@@ -54,7 +56,7 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
             }
         });
 
-        educationFormDao.saveAll(acceptableRequests.stream()
+        educationFormRepository.saveAll(acceptableRequests.stream()
                 .map(mapper::toEntity)
                 .collect(Collectors.toList()));
         log.info("The eduction forms were saved in the database. Saved education forms: {} .",
@@ -64,7 +66,7 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
     @Override
     @Transactional(readOnly = true)
     public EducationFormResponse findById(int id) {
-        Optional<EducationFormResponse> foundEducationForm = educationFormDao.findById(id).map(mapper::toResponse);
+        Optional<EducationFormResponse> foundEducationForm = educationFormRepository.findById(id).map(mapper::toResponse);
 
         if (foundEducationForm.isPresent()) {
             return foundEducationForm.get();
@@ -76,10 +78,10 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
     @Override
     @Transactional(readOnly = true)
     public List<EducationFormResponse> findAll(String page) {
-        final long itemsCount = educationFormDao.count();
+        final long itemsCount = educationFormRepository.count();
         int pageNumber = parsePageNumber(page, itemsCount, 1);
 
-        return educationFormDao.findAll(pageNumber, ITEMS_PER_PAGE).stream()
+        return educationFormRepository.findAll(PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("id"))).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -87,7 +89,7 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
     @Override
     @Transactional(readOnly = true)
     public List<EducationFormResponse> findAll() {
-        return educationFormDao.findAll().stream()
+        return educationFormRepository.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -95,7 +97,7 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
     @Override
     public void edit(EducationFormRequest r) {
         validator.validateNameNotNullOrEmpty(r);
-        educationFormDao.update(mapper.toEntity(r));
+        educationFormRepository.save(mapper.toEntity(r));
     }
 
     @Override
@@ -111,7 +113,7 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
             }
         });
 
-        educationFormDao.updateAll(
+        educationFormRepository.saveAll(
                 acceptableRequests.stream()
                         .map(mapper::toEntity)
                         .collect(Collectors.toList())
@@ -120,13 +122,15 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
 
     @Override
     public boolean deleteById(int id) {
-        Optional<EducationForm> optionalCourseEntities = educationFormDao.findById(id);
+        Optional<EducationForm> optionalCourseEntities = educationFormRepository.findById(id);
 
         if (optionalCourseEntities.isPresent()) {
 
             unbindDependenciesBeforeDelete(id);
 
-            return educationFormDao.deleteById(id);
+            educationFormRepository.deleteById(id);
+
+            return true;
         } else {
             log.info("Delete was rejected. There is no education form with specified id in the database. Id = {}",
                     id);
@@ -137,22 +141,19 @@ public class EducationFormServiceImpl extends AbstractPageableService implements
     @Override
     public boolean deleteByIds(Set<Integer> ids) {
         ids.forEach(this::unbindDependenciesBeforeDelete);
-
-        boolean result = educationFormDao.deleteByIds(ids);
-
-        if (result) log.info("Education forms have been deleted. Deleted courses: {}", ids);
-
-        return result;
+        educationFormRepository.deleteAllByIdInBatch(ids);
+        return true;
     }
 
     @Override
     @Transactional(readOnly = true)
     public int lastPageNumber() {
-        return (int) Math.ceil((double) educationFormDao.count() / ITEMS_PER_PAGE);
+        return (int) Math.ceil((double) educationFormRepository.count() / ITEMS_PER_PAGE);
     }
 
     private void unbindDependenciesBeforeDelete(int id) {
-        groupDao.unbindGroupsFromEducationForm(id);
+        groupRepository.unbindGroupsFromEducationForm(id);
     }
 
 }
+

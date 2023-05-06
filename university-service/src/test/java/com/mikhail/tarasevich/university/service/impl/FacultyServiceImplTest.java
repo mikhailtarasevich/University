@@ -1,11 +1,11 @@
 package com.mikhail.tarasevich.university.service.impl;
 
-import com.mikhail.tarasevich.university.dao.FacultyDao;
-import com.mikhail.tarasevich.university.dao.GroupDao;
 import com.mikhail.tarasevich.university.dto.FacultyRequest;
 import com.mikhail.tarasevich.university.dto.FacultyResponse;
 import com.mikhail.tarasevich.university.entity.Faculty;
 import com.mikhail.tarasevich.university.mapper.FacultyMapper;
+import com.mikhail.tarasevich.university.repository.FacultyRepository;
+import com.mikhail.tarasevich.university.repository.GroupRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.service.validator.FacultyValidator;
@@ -14,6 +14,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.util.*;
 
@@ -27,9 +31,9 @@ class FacultyServiceImplTest {
     @InjectMocks
     FacultyServiceImpl facultyService;
     @Mock
-    FacultyDao facultyDao;
+    FacultyRepository facultyRepository;
     @Mock
-    GroupDao groupDao;
+    GroupRepository groupRepository;
     @Mock
     FacultyMapper mapper;
     @Mock
@@ -93,7 +97,7 @@ class FacultyServiceImplTest {
     @Test
     void register_inputFacultyRequest_expectedFacultyResponseWithId() {
         when(mapper.toEntity(FACULTY_REQUEST_1)).thenReturn(FACULTY_ENTITY_1);
-        when(facultyDao.save(FACULTY_ENTITY_1)).thenReturn(FACULTY_ENTITY_WITH_ID_1);
+        when(facultyRepository.save(FACULTY_ENTITY_1)).thenReturn(FACULTY_ENTITY_WITH_ID_1);
         when(mapper.toResponse(FACULTY_ENTITY_WITH_ID_1)).thenReturn(FACULTY_RESPONSE_WITH_ID_1);
         doNothing().when(validator).validateUniqueNameInDB(FACULTY_REQUEST_1);
         doNothing().when(validator).validateNameNotNullOrEmpty(FACULTY_REQUEST_1);
@@ -102,7 +106,7 @@ class FacultyServiceImplTest {
 
         assertEquals(FACULTY_RESPONSE_WITH_ID_1, facultyResponse);
         verify(mapper, times(1)).toEntity(FACULTY_REQUEST_1);
-        verify(facultyDao, times(1)).save(FACULTY_ENTITY_1);
+        verify(facultyRepository, times(1)).save(FACULTY_ENTITY_1);
         verify(mapper, times(1)).toResponse(FACULTY_ENTITY_WITH_ID_1);
         verify(validator, times(1)).validateUniqueNameInDB(FACULTY_REQUEST_1);
         verify(validator, times(1)).validateUniqueNameInDB(FACULTY_REQUEST_1);
@@ -117,7 +121,6 @@ class FacultyServiceImplTest {
 
         when(mapper.toEntity(FACULTY_REQUEST_1)).thenReturn(FACULTY_ENTITY_1);
         when(mapper.toEntity(FACULTY_REQUEST_2)).thenReturn(FACULTY_ENTITY_2);
-        doNothing().when(facultyDao).saveAll(facultyEntities);
         doNothing().doThrow(new IncorrectRequestDataException())
                 .when(validator).validateUniqueNameInDB(FACULTY_REQUEST_1);
         doNothing().when(validator).validateNameNotNullOrEmpty(FACULTY_REQUEST_1);
@@ -128,7 +131,7 @@ class FacultyServiceImplTest {
 
         verify(mapper, times(1)).toEntity(FACULTY_REQUEST_1);
         verify(mapper, times(1)).toEntity(FACULTY_REQUEST_2);
-        verify(facultyDao, times(1)).saveAll(facultyEntities);
+        verify(facultyRepository, times(1)).saveAll(facultyEntities);
         verify(validator, times(2)).validateUniqueNameInDB(FACULTY_REQUEST_1);
         verify(validator, times(1)).validateNameNotNullOrEmpty(FACULTY_REQUEST_1);
         verify(validator, times(1)).validateUniqueNameInDB(FACULTY_REQUEST_2);
@@ -137,52 +140,56 @@ class FacultyServiceImplTest {
 
     @Test
     void findById_inputIntId_expectedFoundFaculty() {
-        when(facultyDao.findById(1)).thenReturn(Optional.of(FACULTY_ENTITY_WITH_ID_1));
+        when(facultyRepository.findById(1)).thenReturn(Optional.of(FACULTY_ENTITY_WITH_ID_1));
         when(mapper.toResponse(FACULTY_ENTITY_WITH_ID_1)).thenReturn(FACULTY_RESPONSE_WITH_ID_1);
 
         FacultyResponse facultyResponse = facultyService.findById(1);
 
         assertEquals(FACULTY_RESPONSE_WITH_ID_1, facultyResponse);
         verify(mapper, times(1)).toResponse(FACULTY_ENTITY_WITH_ID_1);
-        verify(facultyDao, times(1)).findById(1);
+        verify(facultyRepository, times(1)).findById(1);
     }
 
     @Test
     void findById_inputIncorrectId_expectedException() {
-        when(facultyDao.findById(100)).thenReturn(Optional.empty());
+        when(facultyRepository.findById(100)).thenReturn(Optional.empty());
 
         assertThrows(ObjectWithSpecifiedIdNotFoundException.class, () -> facultyService.findById(100));
 
-        verify(facultyDao, times(1)).findById(100);
+        verify(facultyRepository, times(1)).findById(100);
         verifyNoInteractions(mapper);
     }
 
     @Test
     void findAll_inputNothing_expectedFoundAllFaculties() {
-        when(facultyDao.findAll()).thenReturn(facultyEntitiesWithId);
+        when(facultyRepository.findAll()).thenReturn(facultyEntitiesWithId);
         when(mapper.toResponse(FACULTY_ENTITY_WITH_ID_1)).thenReturn(FACULTY_RESPONSE_WITH_ID_1);
         when(mapper.toResponse(FACULTY_ENTITY_WITH_ID_2)).thenReturn(FACULTY_RESPONSE_WITH_ID_2);
 
         List<FacultyResponse> foundFaculties = facultyService.findAll();
 
         assertEquals(facultyResponses, foundFaculties);
-        verify(facultyDao, times(1)).findAll();
+        verify(facultyRepository, times(1)).findAll();
         verify(mapper, times(1)).toResponse(FACULTY_ENTITY_WITH_ID_1);
         verify(mapper, times(1)).toResponse(FACULTY_ENTITY_WITH_ID_2);
     }
 
     @Test
     void findAll_inputPageOne_expectedFoundFacultiesFromPageOne() {
-        when(facultyDao.findAll(1, AbstractPageableService.ITEMS_PER_PAGE)).thenReturn(facultyEntitiesWithId);
-        when(facultyDao.count()).thenReturn(2L);
+        Page<Faculty> pageOfFacultyEntitiesWithId = new PageImpl<>(facultyEntitiesWithId);
+
+        when(facultyRepository
+                .findAll(PageRequest.of(0, AbstractPageableService.ITEMS_PER_PAGE, Sort.by("id"))))
+                .thenReturn(pageOfFacultyEntitiesWithId);
+        when(facultyRepository.count()).thenReturn(2L);
         when(mapper.toResponse(FACULTY_ENTITY_WITH_ID_1)).thenReturn(FACULTY_RESPONSE_WITH_ID_1);
         when(mapper.toResponse(FACULTY_ENTITY_WITH_ID_2)).thenReturn(FACULTY_RESPONSE_WITH_ID_2);
 
         List<FacultyResponse> foundFaculties = facultyService.findAll("1");
 
         assertEquals(facultyResponses, foundFaculties);
-        verify(facultyDao, times(1)).findAll(1, AbstractPageableService.ITEMS_PER_PAGE);
-        verify(facultyDao, times(1)).count();
+        verify(facultyRepository, times(1)).findAll(PageRequest.of(0, AbstractPageableService.ITEMS_PER_PAGE, Sort.by("id")));
+        verify(facultyRepository, times(1)).count();
         verify(mapper, times(1)).toResponse(FACULTY_ENTITY_WITH_ID_1);
         verify(mapper, times(1)).toResponse(FACULTY_ENTITY_WITH_ID_2);
     }
@@ -199,13 +206,15 @@ class FacultyServiceImplTest {
         FACULTY_REQUEST_FOR_UPDATE_1.setName("update1");
         FACULTY_REQUEST_FOR_UPDATE_1.setDescription("update1");
 
-        doNothing().when(facultyDao).update(FACULTY_ENTITY_FOR_UPDATE_1);
+        doNothing().when(facultyRepository).update(FACULTY_REQUEST_FOR_UPDATE_1.getId(),
+                FACULTY_REQUEST_FOR_UPDATE_1.getName(), FACULTY_REQUEST_FOR_UPDATE_1.getDescription());
         when(mapper.toEntity(FACULTY_REQUEST_FOR_UPDATE_1)).thenReturn(FACULTY_ENTITY_FOR_UPDATE_1);
 
         facultyService.edit(FACULTY_REQUEST_FOR_UPDATE_1);
 
         verify(mapper, times(1)).toEntity(FACULTY_REQUEST_FOR_UPDATE_1);
-        verify(facultyDao, times(1)).update(FACULTY_ENTITY_FOR_UPDATE_1);
+        verify(facultyRepository, times(1)).update(FACULTY_REQUEST_FOR_UPDATE_1.getId(),
+                FACULTY_REQUEST_FOR_UPDATE_1.getName(), FACULTY_REQUEST_FOR_UPDATE_1.getDescription());
     }
 
     @Test
@@ -252,13 +261,11 @@ class FacultyServiceImplTest {
         when(mapper.toEntity(FACULTY_REQUEST_FOR_UPDATE_1)).thenReturn(FACULTY_ENTITY_FOR_UPDATE_1);
         when(mapper.toEntity(FACULTY_REQUEST_FOR_UPDATE_2)).thenReturn(FACULTY_ENTITY_FOR_UPDATE_2);
 
-        doNothing().when(facultyDao).updateAll(listForUpdate);
-
         facultyService.editAll(inputList);
 
         verify(mapper, times(1)).toEntity(FACULTY_REQUEST_FOR_UPDATE_1);
         verify(mapper, times(1)).toEntity(FACULTY_REQUEST_FOR_UPDATE_2);
-        verify(facultyDao, times(1)).updateAll(listForUpdate);
+        verify(facultyRepository, times(1)).saveAll(listForUpdate);
         verify(validator, times(1))
                 .validateNameNotNullOrEmpty(FACULTY_REQUEST_FOR_UPDATE_1);
         verify(validator, times(1))
@@ -271,30 +278,30 @@ class FacultyServiceImplTest {
     void deleteById_inputFacultyId_expectedSuccessDelete() {
         int id = 1;
 
-        when(facultyDao.findById(id)).thenReturn(Optional.of(FACULTY_ENTITY_WITH_ID_1));
-        doNothing().when(groupDao).unbindGroupsFromFaculty(id);
-        when(facultyDao.deleteById(id)).thenReturn(true);
+        when(facultyRepository.findById(id)).thenReturn(Optional.of(FACULTY_ENTITY_WITH_ID_1));
+        doNothing().when(groupRepository).unbindGroupsFromFaculty(id);
+        doNothing().when(facultyRepository).deleteById(id);
 
         boolean result = facultyService.deleteById(1);
 
         assertTrue(result);
-        verify(facultyDao, times(1)).findById(id);
-        verify(facultyDao, times(1)).deleteById(id);
-        verify(groupDao, times(1)).unbindGroupsFromFaculty(id);
+        verify(facultyRepository, times(1)).findById(id);
+        verify(facultyRepository, times(1)).deleteById(id);
+        verify(groupRepository, times(1)).unbindGroupsFromFaculty(id);
     }
 
     @Test
     void deleteById_inputFacultyId_expectedFalseUnsuccessfulDelete() {
         int id = 1;
 
-        when(facultyDao.findById(id)).thenReturn(Optional.empty());
+        when(facultyRepository.findById(id)).thenReturn(Optional.empty());
 
         boolean result = facultyService.deleteById(1);
 
         assertFalse(result);
-        verify(facultyDao, times(1)).findById(id);
-        verifyNoInteractions(groupDao);
-        verify(facultyDao, times(0)).deleteById(id);
+        verify(facultyRepository, times(1)).findById(id);
+        verifyNoInteractions(groupRepository);
+        verify(facultyRepository, times(0)).deleteById(id);
     }
 
     @Test
@@ -303,27 +310,27 @@ class FacultyServiceImplTest {
         ids.add(1);
         ids.add(2);
 
-        doNothing().when(groupDao).unbindGroupsFromFaculty(1);
-        doNothing().when(groupDao).unbindGroupsFromFaculty(2);
-        when(facultyDao.deleteByIds(ids)).thenReturn(true);
+        doNothing().when(groupRepository).unbindGroupsFromFaculty(1);
+        doNothing().when(groupRepository).unbindGroupsFromFaculty(2);
+        doNothing().when(facultyRepository).deleteAllByIdInBatch(ids);
 
         boolean result = facultyService.deleteByIds(ids);
 
         assertTrue(result);
-        verify(facultyDao, times(1)).deleteByIds(ids);
-        verify(groupDao, times(1)).unbindGroupsFromFaculty(1);
-        verify(groupDao, times(1)).unbindGroupsFromFaculty(2);
+        verify(facultyRepository, times(1)).deleteAllByIdInBatch(ids);
+        verify(groupRepository, times(1)).unbindGroupsFromFaculty(1);
+        verify(groupRepository, times(1)).unbindGroupsFromFaculty(2);
     }
 
     @Test
     void lastPageNumber_inputNothing_expectedLastPageNumber() {
-        when(facultyDao.count()).thenReturn(5L);
+        when(facultyRepository.count()).thenReturn(5L);
 
         int expected = (int) Math.ceil(5.0 / AbstractPageableService.ITEMS_PER_PAGE);
 
         assertEquals(expected, facultyService.lastPageNumber());
 
-        verify(facultyDao, times(1)).count();
+        verify(facultyRepository, times(1)).count();
     }
 
 }

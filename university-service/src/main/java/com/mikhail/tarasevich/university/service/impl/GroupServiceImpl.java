@@ -1,12 +1,12 @@
 package com.mikhail.tarasevich.university.service.impl;
 
-import com.mikhail.tarasevich.university.dao.GroupDao;
-import com.mikhail.tarasevich.university.dao.LessonDao;
-import com.mikhail.tarasevich.university.dao.StudentDao;
-import com.mikhail.tarasevich.university.dao.TeacherDao;
 import com.mikhail.tarasevich.university.dto.GroupRequest;
 import com.mikhail.tarasevich.university.dto.GroupResponse;
 import com.mikhail.tarasevich.university.entity.Group;
+import com.mikhail.tarasevich.university.repository.GroupRepository;
+import com.mikhail.tarasevich.university.repository.LessonRepository;
+import com.mikhail.tarasevich.university.repository.StudentRepository;
+import com.mikhail.tarasevich.university.repository.TeacherRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.GroupMapper;
@@ -14,6 +14,8 @@ import com.mikhail.tarasevich.university.service.GroupService;
 import com.mikhail.tarasevich.university.service.validator.GroupValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,10 +31,10 @@ import java.util.stream.Collectors;
 @Log4j2
 public class GroupServiceImpl extends AbstractPageableService implements GroupService {
 
-    private final GroupDao groupDao;
-    private final LessonDao lessonDao;
-    private final StudentDao studentDao;
-    private final TeacherDao teacherDao;
+    private final GroupRepository groupRepository;
+    private final LessonRepository lessonRepository;
+    private final StudentRepository studentRepository;
+    private final TeacherRepository teacherRepository;
     private final GroupMapper mapper;
     private final GroupValidator validator;
 
@@ -41,7 +43,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
         validator.validateUniqueNameInDB(r);
         validator.validateNameNotNullOrEmpty(r);
 
-        return mapper.toResponse(groupDao.save(mapper.toEntity(r)));
+        return mapper.toResponse(groupRepository.save(mapper.toEntity(r)));
     }
 
     @Override
@@ -58,7 +60,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
             }
         });
 
-        groupDao.saveAll(acceptableRequests.stream()
+        groupRepository.saveAll(acceptableRequests.stream()
                 .map(mapper::toEntity)
                 .collect(Collectors.toList()));
         log.info("The groups were saved in the database. Saved groups: {} .", acceptableRequests);
@@ -67,7 +69,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     @Override
     @Transactional(readOnly = true)
     public GroupResponse findById(int id) {
-        Optional<GroupResponse> foundGroup = groupDao.findById(id).map(mapper::toResponse);
+        Optional<GroupResponse> foundGroup = groupRepository.findById(id).map(mapper::toResponse);
 
         if (foundGroup.isPresent()) {
             return foundGroup.get();
@@ -79,10 +81,10 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     @Override
     @Transactional(readOnly = true)
     public List<GroupResponse> findAll(String page) {
-        final long itemsCount = groupDao.count();
+        final long itemsCount = groupRepository.count();
         int pageNumber = parsePageNumber(page, itemsCount, 1);
 
-        return groupDao.findAll(pageNumber, ITEMS_PER_PAGE).stream()
+        return groupRepository.findAll(PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("id"))).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -90,7 +92,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     @Override
     @Transactional(readOnly = true)
     public List<GroupResponse> findAll() {
-        return groupDao.findAll().stream()
+        return groupRepository.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -98,7 +100,9 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     @Override
     public void edit(GroupRequest r) {
         validator.validateNameNotNullOrEmpty(r);
-        groupDao.update(mapper.toEntity(r));
+        Group g = mapper.toEntity(r);
+        groupRepository.update(g.getId(), g.getName(), g.getFaculty().getId(), g.getHeadStudent().getId(),
+                g.getEducationForm().getId());
     }
 
     @Override
@@ -114,7 +118,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
             }
         });
 
-        groupDao.updateAll(
+        groupRepository.saveAll(
                 acceptableRequests.stream()
                         .map(mapper::toEntity)
                         .collect(Collectors.toList())
@@ -123,13 +127,15 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
 
     @Override
     public boolean deleteById(int id) {
-        Optional<Group> optionalCourseEntities = groupDao.findById(id);
+        Optional<Group> optionalCourseEntities = groupRepository.findById(id);
 
         if (optionalCourseEntities.isPresent()) {
 
             unbindDependenciesBeforeDelete(id);
 
-            return groupDao.deleteById(id);
+            groupRepository.deleteById(id);
+
+            return true;
         } else {
             log.info("Delete was rejected. There is no group with specified id in the database. Id = {}", id);
             return false;
@@ -140,17 +146,15 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     public boolean deleteByIds(Set<Integer> ids) {
         ids.forEach(this::unbindDependenciesBeforeDelete);
 
-        boolean result = groupDao.deleteByIds(ids);
+        groupRepository.deleteAllByIdInBatch(ids);
 
-        if (result) log.info("The group have been deleted. Deleted groups: {}", ids);
-
-        return result;
+        return true;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<GroupResponse> findGroupsRelateToTeacher(int teacherId) {
-        return groupDao.findGroupsRelateToTeacher(teacherId).stream()
+        return groupRepository.findGroupByTeachersId(teacherId).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -158,7 +162,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     @Override
     @Transactional(readOnly = true)
     public List<GroupResponse> findGroupsNotRelateToTeacher(int teacherId) {
-        return groupDao.findGroupsNotRelateToTeacher(teacherId).stream()
+        return groupRepository.findGroupsNotRelateToTeacher(teacherId).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -166,7 +170,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     @Override
     @Transactional(readOnly = true)
     public List<GroupResponse> findGroupsRelateToFaculty(int facultyId) {
-        return groupDao.findAll().stream()
+        return groupRepository.findAll().stream()
                 .filter(g -> g.getFaculty() != null && g.getFaculty().getId() == facultyId)
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
@@ -175,7 +179,7 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     @Override
     @Transactional(readOnly = true)
     public List<GroupResponse> findGroupsRelateToEducationForm(int educationFormId) {
-        return groupDao.findAll().stream()
+        return groupRepository.findAll().stream()
                 .filter(g -> g.getEducationForm() != null && g.getEducationForm().getId() == educationFormId)
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
@@ -184,13 +188,13 @@ public class GroupServiceImpl extends AbstractPageableService implements GroupSe
     @Override
     @Transactional(readOnly = true)
     public int lastPageNumber() {
-        return (int) Math.ceil((double) groupDao.count() / ITEMS_PER_PAGE);
+        return (int) Math.ceil((double) groupRepository.count() / ITEMS_PER_PAGE);
     }
 
     private void unbindDependenciesBeforeDelete(int id) {
-        lessonDao.unbindLessonsFromGroup(id);
-        studentDao.unbindStudentsFromGroup(id);
-        teacherDao.unbindTeachersFromGroup(id);
+        lessonRepository.unbindLessonsFromGroup(id);
+        studentRepository.unbindStudentsFromGroup(id);
+        teacherRepository.unbindTeachersFromGroup(id);
     }
 
 }

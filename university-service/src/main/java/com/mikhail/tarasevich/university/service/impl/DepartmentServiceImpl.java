@@ -1,11 +1,12 @@
 package com.mikhail.tarasevich.university.service.impl;
 
-import com.mikhail.tarasevich.university.dao.CourseDao;
-import com.mikhail.tarasevich.university.dao.DepartmentDao;
-import com.mikhail.tarasevich.university.dao.TeacherDao;
 import com.mikhail.tarasevich.university.dto.DepartmentRequest;
 import com.mikhail.tarasevich.university.dto.DepartmentResponse;
+import com.mikhail.tarasevich.university.entity.Course;
 import com.mikhail.tarasevich.university.entity.Department;
+import com.mikhail.tarasevich.university.repository.CourseRepository;
+import com.mikhail.tarasevich.university.repository.DepartmentRepository;
+import com.mikhail.tarasevich.university.repository.TeacherRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.DepartmentMapper;
@@ -13,6 +14,8 @@ import com.mikhail.tarasevich.university.service.DepartmentService;
 import com.mikhail.tarasevich.university.service.validator.DepartmentValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,9 +31,9 @@ import java.util.stream.Collectors;
 @Log4j2
 public class DepartmentServiceImpl extends AbstractPageableService implements DepartmentService {
 
-    private final DepartmentDao departmentDao;
-    private final CourseDao courseDao;
-    private final TeacherDao teacherDao;
+    private final DepartmentRepository departmentRepository;
+    private final CourseRepository courseRepository;
+    private final TeacherRepository teacherRepository;
     private final DepartmentMapper mapper;
     private final DepartmentValidator validator;
 
@@ -39,7 +42,7 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
         validator.validateUniqueNameInDB(r);
         validator.validateNameNotNullOrEmpty(r);
 
-        return mapper.toResponse(departmentDao.save(mapper.toEntity(r)));
+        return mapper.toResponse(departmentRepository.save(mapper.toEntity(r)));
     }
 
     @Override
@@ -56,7 +59,7 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
             }
         });
 
-        departmentDao.saveAll(acceptableRequests.stream()
+        departmentRepository.saveAll(acceptableRequests.stream()
                 .map(mapper::toEntity)
                 .collect(Collectors.toList()));
         log.info("Departments were saved in the database. Saved requests: {} .", acceptableRequests);
@@ -65,7 +68,7 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
     @Override
     @Transactional(readOnly = true)
     public DepartmentResponse findById(int id) {
-        Optional<DepartmentResponse> foundDepartment = departmentDao.findById(id).map(mapper::toResponse);
+        Optional<DepartmentResponse> foundDepartment = departmentRepository.findById(id).map(mapper::toResponse);
 
         if (foundDepartment.isPresent()) {
             return foundDepartment.get();
@@ -77,10 +80,10 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
     @Override
     @Transactional(readOnly = true)
     public List<DepartmentResponse> findAll(String page) {
-        final long itemsCount = departmentDao.count();
+        final long itemsCount = departmentRepository.count();
         int pageNumber = parsePageNumber(page, itemsCount, 1);
 
-        return departmentDao.findAll(pageNumber, ITEMS_PER_PAGE).stream()
+        return departmentRepository.findAll(PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("id"))).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -88,7 +91,7 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
     @Override
     @Transactional(readOnly = true)
     public List<DepartmentResponse> findAll() {
-        return departmentDao.findAll().stream()
+        return departmentRepository.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -96,7 +99,8 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
     @Override
     public void edit(DepartmentRequest r) {
         validator.validateNameNotNullOrEmpty(r);
-        departmentDao.update(mapper.toEntity(r));
+        Department d = mapper.toEntity(r);
+        departmentRepository.update(d.getId(), d.getName(), d.getDescription());
     }
 
     @Override
@@ -112,7 +116,7 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
             }
         });
 
-        departmentDao.updateAll(
+        departmentRepository.saveAll(
                 acceptableRequests.stream()
                         .map(mapper::toEntity)
                         .collect(Collectors.toList())
@@ -121,13 +125,15 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
 
     @Override
     public boolean deleteById(int id) {
-        Optional<Department> optionalCourseEntities = departmentDao.findById(id);
+        Optional<Department> optionalCourseEntities = departmentRepository.findById(id);
 
         if (optionalCourseEntities.isPresent()) {
 
             unbindDependenciesBeforeDelete(id);
 
-            return departmentDao.deleteById(id);
+            departmentRepository.deleteById(id);
+
+            return true;
         } else {
             log.info("Delete was rejected. There is no department with specified id in the database. Id = {}",
                     id);
@@ -139,34 +145,32 @@ public class DepartmentServiceImpl extends AbstractPageableService implements De
     public boolean deleteByIds(Set<Integer> ids) {
         ids.forEach(this::unbindDependenciesBeforeDelete);
 
-        boolean result = departmentDao.deleteByIds(ids);
+        departmentRepository.deleteAllByIdInBatch(ids);
 
-        if (result) log.info("The department have been deleted. Deleted departments: {}", ids);
-
-        return result;
+        return true;
     }
 
     @Override
     public void addCoursesToDepartment(int departmentId, List<Integer> courseIds) {
-        courseIds.forEach(courseId -> departmentDao.addCourseToDepartment(departmentId, courseId));
+        courseIds.forEach(courseId -> departmentRepository.addCourseToDepartment(departmentId, courseId));
         log.info("Courses with ids = {} have been added to department with id = {} ", courseIds, departmentId);
     }
 
     @Override
     public void deleteCoursesFromDepartment(int departmentId, List<Integer> courseIds) {
-        courseIds.forEach(courseId -> departmentDao.deleteCourseFromDepartment(departmentId, courseId));
+        courseIds.forEach(courseId -> departmentRepository.deleteCourseFromDepartment(departmentId, courseId));
         log.info("Courses with ids = {} have been deleted from department with id = {} ", courseIds, departmentId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public int lastPageNumber() {
-        return (int) Math.ceil((double) departmentDao.count() / ITEMS_PER_PAGE);
+        return (int) Math.ceil((double) departmentRepository.count() / ITEMS_PER_PAGE);
     }
 
     private void unbindDependenciesBeforeDelete(int id) {
-        courseDao.unbindCoursesFromDepartment(id);
-        teacherDao.unbindTeachersFromDepartment(id);
+        courseRepository.unbindCoursesFromDepartment(id);
+        teacherRepository.unbindTeachersFromDepartment(id);
     }
 
 }

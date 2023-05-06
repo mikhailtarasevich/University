@@ -1,8 +1,8 @@
 package com.mikhail.tarasevich.university.validator.impl;
 
-import com.mikhail.tarasevich.university.dao.FacultyDao;
 import com.mikhail.tarasevich.university.dto.FacultyRequest;
 import com.mikhail.tarasevich.university.entity.Faculty;
+import com.mikhail.tarasevich.university.repository.FacultyRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.validator.impl.FacultyValidatorImpl;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class FacultyValidatorImplTest {
     @InjectMocks
     FacultyValidatorImpl facultyValidator;
     @Mock
-    FacultyDao facultyDao;
+    FacultyRepository facultyDao;
 
     private static final FacultyRequest FACULTY_REQUEST = new FacultyRequest();
 

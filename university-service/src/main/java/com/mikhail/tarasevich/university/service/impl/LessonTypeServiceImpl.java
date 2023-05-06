@@ -1,10 +1,10 @@
 package com.mikhail.tarasevich.university.service.impl;
 
-import com.mikhail.tarasevich.university.dao.LessonDao;
-import com.mikhail.tarasevich.university.dao.LessonTypeDao;
 import com.mikhail.tarasevich.university.dto.LessonTypeRequest;
 import com.mikhail.tarasevich.university.dto.LessonTypeResponse;
 import com.mikhail.tarasevich.university.entity.LessonType;
+import com.mikhail.tarasevich.university.repository.LessonRepository;
+import com.mikhail.tarasevich.university.repository.LessonTypeRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.LessonTypeMapper;
@@ -12,6 +12,8 @@ import com.mikhail.tarasevich.university.service.LessonTypeService;
 import com.mikhail.tarasevich.university.service.validator.LessonTypeValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,8 +29,8 @@ import java.util.stream.Collectors;
 @Log4j2
 public class LessonTypeServiceImpl extends AbstractPageableService implements LessonTypeService {
 
-    private final LessonTypeDao lessonTypeDao;
-    private final LessonDao lessonDao;
+    private final LessonTypeRepository lessonTypeRepository;
+    private final LessonRepository lessonRepository;
     private final LessonTypeMapper mapper;
     private final LessonTypeValidator validator;
 
@@ -37,7 +39,7 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
         validator.validateUniqueNameInDB(r);
         validator.validateNameNotNullOrEmpty(r);
 
-        return mapper.toResponse(lessonTypeDao.save(mapper.toEntity(r)));
+        return mapper.toResponse(lessonTypeRepository.save(mapper.toEntity(r)));
     }
 
     @Override
@@ -54,7 +56,7 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
             }
         });
 
-        lessonTypeDao.saveAll(acceptableRequests.stream()
+        lessonTypeRepository.saveAll(acceptableRequests.stream()
                 .map(mapper::toEntity)
                 .collect(Collectors.toList()));
         log.info("The lesson types were saved in the database. Saved lesson types: {} .", acceptableRequests);
@@ -63,7 +65,7 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
     @Override
     @Transactional(readOnly = true)
     public LessonTypeResponse findById(int id) {
-        Optional<LessonTypeResponse> foundLessonType = lessonTypeDao.findById(id).map(mapper::toResponse);
+        Optional<LessonTypeResponse> foundLessonType = lessonTypeRepository.findById(id).map(mapper::toResponse);
 
         if (foundLessonType.isPresent()) {
             return foundLessonType.get();
@@ -75,10 +77,10 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
     @Override
     @Transactional(readOnly = true)
     public List<LessonTypeResponse> findAll(String page) {
-        final long itemsCount = lessonTypeDao.count();
+        final long itemsCount = lessonTypeRepository.count();
         int pageNumber = parsePageNumber(page, itemsCount, 1);
 
-        return lessonTypeDao.findAll(pageNumber, ITEMS_PER_PAGE).stream()
+        return lessonTypeRepository.findAll(PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("id"))).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -86,7 +88,7 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
     @Override
     @Transactional(readOnly = true)
     public List<LessonTypeResponse> findAll() {
-        return lessonTypeDao.findAll().stream()
+        return lessonTypeRepository.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -94,7 +96,7 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
     @Override
     public void edit(LessonTypeRequest r) {
         validator.validateNameNotNullOrEmpty(r);
-        lessonTypeDao.update(mapper.toEntity(r));
+        lessonTypeRepository.save(mapper.toEntity(r));
     }
 
     @Override
@@ -110,7 +112,7 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
             }
         });
 
-        lessonTypeDao.updateAll(
+        lessonTypeRepository.saveAll(
                 acceptableRequests.stream()
                         .map(mapper::toEntity)
                         .collect(Collectors.toList())
@@ -119,13 +121,15 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
 
     @Override
     public boolean deleteById(int id) {
-        Optional<LessonType> optionalCourseEntities = lessonTypeDao.findById(id);
+        Optional<LessonType> optionalCourseEntities = lessonTypeRepository.findById(id);
 
         if (optionalCourseEntities.isPresent()) {
 
             unbindDependenciesBeforeDelete(id);
 
-            return lessonTypeDao.deleteById(id);
+            lessonTypeRepository.deleteById(id);
+
+            return true;
         } else {
             log.info("Delete was rejected. There is no lesson type with specified id in the database. Id = {}",
                     id);
@@ -137,21 +141,19 @@ public class LessonTypeServiceImpl extends AbstractPageableService implements Le
     public boolean deleteByIds(Set<Integer> ids) {
         ids.forEach(this::unbindDependenciesBeforeDelete);
 
-        boolean result = lessonTypeDao.deleteByIds(ids);
+        lessonTypeRepository.deleteAllByIdInBatch(ids);
 
-        if (result) log.info("The lesson types have been deleted. Deleted lesson types: {}", ids);
-
-        return result;
+        return true;
     }
 
     @Override
     @Transactional(readOnly = true)
     public int lastPageNumber() {
-        return (int) Math.ceil((double) lessonTypeDao.count() / ITEMS_PER_PAGE);
+        return (int) Math.ceil((double) lessonTypeRepository.count() / ITEMS_PER_PAGE);
     }
 
     private void unbindDependenciesBeforeDelete(int id) {
-        lessonDao.unbindLessonsFromLessonType(id);
+        lessonRepository.unbindLessonsFromLessonType(id);
     }
 
 }

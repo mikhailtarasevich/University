@@ -1,8 +1,8 @@
 package com.mikhail.tarasevich.university.validator.impl;
 
-import com.mikhail.tarasevich.university.dao.GroupDao;
 import com.mikhail.tarasevich.university.dto.GroupRequest;
 import com.mikhail.tarasevich.university.entity.Group;
+import com.mikhail.tarasevich.university.repository.GroupRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.validator.impl.GroupValidatorImpl;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class GroupValidatorImplTest {
     @InjectMocks
     GroupValidatorImpl groupValidator;
     @Mock
-    GroupDao groupDao;
+    GroupRepository groupRepository;
 
     private static final GroupRequest GROUP_REQUEST = new GroupRequest();
 
@@ -34,20 +34,20 @@ class GroupValidatorImplTest {
 
     @Test
     void validateUniqueNameInDB_inputWithUniqueName_expectedNothing() {
-        when(groupDao.findByName(GROUP_REQUEST.getName())).thenReturn(Optional.empty());
+        when(groupRepository.findByName(GROUP_REQUEST.getName())).thenReturn(Optional.empty());
 
         assertDoesNotThrow(() -> groupValidator.validateUniqueNameInDB(GROUP_REQUEST));
 
-        verify(groupDao, times(1)).findByName(GROUP_REQUEST.getName());
+        verify(groupRepository, times(1)).findByName(GROUP_REQUEST.getName());
     }
 
     @Test
     void validateUniqueNameInDB_inputWithNotUniqueName_expectedException() {
-        when(groupDao.findByName(GROUP_REQUEST.getName())).thenReturn(Optional.of(Group.builder().build()));
+        when(groupRepository.findByName(GROUP_REQUEST.getName())).thenReturn(Optional.of(Group.builder().build()));
 
         assertThrows(IncorrectRequestDataException.class, () -> groupValidator.validateUniqueNameInDB(GROUP_REQUEST));
 
-        verify(groupDao, times(1)).findByName(GROUP_REQUEST.getName());
+        verify(groupRepository, times(1)).findByName(GROUP_REQUEST.getName());
     }
 
     @Test
