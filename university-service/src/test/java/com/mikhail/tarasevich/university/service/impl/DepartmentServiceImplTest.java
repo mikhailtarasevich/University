@@ -1,12 +1,12 @@
 package com.mikhail.tarasevich.university.service.impl;
 
-import com.mikhail.tarasevich.university.dao.CourseDao;
-import com.mikhail.tarasevich.university.dao.DepartmentDao;
-import com.mikhail.tarasevich.university.dao.TeacherDao;
 import com.mikhail.tarasevich.university.dto.DepartmentRequest;
 import com.mikhail.tarasevich.university.dto.DepartmentResponse;
 import com.mikhail.tarasevich.university.entity.Department;
 import com.mikhail.tarasevich.university.mapper.DepartmentMapper;
+import com.mikhail.tarasevich.university.repository.CourseRepository;
+import com.mikhail.tarasevich.university.repository.DepartmentRepository;
+import com.mikhail.tarasevich.university.repository.TeacherRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.service.validator.DepartmentValidator;
@@ -15,6 +15,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.util.*;
 
@@ -28,11 +32,11 @@ class DepartmentServiceImplTest {
     @InjectMocks
     DepartmentServiceImpl departmentService;
     @Mock
-    DepartmentDao departmentDao;
+    DepartmentRepository departmentRepository;
     @Mock
-    CourseDao courseDao;
+    CourseRepository courseRepository;
     @Mock
-    TeacherDao teacherDao;
+    TeacherRepository teacherRepository;
     @Mock
     DepartmentMapper mapper;
     @Mock
@@ -98,7 +102,7 @@ class DepartmentServiceImplTest {
     @Test
     void register_inputDepartmentRequest_expectedDepartmentResponseWithId() {
         when(mapper.toEntity(DEPARTMENT_REQUEST_1)).thenReturn(DEPARTMENT_ENTITY_1);
-        when(departmentDao.save(DEPARTMENT_ENTITY_1)).thenReturn(DEPARTMENT_ENTITY_WITH_ID_1);
+        when(departmentRepository.save(DEPARTMENT_ENTITY_1)).thenReturn(DEPARTMENT_ENTITY_WITH_ID_1);
         when(mapper.toResponse(DEPARTMENT_ENTITY_WITH_ID_1)).thenReturn(DEPARTMENT_RESPONSE_WITH_ID_1);
         doNothing().when(validator).validateUniqueNameInDB(DEPARTMENT_REQUEST_1);
         doNothing().when(validator).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_1);
@@ -107,7 +111,7 @@ class DepartmentServiceImplTest {
 
         assertEquals(DEPARTMENT_RESPONSE_WITH_ID_1, departmentResponse);
         verify(mapper, times(1)).toEntity(DEPARTMENT_REQUEST_1);
-        verify(departmentDao, times(1)).save(DEPARTMENT_ENTITY_1);
+        verify(departmentRepository, times(1)).save(DEPARTMENT_ENTITY_1);
         verify(mapper, times(1)).toResponse(DEPARTMENT_ENTITY_WITH_ID_1);
         verify(validator, times(1)).validateUniqueNameInDB(DEPARTMENT_REQUEST_1);
         verify(validator, times(1)).validateUniqueNameInDB(DEPARTMENT_REQUEST_1);
@@ -122,7 +126,6 @@ class DepartmentServiceImplTest {
 
         when(mapper.toEntity(DEPARTMENT_REQUEST_1)).thenReturn(DEPARTMENT_ENTITY_1);
         when(mapper.toEntity(DEPARTMENT_REQUEST_2)).thenReturn(DEPARTMENT_ENTITY_2);
-        doNothing().when(departmentDao).saveAll(departmentEntities);
         doNothing().doThrow(new IncorrectRequestDataException()).when(validator)
                 .validateUniqueNameInDB(DEPARTMENT_REQUEST_1);
         doNothing().when(validator).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_1);
@@ -133,7 +136,7 @@ class DepartmentServiceImplTest {
 
         verify(mapper, times(1)).toEntity(DEPARTMENT_REQUEST_1);
         verify(mapper, times(1)).toEntity(DEPARTMENT_REQUEST_2);
-        verify(departmentDao, times(1)).saveAll(departmentEntities);
+        verify(departmentRepository, times(1)).saveAll(departmentEntities);
         verify(validator, times(2)).validateUniqueNameInDB(DEPARTMENT_REQUEST_1);
         verify(validator, times(1)).validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_1);
         verify(validator, times(1)).validateUniqueNameInDB(DEPARTMENT_REQUEST_2);
@@ -142,53 +145,56 @@ class DepartmentServiceImplTest {
 
     @Test
     void findById_inputIntId_expectedFoundCourse() {
-        when(departmentDao.findById(1)).thenReturn(Optional.of(DEPARTMENT_ENTITY_WITH_ID_1));
+        when(departmentRepository.findById(1)).thenReturn(Optional.of(DEPARTMENT_ENTITY_WITH_ID_1));
         when(mapper.toResponse(DEPARTMENT_ENTITY_WITH_ID_1)).thenReturn(DEPARTMENT_RESPONSE_WITH_ID_1);
 
         DepartmentResponse departmentResponse = departmentService.findById(1);
 
         assertEquals(DEPARTMENT_RESPONSE_WITH_ID_1, departmentResponse);
         verify(mapper, times(1)).toResponse(DEPARTMENT_ENTITY_WITH_ID_1);
-        verify(departmentDao, times(1)).findById(1);
+        verify(departmentRepository, times(1)).findById(1);
     }
 
     @Test
     void findById_inputIncorrectId_expectedException() {
-        when(departmentDao.findById(100)).thenReturn(Optional.empty());
+        when(departmentRepository.findById(100)).thenReturn(Optional.empty());
 
         assertThrows(ObjectWithSpecifiedIdNotFoundException.class, () -> departmentService.findById(100));
 
-        verify(departmentDao, times(1)).findById(100);
+        verify(departmentRepository, times(1)).findById(100);
         verifyNoInteractions(mapper);
     }
 
     @Test
     void findAll_inputNothing_expectedFoundAllDepartments() {
-        when(departmentDao.findAll()).thenReturn(departmentEntitiesWithId);
+        when(departmentRepository.findAll()).thenReturn(departmentEntitiesWithId);
         when(mapper.toResponse(DEPARTMENT_ENTITY_WITH_ID_1)).thenReturn(DEPARTMENT_RESPONSE_WITH_ID_1);
         when(mapper.toResponse(DEPARTMENT_ENTITY_WITH_ID_2)).thenReturn(DEPARTMENT_RESPONSE_WITH_ID_2);
 
         List<DepartmentResponse> foundDepartments = departmentService.findAll();
 
         assertEquals(departmentResponses, foundDepartments);
-        verify(departmentDao, times(1)).findAll();
+        verify(departmentRepository, times(1)).findAll();
         verify(mapper, times(1)).toResponse(DEPARTMENT_ENTITY_WITH_ID_1);
         verify(mapper, times(1)).toResponse(DEPARTMENT_ENTITY_WITH_ID_2);
     }
 
     @Test
     void findAll_inputPageOne_expectedFoundDepartmentsFromPageOne() {
-        when(departmentDao.findAll(1, AbstractPageableService.ITEMS_PER_PAGE))
-                .thenReturn(departmentEntitiesWithId);
-        when(departmentDao.count()).thenReturn(2L);
+        Page<Department> pageOfDepartmentEntitiesWithId = new PageImpl<>(departmentEntitiesWithId);
+
+        when(departmentRepository
+                .findAll(PageRequest.of(0, AbstractPageableService.ITEMS_PER_PAGE, Sort.by("id"))))
+                .thenReturn(pageOfDepartmentEntitiesWithId);
+        when(departmentRepository.count()).thenReturn(2L);
         when(mapper.toResponse(DEPARTMENT_ENTITY_WITH_ID_1)).thenReturn(DEPARTMENT_RESPONSE_WITH_ID_1);
         when(mapper.toResponse(DEPARTMENT_ENTITY_WITH_ID_2)).thenReturn(DEPARTMENT_RESPONSE_WITH_ID_2);
 
         List<DepartmentResponse> foundDepartments = departmentService.findAll("1");
 
         assertEquals(departmentResponses, foundDepartments);
-        verify(departmentDao, times(1)).findAll(1, AbstractPageableService.ITEMS_PER_PAGE);
-        verify(departmentDao, times(1)).count();
+        verify(departmentRepository, times(1)).findAll(PageRequest.of(0, AbstractPageableService.ITEMS_PER_PAGE, Sort.by("id")));
+        verify(departmentRepository, times(1)).count();
         verify(mapper, times(1)).toResponse(DEPARTMENT_ENTITY_WITH_ID_1);
         verify(mapper, times(1)).toResponse(DEPARTMENT_ENTITY_WITH_ID_2);
     }
@@ -206,13 +212,15 @@ class DepartmentServiceImplTest {
         DEPARTMENT_REQUEST_FOR_UPDATE_1.setName("update1");
         DEPARTMENT_REQUEST_FOR_UPDATE_1.setDescription("update1");
 
-        doNothing().when(departmentDao).update(DEPARTMENT_ENTITY_FOR_UPDATE_1);
+        doNothing().when(departmentRepository).update(DEPARTMENT_ENTITY_FOR_UPDATE_1.getId(),
+            DEPARTMENT_ENTITY_FOR_UPDATE_1.getName(), DEPARTMENT_ENTITY_FOR_UPDATE_1.getDescription());
         when(mapper.toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_1)).thenReturn(DEPARTMENT_ENTITY_FOR_UPDATE_1);
 
         departmentService.edit(DEPARTMENT_REQUEST_FOR_UPDATE_1);
 
         verify(mapper, times(1)).toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_1);
-        verify(departmentDao, times(1)).update(DEPARTMENT_ENTITY_FOR_UPDATE_1);
+        verify(departmentRepository, times(1)).update(DEPARTMENT_ENTITY_FOR_UPDATE_1.getId(),
+                DEPARTMENT_ENTITY_FOR_UPDATE_1.getName(), DEPARTMENT_ENTITY_FOR_UPDATE_1.getDescription());
     }
 
     @Test
@@ -260,13 +268,11 @@ class DepartmentServiceImplTest {
         when(mapper.toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_1)).thenReturn(DEPARTMENT_ENTITY_FOR_UPDATE_1);
         when(mapper.toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_2)).thenReturn(DEPARTMENT_ENTITY_FOR_UPDATE_2);
 
-        doNothing().when(departmentDao).updateAll(listForUpdate);
-
         departmentService.editAll(inputList);
 
         verify(mapper, times(1)).toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_1);
         verify(mapper, times(1)).toEntity(DEPARTMENT_REQUEST_FOR_UPDATE_2);
-        verify(departmentDao, times(1)).updateAll(listForUpdate);
+        verify(departmentRepository, times(1)).saveAll(listForUpdate);
         verify(validator, times(1))
                 .validateNameNotNullOrEmpty(DEPARTMENT_REQUEST_FOR_UPDATE_1);
         verify(validator, times(1))
@@ -279,33 +285,33 @@ class DepartmentServiceImplTest {
     void deleteById_inputDepartmentId_expectedSuccessDelete() {
         int id = 1;
 
-        when(departmentDao.findById(id)).thenReturn(Optional.of(DEPARTMENT_ENTITY_1));
-        doNothing().when(courseDao).unbindCoursesFromDepartment(id);
-        doNothing().when(teacherDao).unbindTeachersFromDepartment(id);
-        when(departmentDao.deleteById(id)).thenReturn(true);
+        when(departmentRepository.findById(id)).thenReturn(Optional.of(DEPARTMENT_ENTITY_1));
+        doNothing().when(courseRepository).unbindCoursesFromDepartment(id);
+        doNothing().when(teacherRepository).unbindTeachersFromDepartment(id);
+        doNothing().when(departmentRepository).deleteById(id);
 
         boolean result = departmentService.deleteById(1);
 
         assertTrue(result);
-        verify(departmentDao, times(1)).findById(id);
-        verify(departmentDao, times(1)).deleteById(id);
-        verify(courseDao, times(1)).unbindCoursesFromDepartment(id);
-        verify(teacherDao, times(1)).unbindTeachersFromDepartment(id);
+        verify(departmentRepository, times(1)).findById(id);
+        verify(departmentRepository, times(1)).deleteById(id);
+        verify(courseRepository, times(1)).unbindCoursesFromDepartment(id);
+        verify(teacherRepository, times(1)).unbindTeachersFromDepartment(id);
     }
 
     @Test
     void deleteById_inputDepartmentId_expectedFalseUnsuccessfulDelete() {
         int id = 1;
 
-        when(departmentDao.findById(id)).thenReturn(Optional.empty());
+        when(departmentRepository.findById(id)).thenReturn(Optional.empty());
 
         boolean result = departmentService.deleteById(1);
 
         assertFalse(result);
-        verify(departmentDao, times(1)).findById(id);
-        verifyNoInteractions(courseDao);
-        verifyNoInteractions(teacherDao);
-        verify(departmentDao, times(0)).deleteById(id);
+        verify(departmentRepository, times(1)).findById(id);
+        verifyNoInteractions(courseRepository);
+        verifyNoInteractions(teacherRepository);
+        verify(departmentRepository, times(0)).deleteById(id);
     }
 
     @Test
@@ -314,20 +320,20 @@ class DepartmentServiceImplTest {
         ids.add(1);
         ids.add(2);
 
-        doNothing().when(courseDao).unbindCoursesFromDepartment(1);
-        doNothing().when(teacherDao).unbindTeachersFromDepartment(1);
-        doNothing().when(courseDao).unbindCoursesFromDepartment(2);
-        doNothing().when(teacherDao).unbindTeachersFromDepartment(2);
-        when(departmentDao.deleteByIds(ids)).thenReturn(true);
+        doNothing().when(courseRepository).unbindCoursesFromDepartment(1);
+        doNothing().when(teacherRepository).unbindTeachersFromDepartment(1);
+        doNothing().when(courseRepository).unbindCoursesFromDepartment(2);
+        doNothing().when(teacherRepository).unbindTeachersFromDepartment(2);
+        doNothing().when(departmentRepository).deleteAllByIdInBatch(ids);
 
         boolean result = departmentService.deleteByIds(ids);
 
         assertTrue(result);
-        verify(departmentDao, times(1)).deleteByIds(ids);
-        verify(courseDao, times(1)).unbindCoursesFromDepartment(1);
-        verify(teacherDao, times(1)).unbindTeachersFromDepartment(1);
-        verify(courseDao, times(1)).unbindCoursesFromDepartment(2);
-        verify(teacherDao, times(1)).unbindTeachersFromDepartment(2);
+        verify(departmentRepository, times(1)).deleteAllByIdInBatch(ids);
+        verify(courseRepository, times(1)).unbindCoursesFromDepartment(1);
+        verify(teacherRepository, times(1)).unbindTeachersFromDepartment(1);
+        verify(courseRepository, times(1)).unbindCoursesFromDepartment(2);
+        verify(teacherRepository, times(1)).unbindTeachersFromDepartment(2);
     }
 
     @Test
@@ -337,15 +343,15 @@ class DepartmentServiceImplTest {
         courses.add(1);
         courses.add(2);
 
-        doNothing().when(departmentDao).addCourseToDepartment(departmentId, courses.get(0));
-        doNothing().when(departmentDao).addCourseToDepartment(departmentId, courses.get(1));
+        doNothing().when(departmentRepository).addCourseToDepartment(departmentId, courses.get(0));
+        doNothing().when(departmentRepository).addCourseToDepartment(departmentId, courses.get(1));
 
         assertDoesNotThrow(() -> departmentService.addCoursesToDepartment(departmentId, courses));
 
-        verify(departmentDao, times(1)).addCourseToDepartment(departmentId, courses.get(0));
-        verify(departmentDao, times(1)).addCourseToDepartment(departmentId, courses.get(1));
-        verifyNoInteractions(teacherDao);
-        verifyNoInteractions(courseDao);
+        verify(departmentRepository, times(1)).addCourseToDepartment(departmentId, courses.get(0));
+        verify(departmentRepository, times(1)).addCourseToDepartment(departmentId, courses.get(1));
+        verifyNoInteractions(teacherRepository);
+        verifyNoInteractions(courseRepository);
     }
 
     @Test
@@ -355,26 +361,26 @@ class DepartmentServiceImplTest {
         courses.add(1);
         courses.add(2);
 
-        doNothing().when(departmentDao).deleteCourseFromDepartment(departmentId, courses.get(0));
-        doNothing().when(departmentDao).deleteCourseFromDepartment(departmentId, courses.get(1));
+        doNothing().when(departmentRepository).deleteCourseFromDepartment(departmentId, courses.get(0));
+        doNothing().when(departmentRepository).deleteCourseFromDepartment(departmentId, courses.get(1));
 
         assertDoesNotThrow(() -> departmentService.deleteCoursesFromDepartment(departmentId, courses));
 
-        verify(departmentDao, times(1)).deleteCourseFromDepartment(departmentId, courses.get(0));
-        verify(departmentDao, times(1)).deleteCourseFromDepartment(departmentId, courses.get(1));
-        verifyNoInteractions(teacherDao);
-        verifyNoInteractions(courseDao);
+        verify(departmentRepository, times(1)).deleteCourseFromDepartment(departmentId, courses.get(0));
+        verify(departmentRepository, times(1)).deleteCourseFromDepartment(departmentId, courses.get(1));
+        verifyNoInteractions(teacherRepository);
+        verifyNoInteractions(courseRepository);
     }
 
     @Test
     void lastPageNumber_inputNothing_expectedLastPageNumber() {
-        when(departmentDao.count()).thenReturn(5L);
+        when(departmentRepository.count()).thenReturn(5L);
 
         int expected = (int) Math.ceil(5.0 / AbstractPageableService.ITEMS_PER_PAGE);
 
         assertEquals(expected, departmentService.lastPageNumber());
 
-        verify(departmentDao, times(1)).count();
+        verify(departmentRepository, times(1)).count();
     }
 
 }

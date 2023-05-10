@@ -1,12 +1,12 @@
 package com.mikhail.tarasevich.university.service.impl;
 
-import com.mikhail.tarasevich.university.dao.GroupDao;
-import com.mikhail.tarasevich.university.dao.RoleDao;
-import com.mikhail.tarasevich.university.dao.StudentDao;
 import com.mikhail.tarasevich.university.dto.StudentRequest;
 import com.mikhail.tarasevich.university.dto.StudentResponse;
 import com.mikhail.tarasevich.university.entity.Student;
 import com.mikhail.tarasevich.university.mapper.StudentMapper;
+import com.mikhail.tarasevich.university.repository.GroupRepository;
+import com.mikhail.tarasevich.university.repository.RoleRepository;
+import com.mikhail.tarasevich.university.repository.StudentRepository;
 import com.mikhail.tarasevich.university.service.StudentService;
 import com.mikhail.tarasevich.university.service.validator.UserValidator;
 import lombok.extern.log4j.Log4j2;
@@ -23,27 +23,28 @@ import java.util.stream.Collectors;
 @Transactional
 @Log4j2
 public class StudentServiceImpl
-        extends AbstractUserPageableService<StudentDao, StudentRequest, StudentResponse, Student>
+        extends AbstractUserPageableService<StudentRepository, StudentRequest, StudentResponse, Student>
         implements StudentService {
 
-    private final GroupDao groupDao;
+    private final GroupRepository groupRepository;
 
-    public StudentServiceImpl(StudentDao userDao, RoleDao roleDao, PasswordEncoder encoder,
-                              StudentMapper mapper,
+    public StudentServiceImpl(StudentRepository studentRepository, RoleRepository roleRepository,
+                              PasswordEncoder encoder, StudentMapper mapper,
                               UserValidator<StudentRequest> validator,
-                              GroupDao groupDao) {
-        super(userDao, roleDao, encoder, mapper, validator);
-        this.groupDao = groupDao;
+                              GroupRepository groupRepository) {
+        super(studentRepository, roleRepository, encoder, mapper, validator);
+        this.groupRepository = groupRepository;
     }
 
     @Override
     public boolean deleteById(int id) {
-        Optional<Student> optionalStudentEntity = userDao.findById(id);
+        Optional<Student> optionalStudentEntity = userRepository.findById(id);
 
         if (optionalStudentEntity.isPresent()) {
-            groupDao.unbindGroupsFromStudent(id);
-            roleDao.unbindRoleFromUser(id);
-            return userDao.deleteById(id);
+            groupRepository.unbindGroupsFromStudent(id);
+            roleRepository.unbindRoleFromUser(id);
+            userRepository.deleteById(id);
+            return true;
         } else {
             log.info("Delete was rejected. There is no student with specified id in the database. Id = {}",
                     id);
@@ -53,40 +54,37 @@ public class StudentServiceImpl
 
     @Override
     public boolean deleteByIds(Set<Integer> ids) {
-        ids.forEach(groupDao::unbindGroupsFromStudent);
-        ids.forEach(roleDao::unbindRoleFromUser);
+        ids.forEach(groupRepository::unbindGroupsFromStudent);
+        ids.forEach(roleRepository::unbindRoleFromUser);
 
-        boolean result = userDao.deleteByIds(ids);
+        userRepository.deleteAllByIdInBatch(ids);
 
-        if (result) log.info("Students have been deleted. Deleted students: {}", ids);
-        else log.info("Students haven't been deleted. Student ids: {}", ids);
-
-        return result;
+        return true;
     }
 
     @Override
     public void subscribeUserToGroup(int userId, int groupId) {
-        userDao.addUserToGroup(userId, groupId);
+        userRepository.addUserToGroup(userId, groupId);
         log.info("Student with id = {} have been subscribed to group with id = {}", userId, groupId);
     }
 
     @Override
     public void unsubscribeStudentFromGroup(int userId) {
-        userDao.deleteStudentFromGroup(userId);
+        userRepository.deleteStudentFromGroup(userId);
         log.info("Student with id = {} have been unsubscribed from group", userId);
     }
 
     @Override
     public List<StudentResponse> findStudentsRelateToGroup(int groupId) {
-        return userDao.findStudentsRelateToGroup(groupId)
+        return userRepository.findStudentsByGroupId(groupId)
                 .stream().map(userMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<StudentResponse> findStudentsNotRelateToGroup(int groupId) {
-        List<Student> allStudents = userDao.findAll();
-        List<Student> relateToGroup = userDao.findStudentsRelateToGroup(groupId);
+        List<Student> allStudents = userRepository.findAll();
+        List<Student> relateToGroup = userRepository.findStudentsByGroupId(groupId);
 
         return allStudents.stream()
                 .filter(student -> !relateToGroup.contains(student))

@@ -1,9 +1,12 @@
 package com.mikhail.tarasevich.university.service.impl;
 
-import com.mikhail.tarasevich.university.dao.*;
 import com.mikhail.tarasevich.university.dto.CourseRequest;
 import com.mikhail.tarasevich.university.dto.CourseResponse;
 import com.mikhail.tarasevich.university.entity.Course;
+import com.mikhail.tarasevich.university.repository.CourseRepository;
+import com.mikhail.tarasevich.university.repository.DepartmentRepository;
+import com.mikhail.tarasevich.university.repository.LessonRepository;
+import com.mikhail.tarasevich.university.repository.TeacherRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.CourseMapper;
@@ -11,6 +14,8 @@ import com.mikhail.tarasevich.university.service.CourseService;
 import com.mikhail.tarasevich.university.service.validator.CourseValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,10 +31,10 @@ import java.util.stream.Collectors;
 @Log4j2
 public class CourseServiceImpl extends AbstractPageableService implements CourseService {
 
-    private final CourseDao courseDao;
-    private final DepartmentDao departmentDao;
-    private final LessonDao lessonDao;
-    private final TeacherDao teacherDao;
+    private final CourseRepository courseRepository;
+    private final DepartmentRepository departmentRepository;
+    private final LessonRepository lessonRepository;
+    private final TeacherRepository teacherRepository;
     private final CourseMapper mapper;
     private final CourseValidator validator;
 
@@ -39,7 +44,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
         validator.validateUniqueNameInDB(r);
         validator.validateNameNotNullOrEmpty(r);
 
-        return mapper.toResponse(courseDao.save(mapper.toEntity(r)));
+        return mapper.toResponse(courseRepository.save(mapper.toEntity(r)));
     }
 
     @Override
@@ -56,7 +61,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
             }
         });
 
-        courseDao.saveAll(acceptableRequests.stream()
+        courseRepository.saveAll(acceptableRequests.stream()
                 .map(mapper::toEntity)
                 .collect(Collectors.toList()));
         log.info("Courses were saved in the database. Saved courses: {} .", acceptableRequests);
@@ -65,7 +70,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     @Override
     @Transactional(readOnly = true)
     public CourseResponse findById(int id) {
-        Optional<CourseResponse> foundCourse = courseDao.findById(id).map(mapper::toResponse);
+        Optional<CourseResponse> foundCourse = courseRepository.findById(id).map(mapper::toResponse);
 
         if (foundCourse.isPresent()) {
             return foundCourse.get();
@@ -77,10 +82,10 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     @Override
     @Transactional(readOnly = true)
     public List<CourseResponse> findAll(String page) {
-        final long itemsCount = courseDao.count();
+        final long itemsCount = courseRepository.count();
         int pageNumber = parsePageNumber(page, itemsCount, 1);
 
-        return courseDao.findAll(pageNumber, ITEMS_PER_PAGE).stream()
+        return courseRepository.findAll(PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("id"))).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -88,7 +93,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     @Override
     @Transactional(readOnly = true)
     public List<CourseResponse> findAll() {
-        return courseDao.findAll().stream()
+        return courseRepository.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -96,7 +101,8 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     @Override
     public void edit(CourseRequest r) {
         validator.validateNameNotNullOrEmpty(r);
-        courseDao.update(mapper.toEntity(r));
+        Course c = mapper.toEntity(r);
+        courseRepository.update(c.getId(), c.getName(), c.getDescription());
     }
 
     @Override
@@ -112,7 +118,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
             }
         });
 
-        courseDao.updateAll(
+        courseRepository.saveAll(
                 acceptableRequests.stream()
                         .map(mapper::toEntity)
                         .collect(Collectors.toList())
@@ -121,13 +127,15 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
 
     @Override
     public boolean deleteById(int id) {
-        Optional<Course> optionalCourseEntities = courseDao.findById(id);
+        Optional<Course> optionalCourseEntities = courseRepository.findById(id);
 
         if (optionalCourseEntities.isPresent()) {
 
             unbindDependenciesBeforeDelete(id);
 
-            return courseDao.deleteById(id);
+            courseRepository.deleteById(id);
+
+            return true;
         } else {
             log.info("Delete was rejected. There is no courses with specified id in the database. Id = {}", id);
             return false;
@@ -138,17 +146,15 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     public boolean deleteByIds(Set<Integer> ids) {
         ids.forEach(this::unbindDependenciesBeforeDelete);
 
-        boolean result = courseDao.deleteByIds(ids);
+        courseRepository.deleteAllByIdInBatch(ids);
 
-        if (result) log.info("Courses have been deleted. Deleted courses: {}", ids);
-
-        return result;
+        return true;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<CourseResponse> findCoursesRelateToDepartment(int departmentId) {
-        return courseDao.findCoursesRelateToDepartment(departmentId).stream()
+        return courseRepository.findCoursesByDepartmentsId(departmentId).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -156,8 +162,8 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     @Override
     @Transactional(readOnly = true)
     public List<CourseResponse> findCoursesNotRelateToDepartment(int departmentId) {
-        List<Course> allCourses = courseDao.findAll();
-        List<Course> relateToDepartment = courseDao.findCoursesRelateToDepartment(departmentId);
+        List<Course> allCourses = courseRepository.findAll();
+        List<Course> relateToDepartment = courseRepository.findCoursesByDepartmentsId(departmentId);
 
         return allCourses.stream()
                 .filter(course -> !relateToDepartment.contains(course))
@@ -168,7 +174,7 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     @Override
     @Transactional(readOnly = true)
     public List<CourseResponse> findCoursesRelateToTeacher(int teacherId) {
-        return courseDao.findCoursesRelateToTeacher(teacherId).stream()
+        return courseRepository.findCoursesByTeachersId(teacherId).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -176,8 +182,8 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     @Override
     @Transactional(readOnly = true)
     public List<CourseResponse> findCoursesRelateToDepartmentNotRelateToTeacher(int departmentId, int teacherId) {
-        List<Course> coursesRelateToDepartment = courseDao.findCoursesRelateToDepartment(departmentId);
-        List<Course> coursesRelateToTeacher = courseDao.findCoursesRelateToTeacher(teacherId);
+        List<Course> coursesRelateToDepartment = courseRepository.findCoursesByDepartmentsId(departmentId);
+        List<Course> coursesRelateToTeacher = courseRepository.findCoursesByTeachersId(teacherId);
 
         return coursesRelateToDepartment.stream()
                 .filter(c -> !coursesRelateToTeacher.contains(c))
@@ -187,14 +193,14 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
 
     @Override
     public void subscribeCourseToDepartment(int departmentId, int courseId) {
-        departmentDao.addCourseToDepartment(departmentId, courseId);
+        departmentRepository.addCourseToDepartment(departmentId, courseId);
         log.info("Course with id = {} have been subscribed to department with id = {}",
                 courseId, departmentId);
     }
 
     @Override
     public void unsubscribeCourseFromDepartment(int departmentId, int courseId) {
-        departmentDao.deleteCourseFromDepartment(departmentId, courseId);
+        departmentRepository.deleteCourseFromDepartment(departmentId, courseId);
         log.info("Course with id = {} have been unsubscribed from department with id = {}",
                 courseId, departmentId);
     }
@@ -202,13 +208,13 @@ public class CourseServiceImpl extends AbstractPageableService implements Course
     @Override
     @Transactional(readOnly = true)
     public int lastPageNumber() {
-        return (int) Math.ceil((double) courseDao.count() / ITEMS_PER_PAGE);
+        return (int) Math.ceil((double) courseRepository.count() / ITEMS_PER_PAGE);
     }
 
     private void unbindDependenciesBeforeDelete(int id) {
-        departmentDao.unbindDepartmentsFromCourse(id);
-        lessonDao.unbindLessonsFromCourse(id);
-        teacherDao.unbindTeachersFromCourse(id);
+        departmentRepository.unbindDepartmentsFromCourse(id);
+        lessonRepository.unbindLessonsFromCourse(id);
+        teacherRepository.unbindTeachersFromCourse(id);
     }
 
 }

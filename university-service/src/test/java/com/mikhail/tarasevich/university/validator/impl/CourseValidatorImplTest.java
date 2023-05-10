@@ -1,8 +1,8 @@
 package com.mikhail.tarasevich.university.validator.impl;
 
-import com.mikhail.tarasevich.university.dao.CourseDao;
 import com.mikhail.tarasevich.university.dto.CourseRequest;
 import com.mikhail.tarasevich.university.entity.Course;
+import com.mikhail.tarasevich.university.repository.CourseRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.validator.impl.CourseValidatorImpl;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ class CourseValidatorImplTest {
     @InjectMocks
     CourseValidatorImpl courseValidator;
     @Mock
-    CourseDao courseDao;
+    CourseRepository courseRepository;
 
     private static final CourseRequest COURSE_REQUEST = new CourseRequest();
 
@@ -36,20 +36,20 @@ class CourseValidatorImplTest {
 
     @Test
     void validateUniqueNameInDB_inputWithUniqueName_expectedNothing() {
-        when(courseDao.findByName(COURSE_REQUEST.getName())).thenReturn(Optional.empty());
+        when(courseRepository.findByName(COURSE_REQUEST.getName())).thenReturn(Optional.empty());
 
         assertDoesNotThrow(() -> courseValidator.validateUniqueNameInDB(COURSE_REQUEST));
 
-        verify(courseDao, times(1)).findByName(COURSE_REQUEST.getName());
+        verify(courseRepository, times(1)).findByName(COURSE_REQUEST.getName());
     }
 
     @Test
     void validateUniqueNameInDB_inputWithNotUniqueName_expectedException() {
-        when(courseDao.findByName(COURSE_REQUEST.getName())).thenReturn(Optional.of(Course.builder().build()));
+        when(courseRepository.findByName(COURSE_REQUEST.getName())).thenReturn(Optional.of(Course.builder().build()));
 
         assertThrows(IncorrectRequestDataException.class, () -> courseValidator.validateUniqueNameInDB(COURSE_REQUEST));
 
-        verify(courseDao, times(1)).findByName(COURSE_REQUEST.getName());
+        verify(courseRepository, times(1)).findByName(COURSE_REQUEST.getName());
     }
 
     @Test

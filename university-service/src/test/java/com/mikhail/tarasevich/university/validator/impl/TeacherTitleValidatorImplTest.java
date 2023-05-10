@@ -1,8 +1,8 @@
 package com.mikhail.tarasevich.university.validator.impl;
 
-import com.mikhail.tarasevich.university.dao.TeacherTitleDao;
 import com.mikhail.tarasevich.university.dto.TeacherTitleRequest;
 import com.mikhail.tarasevich.university.entity.TeacherTitle;
+import com.mikhail.tarasevich.university.repository.TeacherTitleRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.validator.impl.TeacherTitleValidatorImpl;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class TeacherTitleValidatorImplTest {
     @InjectMocks
     TeacherTitleValidatorImpl teacherTitleValidator;
     @Mock
-    TeacherTitleDao teacherTitleDao;
+    TeacherTitleRepository teacherTitleRepository;
 
     private static final TeacherTitleRequest TEACHER_TITLE_REQUEST = new TeacherTitleRequest();
 
@@ -34,22 +34,22 @@ class TeacherTitleValidatorImplTest {
 
     @Test
     void validateUniqueNameInDB_inputWithUniqueName_expectedNothing() {
-        when(teacherTitleDao.findByName(TEACHER_TITLE_REQUEST.getName())).thenReturn(Optional.empty());
+        when(teacherTitleRepository.findByName(TEACHER_TITLE_REQUEST.getName())).thenReturn(Optional.empty());
 
         assertDoesNotThrow(() -> teacherTitleValidator.validateUniqueNameInDB(TEACHER_TITLE_REQUEST));
 
-        verify(teacherTitleDao, times(1)).findByName(TEACHER_TITLE_REQUEST.getName());
+        verify(teacherTitleRepository, times(1)).findByName(TEACHER_TITLE_REQUEST.getName());
     }
 
     @Test
     void validateUniqueNameInDB_inputWithNotUniqueName_expectedException() {
-        when(teacherTitleDao.findByName(TEACHER_TITLE_REQUEST.getName()))
+        when(teacherTitleRepository.findByName(TEACHER_TITLE_REQUEST.getName()))
                 .thenReturn(Optional.of(TeacherTitle.builder().build()));
 
         assertThrows(IncorrectRequestDataException.class,
                 () -> teacherTitleValidator.validateUniqueNameInDB(TEACHER_TITLE_REQUEST));
 
-        verify(teacherTitleDao, times(1)).findByName(TEACHER_TITLE_REQUEST.getName());
+        verify(teacherTitleRepository, times(1)).findByName(TEACHER_TITLE_REQUEST.getName());
     }
 
     @Test

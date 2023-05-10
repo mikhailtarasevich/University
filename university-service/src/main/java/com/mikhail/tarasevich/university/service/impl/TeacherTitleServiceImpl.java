@@ -1,10 +1,10 @@
 package com.mikhail.tarasevich.university.service.impl;
 
-import com.mikhail.tarasevich.university.dao.TeacherDao;
-import com.mikhail.tarasevich.university.dao.TeacherTitleDao;
 import com.mikhail.tarasevich.university.dto.TeacherTitleRequest;
 import com.mikhail.tarasevich.university.dto.TeacherTitleResponse;
 import com.mikhail.tarasevich.university.entity.TeacherTitle;
+import com.mikhail.tarasevich.university.repository.TeacherRepository;
+import com.mikhail.tarasevich.university.repository.TeacherTitleRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.TeacherTitleMapper;
@@ -12,6 +12,7 @@ import com.mikhail.tarasevich.university.service.TeacherTitleService;
 import com.mikhail.tarasevich.university.service.validator.TeacherTitleValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,8 +28,8 @@ import java.util.stream.Collectors;
 @Log4j2
 public class TeacherTitleServiceImpl extends AbstractPageableService implements TeacherTitleService {
 
-    private final TeacherTitleDao teacherTitleDao;
-    private final TeacherDao teacherDao;
+    private final TeacherTitleRepository teacherTitleRepository;
+    private final TeacherRepository teacherRepository;
     private final TeacherTitleMapper mapper;
     private final TeacherTitleValidator validator;
 
@@ -37,7 +38,7 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
         validator.validateUniqueNameInDB(r);
         validator.validateNameNotNullOrEmpty(r);
 
-        return mapper.toResponse(teacherTitleDao.save(mapper.toEntity(r)));
+        return mapper.toResponse(teacherTitleRepository.save(mapper.toEntity(r)));
     }
 
     @Override
@@ -54,7 +55,7 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
             }
         });
 
-        teacherTitleDao.saveAll(acceptableRequests.stream()
+        teacherTitleRepository.saveAll(acceptableRequests.stream()
                 .map(mapper::toEntity)
                 .collect(Collectors.toList()));
         log.info("The teacher titles were saved in the database. Saved teacher titles: {} .",
@@ -64,7 +65,7 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
     @Override
     @Transactional(readOnly = true)
     public TeacherTitleResponse findById(int id) {
-        Optional<TeacherTitleResponse> foundTeacherTitle = teacherTitleDao.findById(id).map(mapper::toResponse);
+        Optional<TeacherTitleResponse> foundTeacherTitle = teacherTitleRepository.findById(id).map(mapper::toResponse);
 
         if (foundTeacherTitle.isPresent()) {
             return foundTeacherTitle.get();
@@ -76,10 +77,10 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
     @Override
     @Transactional(readOnly = true)
     public List<TeacherTitleResponse> findAll(String page) {
-        final long itemsCount = teacherTitleDao.count();
+        final long itemsCount = teacherTitleRepository.count();
         int pageNumber = parsePageNumber(page, itemsCount, 1);
 
-        return teacherTitleDao.findAll(pageNumber, ITEMS_PER_PAGE).stream()
+        return teacherTitleRepository.findAll(PageRequest.of(pageNumber, ITEMS_PER_PAGE)).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -87,7 +88,7 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
     @Override
     @Transactional(readOnly = true)
     public List<TeacherTitleResponse> findAll() {
-        return teacherTitleDao.findAll().stream()
+        return teacherTitleRepository.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -95,7 +96,7 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
     @Override
     public void edit(TeacherTitleRequest r) {
         validator.validateNameNotNullOrEmpty(r);
-        teacherTitleDao.update(mapper.toEntity(r));
+        teacherTitleRepository.save(mapper.toEntity(r));
     }
 
     @Override
@@ -111,7 +112,7 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
             }
         });
 
-        teacherTitleDao.updateAll(
+        teacherTitleRepository.saveAll(
                 acceptableRequests.stream()
                         .map(mapper::toEntity)
                         .collect(Collectors.toList())
@@ -120,13 +121,15 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
 
     @Override
     public boolean deleteById(int id) {
-        Optional<TeacherTitle> optionalCourseEntities = teacherTitleDao.findById(id);
+        Optional<TeacherTitle> optionalCourseEntities = teacherTitleRepository.findById(id);
 
         if (optionalCourseEntities.isPresent()) {
 
             unbindDependenciesBeforeDelete(id);
 
-            return teacherTitleDao.deleteById(id);
+            teacherTitleRepository.deleteById(id);
+
+            return true;
         } else {
             log.info("Delete was rejected. There is no teacher title with specified id in the database. Id = {}",
                     id);
@@ -138,20 +141,18 @@ public class TeacherTitleServiceImpl extends AbstractPageableService implements 
     public boolean deleteByIds(Set<Integer> ids) {
         ids.forEach(this::unbindDependenciesBeforeDelete);
 
-        boolean result = teacherTitleDao.deleteByIds(ids);
+        teacherTitleRepository.deleteAllByIdInBatch(ids);
 
-        if (result) log.info("The teacher titles have been deleted. Deleted teacher titles: {}", ids);
-
-        return result;
+        return true;
     }
 
     @Override
     public int lastPageNumber() {
-        return (int) Math.ceil((double) teacherTitleDao.count() / ITEMS_PER_PAGE);
+        return (int) Math.ceil((double) teacherTitleRepository.count() / ITEMS_PER_PAGE);
     }
 
     private void unbindDependenciesBeforeDelete(int id) {
-        teacherDao.unbindTeachersFromTeacherTitle(id);
+        teacherRepository.unbindTeachersFromTeacherTitle(id);
     }
 
 }

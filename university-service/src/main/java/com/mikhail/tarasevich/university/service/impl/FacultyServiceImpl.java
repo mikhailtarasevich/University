@@ -1,9 +1,10 @@
 package com.mikhail.tarasevich.university.service.impl;
 
-import com.mikhail.tarasevich.university.dao.*;
 import com.mikhail.tarasevich.university.dto.FacultyRequest;
 import com.mikhail.tarasevich.university.dto.FacultyResponse;
 import com.mikhail.tarasevich.university.entity.Faculty;
+import com.mikhail.tarasevich.university.repository.FacultyRepository;
+import com.mikhail.tarasevich.university.repository.GroupRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.FacultyMapper;
@@ -11,6 +12,8 @@ import com.mikhail.tarasevich.university.service.FacultyService;
 import com.mikhail.tarasevich.university.service.validator.FacultyValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,8 +29,8 @@ import java.util.stream.Collectors;
 @Log4j2
 public class FacultyServiceImpl extends AbstractPageableService implements FacultyService {
 
-    private final FacultyDao facultyDao;
-    private final GroupDao groupDao;
+    private final FacultyRepository facultyRepository;
+    private final GroupRepository groupRepository;
     private final FacultyMapper mapper;
     private final FacultyValidator validator;
 
@@ -36,7 +39,7 @@ public class FacultyServiceImpl extends AbstractPageableService implements Facul
         validator.validateUniqueNameInDB(r);
         validator.validateNameNotNullOrEmpty(r);
 
-        return mapper.toResponse(facultyDao.save(mapper.toEntity(r)));
+        return mapper.toResponse(facultyRepository.save(mapper.toEntity(r)));
     }
 
     @Override
@@ -53,7 +56,7 @@ public class FacultyServiceImpl extends AbstractPageableService implements Facul
             }
         });
 
-        facultyDao.saveAll(acceptableRequests.stream()
+        facultyRepository.saveAll(acceptableRequests.stream()
                 .map(mapper::toEntity)
                 .collect(Collectors.toList()));
         log.info("Faculties were saved in the database. Saved faculties: {} .", acceptableRequests);
@@ -62,7 +65,7 @@ public class FacultyServiceImpl extends AbstractPageableService implements Facul
     @Override
     @Transactional(readOnly = true)
     public FacultyResponse findById(int id) {
-        Optional<FacultyResponse> foundFaculty = facultyDao.findById(id).map(mapper::toResponse);
+        Optional<FacultyResponse> foundFaculty = facultyRepository.findById(id).map(mapper::toResponse);
 
         if (foundFaculty.isPresent()) {
             return foundFaculty.get();
@@ -74,10 +77,10 @@ public class FacultyServiceImpl extends AbstractPageableService implements Facul
     @Override
     @Transactional(readOnly = true)
     public List<FacultyResponse> findAll(String page) {
-        final long itemsCount = facultyDao.count();
+        final long itemsCount = facultyRepository.count();
         int pageNumber = parsePageNumber(page, itemsCount, 1);
 
-        return facultyDao.findAll(pageNumber, ITEMS_PER_PAGE).stream()
+        return facultyRepository.findAll(PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("id"))).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -85,7 +88,7 @@ public class FacultyServiceImpl extends AbstractPageableService implements Facul
     @Override
     @Transactional(readOnly = true)
     public List<FacultyResponse> findAll() {
-        return facultyDao.findAll().stream()
+        return facultyRepository.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -93,7 +96,8 @@ public class FacultyServiceImpl extends AbstractPageableService implements Facul
     @Override
     public void edit(FacultyRequest r) {
         validator.validateNameNotNullOrEmpty(r);
-        facultyDao.update(mapper.toEntity(r));
+        Faculty f = mapper.toEntity(r);
+        facultyRepository.update(f.getId(), f.getName(), f.getDescription());
     }
 
     @Override
@@ -109,7 +113,7 @@ public class FacultyServiceImpl extends AbstractPageableService implements Facul
             }
         });
 
-        facultyDao.updateAll(
+        facultyRepository.saveAll(
                 acceptableRequests.stream()
                         .map(mapper::toEntity)
                         .collect(Collectors.toList())
@@ -118,13 +122,15 @@ public class FacultyServiceImpl extends AbstractPageableService implements Facul
 
     @Override
     public boolean deleteById(int id) {
-        Optional<Faculty> optionalCourseEntities = facultyDao.findById(id);
+        Optional<Faculty> optionalCourseEntities = facultyRepository.findById(id);
 
         if (optionalCourseEntities.isPresent()) {
 
             unbindDependenciesBeforeDelete(id);
 
-            return facultyDao.deleteById(id);
+            facultyRepository.deleteById(id);
+
+            return true;
         } else {
             log.info("Delete was rejected. There is no faculty with specified id in the database. Id = {}", id);
             return false;
@@ -135,21 +141,19 @@ public class FacultyServiceImpl extends AbstractPageableService implements Facul
     public boolean deleteByIds(Set<Integer> ids) {
         ids.forEach(this::unbindDependenciesBeforeDelete);
 
-        boolean result = facultyDao.deleteByIds(ids);
+        facultyRepository.deleteAllByIdInBatch(ids);
 
-        if (result) log.info("The faculties have been deleted. Deleted faculties: {}", ids);
-
-        return result;
+        return true;
     }
 
     @Override
     @Transactional(readOnly = true)
     public int lastPageNumber() {
-        return (int) Math.ceil((double) facultyDao.count() / ITEMS_PER_PAGE);
+        return (int) Math.ceil((double) facultyRepository.count() / ITEMS_PER_PAGE);
     }
 
     private void unbindDependenciesBeforeDelete(int id) {
-        groupDao.unbindGroupsFromFaculty(id);
+        groupRepository.unbindGroupsFromFaculty(id);
     }
 
 }

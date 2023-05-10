@@ -1,7 +1,7 @@
 package com.mikhail.tarasevich.university.service.validator.impl;
 
-import com.mikhail.tarasevich.university.dao.EducationFormDao;
 import com.mikhail.tarasevich.university.dto.EducationFormRequest;
+import com.mikhail.tarasevich.university.repository.EducationFormRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.validator.EducationFormValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class EducationFormValidatorImpl  implements EducationFormValidator {
 
-    private final EducationFormDao dao;
+    private final EducationFormRepository dao;
 
     @Autowired
-    public EducationFormValidatorImpl(EducationFormDao dao) {
+    public EducationFormValidatorImpl(EducationFormRepository dao) {
         this.dao = dao;
     }
 

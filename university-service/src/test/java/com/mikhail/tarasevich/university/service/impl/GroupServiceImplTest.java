@@ -1,14 +1,15 @@
 package com.mikhail.tarasevich.university.service.impl;
 
-import com.mikhail.tarasevich.university.dao.GroupDao;
-import com.mikhail.tarasevich.university.dao.LessonDao;
-import com.mikhail.tarasevich.university.dao.StudentDao;
-import com.mikhail.tarasevich.university.dao.TeacherDao;
 import com.mikhail.tarasevich.university.dto.GroupRequest;
 import com.mikhail.tarasevich.university.dto.GroupResponse;
 import com.mikhail.tarasevich.university.entity.EducationForm;
 import com.mikhail.tarasevich.university.entity.Faculty;
 import com.mikhail.tarasevich.university.entity.Group;
+import com.mikhail.tarasevich.university.entity.Student;
+import com.mikhail.tarasevich.university.repository.GroupRepository;
+import com.mikhail.tarasevich.university.repository.LessonRepository;
+import com.mikhail.tarasevich.university.repository.StudentRepository;
+import com.mikhail.tarasevich.university.repository.TeacherRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.exception.ObjectWithSpecifiedIdNotFoundException;
 import com.mikhail.tarasevich.university.mapper.GroupMapper;
@@ -18,6 +19,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.util.*;
 
@@ -32,13 +37,13 @@ class GroupServiceImplTest {
     @InjectMocks
     GroupServiceImpl groupService;
     @Mock
-    GroupDao groupDao;
+    GroupRepository groupRepository;
     @Mock
-    LessonDao lessonDao;
+    LessonRepository lessonRepository;
     @Mock
-    StudentDao studentDao;
+    StudentRepository studentRepository;
     @Mock
-    TeacherDao teacherDao;
+    TeacherRepository teacherRepository;
     @Mock
     GroupMapper mapper;
     @Mock
@@ -84,7 +89,7 @@ class GroupServiceImplTest {
     @Test
     void register_inputGroupRequest_expectedGroupResponseWithId() {
         when(mapper.toEntity(GROUP_REQUEST_1)).thenReturn(GROUP_ENTITY_1);
-        when(groupDao.save(GROUP_ENTITY_1)).thenReturn(GROUP_ENTITY_WITH_ID_1);
+        when(groupRepository.save(GROUP_ENTITY_1)).thenReturn(GROUP_ENTITY_WITH_ID_1);
         when(mapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
         doNothing().when(validator).validateUniqueNameInDB(GROUP_REQUEST_1);
         doNothing().when(validator).validateNameNotNullOrEmpty(GROUP_REQUEST_1);
@@ -93,7 +98,7 @@ class GroupServiceImplTest {
 
         assertEquals(GROUP_RESPONSE_WITH_ID_1, groupResponse);
         verify(mapper, times(1)).toEntity(GROUP_REQUEST_1);
-        verify(groupDao, times(1)).save(GROUP_ENTITY_1);
+        verify(groupRepository, times(1)).save(GROUP_ENTITY_1);
         verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
         verify(validator, times(1)).validateUniqueNameInDB(GROUP_REQUEST_1);
         verify(validator, times(1)).validateUniqueNameInDB(GROUP_REQUEST_1);
@@ -108,7 +113,6 @@ class GroupServiceImplTest {
 
         when(mapper.toEntity(GROUP_REQUEST_1)).thenReturn(GROUP_ENTITY_1);
         when(mapper.toEntity(GROUP_REQUEST_2)).thenReturn(GROUP_ENTITY_2);
-        doNothing().when(groupDao).saveAll(groupEntities);
         doNothing().doThrow(new IncorrectRequestDataException()).when(validator).validateUniqueNameInDB(GROUP_REQUEST_1);
         doNothing().when(validator).validateNameNotNullOrEmpty(GROUP_REQUEST_1);
         doNothing().when(validator).validateUniqueNameInDB(GROUP_REQUEST_2);
@@ -118,7 +122,7 @@ class GroupServiceImplTest {
 
         verify(mapper, times(1)).toEntity(GROUP_REQUEST_1);
         verify(mapper, times(1)).toEntity(GROUP_REQUEST_2);
-        verify(groupDao, times(1)).saveAll(groupEntities);
+        verify(groupRepository, times(1)).saveAll(groupEntities);
         verify(validator, times(2)).validateUniqueNameInDB(GROUP_REQUEST_1);
         verify(validator, times(1)).validateNameNotNullOrEmpty(GROUP_REQUEST_1);
         verify(validator, times(1)).validateUniqueNameInDB(GROUP_REQUEST_2);
@@ -127,85 +131,97 @@ class GroupServiceImplTest {
 
     @Test
     void findById_inputIntId_expectedFoundGroup() {
-        when(groupDao.findById(1)).thenReturn(Optional.of(GROUP_ENTITY_WITH_ID_1));
+        when(groupRepository.findById(1)).thenReturn(Optional.of(GROUP_ENTITY_WITH_ID_1));
         when(mapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
 
         GroupResponse groupResponse = groupService.findById(1);
 
         assertEquals(GROUP_RESPONSE_WITH_ID_1, groupResponse);
         verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
-        verify(groupDao, times(1)).findById(1);
+        verify(groupRepository, times(1)).findById(1);
     }
 
     @Test
     void findById_inputIncorrectId_expectedException() {
-        when(groupDao.findById(100)).thenReturn(Optional.empty());
+        when(groupRepository.findById(100)).thenReturn(Optional.empty());
 
         assertThrows(ObjectWithSpecifiedIdNotFoundException.class, () -> groupService.findById(100));
 
-        verify(groupDao, times(1)).findById(100);
+        verify(groupRepository, times(1)).findById(100);
         verifyNoInteractions(mapper);
     }
 
     @Test
     void findAll_inputNothing_expectedFoundAllGroups() {
-        when(groupDao.findAll()).thenReturn(groupEntitiesWithId);
+        when(groupRepository.findAll()).thenReturn(groupEntitiesWithId);
         when(mapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
         when(mapper.toResponse(GROUP_ENTITY_WITH_ID_2)).thenReturn(GROUP_RESPONSE_WITH_ID_2);
 
         List<GroupResponse> foundGroups = groupService.findAll();
 
         assertEquals(groupResponses, foundGroups);
-        verify(groupDao, times(1)).findAll();
+        verify(groupRepository, times(1)).findAll();
         verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
         verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_2);
     }
 
     @Test
     void findAll_inputPageOne_expectedFoundGroupsFromPageOne() {
-        when(groupDao.findAll(1, AbstractPageableService.ITEMS_PER_PAGE)).thenReturn(groupEntitiesWithId);
-        when(groupDao.count()).thenReturn(2L);
+        Page<Group> pageOfGroupEntitiesWithId = new PageImpl<>(groupEntitiesWithId);
+
+        when(groupRepository
+                .findAll(PageRequest.of(0, AbstractPageableService.ITEMS_PER_PAGE, Sort.by("id"))))
+                .thenReturn(pageOfGroupEntitiesWithId);
+        when(groupRepository.count()).thenReturn(2L);
         when(mapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
         when(mapper.toResponse(GROUP_ENTITY_WITH_ID_2)).thenReturn(GROUP_RESPONSE_WITH_ID_2);
 
         List<GroupResponse> foundGroups = groupService.findAll("1");
 
         assertEquals(groupResponses, foundGroups);
-        verify(groupDao, times(1)).findAll(1, AbstractPageableService.ITEMS_PER_PAGE);
-        verify(groupDao, times(1)).count();
+        verify(groupRepository, times(1)).findAll(PageRequest.of(0, AbstractPageableService.ITEMS_PER_PAGE, Sort.by("id")));
+        verify(groupRepository, times(1)).count();
         verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
         verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_2);
     }
 
     @Test
     void findGroupsNotRelateToTeacher_inputTeacherId_expectedFoundGroupsFromDB() {
-        when(groupDao.findGroupsNotRelateToTeacher(1)).thenReturn(groupEntitiesWithId);
+        when(groupRepository.findGroupsNotRelateToTeacher(1)).thenReturn(groupEntitiesWithId);
         when(mapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
         when(mapper.toResponse(GROUP_ENTITY_WITH_ID_2)).thenReturn(GROUP_RESPONSE_WITH_ID_2);
 
         List<GroupResponse> foundGroups = groupService.findGroupsNotRelateToTeacher(1);
 
         assertEquals(groupResponses, foundGroups);
-        verify(groupDao, times(1)).findGroupsNotRelateToTeacher(1);
+        verify(groupRepository, times(1)).findGroupsNotRelateToTeacher(1);
         verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
         verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_2);
     }
 
     @Test
     void edit_inputGroupRequest_expectedNothing() {
-        final Group GROUP_ENTITY_FOR_UPDATE_1 = Group.builder().withId(1).withName("update1").build();
+        final Group GROUP_ENTITY_FOR_UPDATE_1 = Group.builder()
+                .withId(1)
+                .withName("update1")
+                .withFaculty(Faculty.builder().withId(1).build())
+                .withEducationForm(EducationForm.builder().withId(1).build())
+                .withHeadStudent(Student.builder().withId(1).build())
+                .build();
         final GroupRequest GROUP_REQUEST_FOR_UPDATE_1 = new GroupRequest();
         GROUP_REQUEST_FOR_UPDATE_1.setId(1);
         GROUP_REQUEST_FOR_UPDATE_1.setName("update1");
 
 
-        doNothing().when(groupDao).update(GROUP_ENTITY_FOR_UPDATE_1);
+        doNothing().when(groupRepository).update(GROUP_ENTITY_FOR_UPDATE_1.getId(), GROUP_ENTITY_FOR_UPDATE_1.getName(),
+                1, 1, 1);
         when(mapper.toEntity(GROUP_REQUEST_FOR_UPDATE_1)).thenReturn(GROUP_ENTITY_FOR_UPDATE_1);
 
         groupService.edit(GROUP_REQUEST_FOR_UPDATE_1);
 
         verify(mapper, times(1)).toEntity(GROUP_REQUEST_FOR_UPDATE_1);
-        verify(groupDao, times(1)).update(GROUP_ENTITY_FOR_UPDATE_1);
+        verify(groupRepository, times(1)).update(GROUP_ENTITY_FOR_UPDATE_1.getId(),
+                GROUP_ENTITY_FOR_UPDATE_1.getName(), 1, 1, 1);
     }
 
     @Test
@@ -241,13 +257,11 @@ class GroupServiceImplTest {
         when(mapper.toEntity(GROUP_REQUEST_FOR_UPDATE_1)).thenReturn(GROUP_ENTITY_FOR_UPDATE_1);
         when(mapper.toEntity(GROUP_REQUEST_FOR_UPDATE_2)).thenReturn(GROUP_ENTITY_FOR_UPDATE_2);
 
-        doNothing().when(groupDao).updateAll(listForUpdate);
-
         groupService.editAll(inputList);
 
         verify(mapper, times(1)).toEntity(GROUP_REQUEST_FOR_UPDATE_1);
         verify(mapper, times(1)).toEntity(GROUP_REQUEST_FOR_UPDATE_2);
-        verify(groupDao, times(1)).updateAll(listForUpdate);
+        verify(groupRepository, times(1)).saveAll(listForUpdate);
         verify(validator, times(1)).validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_1);
         verify(validator, times(1)).validateNameNotNullOrEmpty(GROUP_REQUEST_FOR_UPDATE_2);
         verify(validator, times(1))
@@ -258,36 +272,36 @@ class GroupServiceImplTest {
     void deleteById_inputGroupId_expectedSuccessDelete() {
         int id = 1;
 
-        when(groupDao.findById(id)).thenReturn(Optional.of(GROUP_ENTITY_1));
-        doNothing().when(lessonDao).unbindLessonsFromGroup(id);
-        doNothing().when(studentDao).unbindStudentsFromGroup(id);
-        doNothing().when(teacherDao).unbindTeachersFromGroup(id);
-        when(groupDao.deleteById(id)).thenReturn(true);
+        when(groupRepository.findById(id)).thenReturn(Optional.of(GROUP_ENTITY_1));
+        doNothing().when(lessonRepository).unbindLessonsFromGroup(id);
+        doNothing().when(studentRepository).unbindStudentsFromGroup(id);
+        doNothing().when(teacherRepository).unbindTeachersFromGroup(id);
+        doNothing().when(groupRepository).deleteById(id);
 
         boolean result = groupService.deleteById(1);
 
         assertTrue(result);
-        verify(groupDao, times(1)).findById(id);
-        verify(groupDao, times(1)).deleteById(id);
-        verify(lessonDao, times(1)).unbindLessonsFromGroup(id);
-        verify(studentDao, times(1)).unbindStudentsFromGroup(id);
-        verify(teacherDao, times(1)).unbindTeachersFromGroup(id);
+        verify(groupRepository, times(1)).findById(id);
+        verify(groupRepository, times(1)).deleteById(id);
+        verify(lessonRepository, times(1)).unbindLessonsFromGroup(id);
+        verify(studentRepository, times(1)).unbindStudentsFromGroup(id);
+        verify(teacherRepository, times(1)).unbindTeachersFromGroup(id);
     }
 
     @Test
     void deleteById_inputGroupId_expectedFalseUnsuccessfulDelete() {
         int id = 1;
 
-        when(groupDao.findById(id)).thenReturn(Optional.empty());
+        when(groupRepository.findById(id)).thenReturn(Optional.empty());
 
         boolean result = groupService.deleteById(1);
 
         assertFalse(result);
-        verify(groupDao, times(1)).findById(id);
-        verifyNoInteractions(lessonDao);
-        verifyNoInteractions(studentDao);
-        verifyNoInteractions(teacherDao);
-        verify(groupDao, times(0)).deleteById(id);
+        verify(groupRepository, times(1)).findById(id);
+        verifyNoInteractions(lessonRepository);
+        verifyNoInteractions(studentRepository);
+        verifyNoInteractions(teacherRepository);
+        verify(groupRepository, times(0)).deleteById(id);
     }
 
     @Test
@@ -296,29 +310,29 @@ class GroupServiceImplTest {
         ids.add(1);
         ids.add(2);
 
-        doNothing().when(lessonDao).unbindLessonsFromGroup(1);
-        doNothing().when(studentDao).unbindStudentsFromGroup(1);
-        doNothing().when(teacherDao).unbindTeachersFromGroup(1);
-        doNothing().when(lessonDao).unbindLessonsFromGroup(2);
-        doNothing().when(studentDao).unbindStudentsFromGroup(2);
-        doNothing().when(teacherDao).unbindTeachersFromGroup(2);
-        when(groupDao.deleteByIds(ids)).thenReturn(true);
+        doNothing().when(lessonRepository).unbindLessonsFromGroup(1);
+        doNothing().when(studentRepository).unbindStudentsFromGroup(1);
+        doNothing().when(teacherRepository).unbindTeachersFromGroup(1);
+        doNothing().when(lessonRepository).unbindLessonsFromGroup(2);
+        doNothing().when(studentRepository).unbindStudentsFromGroup(2);
+        doNothing().when(teacherRepository).unbindTeachersFromGroup(2);
+        doNothing().when(groupRepository).deleteAllByIdInBatch(ids);
 
         boolean result = groupService.deleteByIds(ids);
 
         assertTrue(result);
-        verify(groupDao, times(1)).deleteByIds(ids);
-        verify(lessonDao, times(1)).unbindLessonsFromGroup(1);
-        verify(studentDao, times(1)).unbindStudentsFromGroup(1);
-        verify(teacherDao, times(1)).unbindTeachersFromGroup(1);
-        verify(lessonDao, times(1)).unbindLessonsFromGroup(2);
-        verify(studentDao, times(1)).unbindStudentsFromGroup(2);
-        verify(teacherDao, times(1)).unbindTeachersFromGroup(2);
+        verify(groupRepository, times(1)).deleteAllByIdInBatch(ids);
+        verify(lessonRepository, times(1)).unbindLessonsFromGroup(1);
+        verify(studentRepository, times(1)).unbindStudentsFromGroup(1);
+        verify(teacherRepository, times(1)).unbindTeachersFromGroup(1);
+        verify(lessonRepository, times(1)).unbindLessonsFromGroup(2);
+        verify(studentRepository, times(1)).unbindStudentsFromGroup(2);
+        verify(teacherRepository, times(1)).unbindTeachersFromGroup(2);
     }
 
     @Test
     void findGroupsRelateToTeacher_inputTeacherId_expectedGroupList() {
-        when(groupDao.findGroupsRelateToTeacher(1)).thenReturn(groupEntitiesWithId);
+        when(groupRepository.findGroupByTeachersId(1)).thenReturn(groupEntitiesWithId);
         when(mapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
         when(mapper.toResponse(GROUP_ENTITY_WITH_ID_2)).thenReturn(GROUP_RESPONSE_WITH_ID_2);
 
@@ -327,7 +341,7 @@ class GroupServiceImplTest {
         assertEquals(groupResponses, foundGroups);
         verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
         verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_2);
-        verify(groupDao, times(1)).findGroupsRelateToTeacher(1);
+        verify(groupRepository, times(1)).findGroupByTeachersId(1);
     }
 
     @Test
@@ -350,14 +364,14 @@ class GroupServiceImplTest {
         final List<GroupResponse> expected = new ArrayList<>();
         expected.add(GROUP_RESPONSE_WITH_ID_1);
 
-        when(groupDao.findAll()).thenReturn(groups);
+        when(groupRepository.findAll()).thenReturn(groups);
         when(mapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
 
         List<GroupResponse> foundGroups = groupService.findGroupsRelateToFaculty(1);
 
         assertEquals(expected, foundGroups);
         verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
-        verify(groupDao, times(1)).findAll();
+        verify(groupRepository, times(1)).findAll();
     }
 
     @Test
@@ -380,25 +394,25 @@ class GroupServiceImplTest {
         final List<GroupResponse> expected = new ArrayList<>();
         expected.add(GROUP_RESPONSE_WITH_ID_1);
 
-        when(groupDao.findAll()).thenReturn(groups);
+        when(groupRepository.findAll()).thenReturn(groups);
         when(mapper.toResponse(GROUP_ENTITY_WITH_ID_1)).thenReturn(GROUP_RESPONSE_WITH_ID_1);
 
         List<GroupResponse> foundGroups = groupService.findGroupsRelateToEducationForm(1);
 
         assertEquals(expected, foundGroups);
         verify(mapper, times(1)).toResponse(GROUP_ENTITY_WITH_ID_1);
-        verify(groupDao, times(1)).findAll();
+        verify(groupRepository, times(1)).findAll();
     }
 
     @Test
     void lastPageNumber_inputNothing_expectedLastPageNumber() {
-        when(groupDao.count()).thenReturn(5L);
+        when(groupRepository.count()).thenReturn(5L);
 
         int expected = (int) Math.ceil(5.0 / AbstractPageableService.ITEMS_PER_PAGE);
 
         assertEquals(expected, groupService.lastPageNumber());
 
-        verify(groupDao, times(1)).count();
+        verify(groupRepository, times(1)).count();
     }
 
 }

@@ -1,7 +1,7 @@
 package com.mikhail.tarasevich.university.service.validator.impl;
 
-import com.mikhail.tarasevich.university.dao.CourseDao;
 import com.mikhail.tarasevich.university.dto.CourseRequest;
+import com.mikhail.tarasevich.university.repository.CourseRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.validator.CourseValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class CourseValidatorImpl implements CourseValidator {
 
-    private final CourseDao dao;
+    private final CourseRepository dao;
 
     @Autowired
-    public CourseValidatorImpl(CourseDao dao) {
+    public CourseValidatorImpl(CourseRepository dao) {
         this.dao = dao;
     }
 

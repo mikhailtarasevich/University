@@ -1,7 +1,7 @@
 package com.mikhail.tarasevich.university.service.validator.impl;
 
-import com.mikhail.tarasevich.university.dao.DepartmentDao;
 import com.mikhail.tarasevich.university.dto.DepartmentRequest;
+import com.mikhail.tarasevich.university.repository.DepartmentRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.validator.DepartmentValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class DepartmentValidatorImpl implements DepartmentValidator {
 
-    private final DepartmentDao dao;
+    private final DepartmentRepository dao;
 
     @Autowired
-    public DepartmentValidatorImpl(DepartmentDao dao) {
+    public DepartmentValidatorImpl(DepartmentRepository dao) {
         this.dao = dao;
     }
 

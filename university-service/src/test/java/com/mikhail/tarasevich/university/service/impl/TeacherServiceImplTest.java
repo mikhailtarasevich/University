@@ -1,10 +1,15 @@
 package com.mikhail.tarasevich.university.service.impl;
 
-import com.mikhail.tarasevich.university.dao.*;
 import com.mikhail.tarasevich.university.dto.TeacherRequest;
 import com.mikhail.tarasevich.university.dto.TeacherResponse;
+import com.mikhail.tarasevich.university.entity.Gender;
 import com.mikhail.tarasevich.university.entity.Teacher;
 import com.mikhail.tarasevich.university.entity.TeacherTitle;
+import com.mikhail.tarasevich.university.repository.CourseRepository;
+import com.mikhail.tarasevich.university.repository.GroupRepository;
+import com.mikhail.tarasevich.university.repository.LessonRepository;
+import com.mikhail.tarasevich.university.repository.RoleRepository;
+import com.mikhail.tarasevich.university.repository.TeacherRepository;
 import com.mikhail.tarasevich.university.service.exception.EmailAlreadyExistsException;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.exception.ObjectWithSpecifiedIdNotFoundException;
@@ -15,6 +20,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.*;
@@ -29,15 +38,15 @@ class TeacherServiceImplTest {
     @InjectMocks
     TeacherServiceImpl teacherService;
     @Mock
-    TeacherDao teacherDao;
+    TeacherRepository teacherRepository;
     @Mock
-    LessonDao lessonDao;
+    LessonRepository lessonRepository;
     @Mock
-    CourseDao courseDao;
+    CourseRepository courseRepository;
     @Mock
-    GroupDao groupDao;
+    GroupRepository groupRepository;
     @Mock
-    RoleDao roleDao;
+    RoleRepository roleRepository;
     @Mock
     PasswordEncoder passwordEncoder;
     @Mock
@@ -117,29 +126,29 @@ class TeacherServiceImplTest {
     @Test
     void register_inputTeacherRequest_expectedTeacherResponseWithId() {
         when(mapper.toEntity(TEACHER_REQUEST_1)).thenReturn(TEACHER_ENTITY_1);
-        when(teacherDao.save(TEACHER_ENTITY_1)).thenReturn(TEACHER_ENTITY_WITH_ID_1);
+        when(teacherRepository.save(TEACHER_ENTITY_1)).thenReturn(TEACHER_ENTITY_WITH_ID_1);
         when(mapper.toResponse(TEACHER_ENTITY_WITH_ID_1)).thenReturn(TEACHER_RESPONSE_WITH_ID_1);
         doNothing().when(validator).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_1);
-        doNothing().when(roleDao).addRoleForUser(1, 2);
+        doNothing().when(roleRepository).addRoleForUser(1, 2);
 
         TeacherResponse teacherResponse = teacherService.register(TEACHER_REQUEST_1);
 
         assertEquals(TEACHER_RESPONSE_WITH_ID_1, teacherResponse);
         verify(mapper, times(1)).toEntity(TEACHER_REQUEST_1);
-        verify(teacherDao, times(1)).save(TEACHER_ENTITY_1);
+        verify(teacherRepository, times(1)).save(TEACHER_ENTITY_1);
         verify(mapper, times(1)).toResponse(TEACHER_ENTITY_WITH_ID_1);
         verify(validator, times(1)).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_1);
-        verify(roleDao, times(1)).addRoleForUser(1, 2);
+        verify(roleRepository, times(1)).addRoleForUser(1, 2);
     }
 
     @Test
     void register_inputTeacherRequestWithExistingEmailInDB_expectedException() {
-        when(teacherDao.findByName(TEACHER_REQUEST_1.getEmail())).thenReturn(Optional.of(Teacher.builder().build()));
+        when(teacherRepository.findByEmail(TEACHER_REQUEST_1.getEmail())).thenReturn(Optional.of(Teacher.builder().build()));
 
         assertThrows(EmailAlreadyExistsException.class, () -> teacherService.register(TEACHER_REQUEST_1));
 
         verify(mapper, times(0)).toEntity(TEACHER_REQUEST_1);
-        verify(teacherDao, times(0)).save(TEACHER_ENTITY_1);
+        verify(teacherRepository, times(0)).save(TEACHER_ENTITY_1);
         verify(mapper, times(0)).toResponse(TEACHER_ENTITY_WITH_ID_1);
         verify(validator, times(0)).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_1);
     }
@@ -160,13 +169,12 @@ class TeacherServiceImplTest {
         listForRegister.add(TeacherWithExistingEmail);
         listForRegister.add(TeacherWithInvalidLastName);
 
-        when(teacherDao.findByName(TEACHER_REQUEST_1.getEmail())).thenReturn(Optional.empty());
-        when(teacherDao.findByName(TEACHER_REQUEST_2.getEmail())).thenReturn(Optional.empty());
-        when(teacherDao.findByName(TeacherWithInvalidLastName.getEmail())).thenReturn(Optional.empty());
-        when(teacherDao.findByName(TeacherWithExistingEmail.getEmail())).thenReturn(Optional.of(Teacher.builder().build()));
+        when(teacherRepository.findByEmail(TEACHER_REQUEST_1.getEmail())).thenReturn(Optional.empty());
+        when(teacherRepository.findByEmail(TEACHER_REQUEST_2.getEmail())).thenReturn(Optional.empty());
+        when(teacherRepository.findByEmail(TeacherWithInvalidLastName.getEmail())).thenReturn(Optional.empty());
+        when(teacherRepository.findByEmail(TeacherWithExistingEmail.getEmail())).thenReturn(Optional.of(Teacher.builder().build()));
         when(mapper.toEntity(TEACHER_REQUEST_1)).thenReturn(TEACHER_ENTITY_1);
         when(mapper.toEntity(TEACHER_REQUEST_2)).thenReturn(TEACHER_ENTITY_2);
-        doNothing().when(teacherDao).saveAll(teacherEntities);
         doNothing().when(validator).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_1);
         doNothing().when(validator).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_2);
         doThrow(IncorrectRequestDataException.class).when(validator).validateUserNameNotNullOrEmpty(TeacherWithInvalidLastName);
@@ -175,7 +183,7 @@ class TeacherServiceImplTest {
 
         verify(mapper, times(1)).toEntity(TEACHER_REQUEST_1);
         verify(mapper, times(1)).toEntity(TEACHER_REQUEST_2);
-        verify(teacherDao, times(1)).saveAll(teacherEntities);
+        verify(teacherRepository, times(1)).saveAll(teacherEntities);
         verify(validator, times(1)).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_1);
         verify(validator, times(1)).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_2);
         verify(validator, times(1)).validateUserNameNotNullOrEmpty(TeacherWithInvalidLastName);
@@ -184,52 +192,56 @@ class TeacherServiceImplTest {
 
     @Test
     void findById_inputIntId_expectedFoundTeacher() {
-        when(teacherDao.findById(1)).thenReturn(Optional.of(TEACHER_ENTITY_WITH_ID_1));
+        when(teacherRepository.findById(1)).thenReturn(Optional.of(TEACHER_ENTITY_WITH_ID_1));
         when(mapper.toResponse(TEACHER_ENTITY_WITH_ID_1)).thenReturn(TEACHER_RESPONSE_WITH_ID_1);
 
         TeacherResponse TeacherResponse = teacherService.findById(1);
 
         assertEquals(TEACHER_RESPONSE_WITH_ID_1, TeacherResponse);
         verify(mapper, times(1)).toResponse(TEACHER_ENTITY_WITH_ID_1);
-        verify(teacherDao, times(1)).findById(1);
+        verify(teacherRepository, times(1)).findById(1);
     }
 
     @Test
     void findById_inputNonExistentId_expectedException() {
-        when(teacherDao.findById(100)).thenReturn(Optional.empty());
+        when(teacherRepository.findById(100)).thenReturn(Optional.empty());
 
         assertThrows(ObjectWithSpecifiedIdNotFoundException.class, () -> teacherService.findById(100));
 
-        verify(teacherDao, times(1)).findById(100);
+        verify(teacherRepository, times(1)).findById(100);
         verifyNoInteractions(mapper);
     }
 
     @Test
     void findAll_inputNothing_expectedFoundAllStudents() {
-        when(teacherDao.findAll()).thenReturn(teacherEntitiesWithId);
+        when(teacherRepository.findAll()).thenReturn(teacherEntitiesWithId);
         when(mapper.toResponse(TEACHER_ENTITY_WITH_ID_1)).thenReturn(TEACHER_RESPONSE_WITH_ID_1);
         when(mapper.toResponse(TEACHER_ENTITY_WITH_ID_2)).thenReturn(TEACHER_RESPONSE_WITH_ID_2);
 
         List<TeacherResponse> foundTeachers = teacherService.findAll();
 
         assertEquals(teacherResponses, foundTeachers);
-        verify(teacherDao, times(1)).findAll();
+        verify(teacherRepository, times(1)).findAll();
         verify(mapper, times(1)).toResponse(TEACHER_ENTITY_WITH_ID_1);
         verify(mapper, times(1)).toResponse(TEACHER_ENTITY_WITH_ID_2);
     }
 
     @Test
     void findAll_inputPageOne_expectedFoundTeachersFromPageOne() {
-        when(teacherDao.findAll(1, AbstractPageableService.ITEMS_PER_PAGE)).thenReturn(teacherEntitiesWithId);
-        when(teacherDao.count()).thenReturn(2L);
+        Page<Teacher> pageOfTeacherEntitiesWithId = new PageImpl<>(teacherEntitiesWithId);
+
+        when(teacherRepository
+                .findAll(PageRequest.of(0, AbstractPageableService.ITEMS_PER_PAGE, Sort.by("id"))))
+                .thenReturn(pageOfTeacherEntitiesWithId);
+        when(teacherRepository.count()).thenReturn(2L);
         when(mapper.toResponse(TEACHER_ENTITY_WITH_ID_1)).thenReturn(TEACHER_RESPONSE_WITH_ID_1);
         when(mapper.toResponse(TEACHER_ENTITY_WITH_ID_2)).thenReturn(TEACHER_RESPONSE_WITH_ID_2);
 
         List<TeacherResponse> foundTeachers = teacherService.findAll("1");
 
         assertEquals(teacherResponses, foundTeachers);
-        verify(teacherDao, times(1)).findAll(1, AbstractPageableService.ITEMS_PER_PAGE);
-        verify(teacherDao, times(1)).count();
+        verify(teacherRepository, times(1)).findAll(PageRequest.of(0, AbstractPageableService.ITEMS_PER_PAGE, Sort.by("id")));
+        verify(teacherRepository, times(1)).count();
         verify(mapper, times(1)).toResponse(TEACHER_ENTITY_WITH_ID_1);
         verify(mapper, times(1)).toResponse(TEACHER_ENTITY_WITH_ID_2);
     }
@@ -241,16 +253,17 @@ class TeacherServiceImplTest {
                         .withId(1)
                         .withFirstName("update1")
                         .withLastName("update1")
+                        .withGender(Gender.MALE)
                         .withEmail("update1@email.com")
                         .build();
         final TeacherRequest TEACHER_REQUEST_FOR_UPDATE_1 = new TeacherRequest();
         TEACHER_REQUEST_FOR_UPDATE_1.setId(1);
         TEACHER_REQUEST_FOR_UPDATE_1.setFirstName("update1");
         TEACHER_REQUEST_FOR_UPDATE_1.setLastName("update1");
+        TEACHER_REQUEST_FOR_UPDATE_1.setGender(Gender.MALE);
         TEACHER_REQUEST_FOR_UPDATE_1.setEmail("update1@email.com");
         TEACHER_REQUEST_FOR_UPDATE_1.setPassword("0000");
 
-        doNothing().when(teacherDao).update(TEACHER_ENTITY_FOR_UPDATE_1);
         when(mapper.toEntity(TEACHER_REQUEST_FOR_UPDATE_1)).thenReturn(TEACHER_ENTITY_FOR_UPDATE_1);
 
         teacherService.edit(TEACHER_REQUEST_FOR_UPDATE_1);
@@ -259,7 +272,7 @@ class TeacherServiceImplTest {
         verify(validator, times(1)).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_FOR_UPDATE_1);
         verify(validator, times(1)).validateEmail(TEACHER_REQUEST_FOR_UPDATE_1);
         verify(validator, times(1)).validatePassword(TEACHER_REQUEST_FOR_UPDATE_1);
-        verify(teacherDao, times(1)).update(TEACHER_ENTITY_FOR_UPDATE_1);
+        verify(teacherRepository, times(1)).save(TEACHER_ENTITY_FOR_UPDATE_1);
     }
 
     @Test
@@ -269,16 +282,20 @@ class TeacherServiceImplTest {
                         .withId(1)
                         .withFirstName("update1")
                         .withLastName("update1")
+                        .withGender(Gender.MALE)
                         .withEmail("update1@email.com")
                         .build();
         final TeacherRequest TEACHER_REQUEST_FOR_UPDATE_1 = new TeacherRequest();
         TEACHER_REQUEST_FOR_UPDATE_1.setId(1);
         TEACHER_REQUEST_FOR_UPDATE_1.setFirstName("update1");
         TEACHER_REQUEST_FOR_UPDATE_1.setLastName("update1");
+        TEACHER_REQUEST_FOR_UPDATE_1.setGender(Gender.MALE);
         TEACHER_REQUEST_FOR_UPDATE_1.setEmail("update1@email.com");
         TEACHER_REQUEST_FOR_UPDATE_1.setPassword("0000");
 
-        doNothing().when(teacherDao).updateGeneralUserInfo(TEACHER_ENTITY_FOR_UPDATE_1);
+        doNothing().when(teacherRepository).updateGeneralInfo(TEACHER_ENTITY_FOR_UPDATE_1.getId(),
+                TEACHER_ENTITY_FOR_UPDATE_1.getFirstName(), TEACHER_ENTITY_FOR_UPDATE_1.getLastName(),
+                TEACHER_ENTITY_FOR_UPDATE_1.getGender(), TEACHER_ENTITY_FOR_UPDATE_1.getEmail());
         when(mapper.toEntity(TEACHER_REQUEST_FOR_UPDATE_1)).thenReturn(TEACHER_ENTITY_FOR_UPDATE_1);
 
         teacherService.editGeneralUserInfo(TEACHER_REQUEST_FOR_UPDATE_1);
@@ -286,7 +303,9 @@ class TeacherServiceImplTest {
         verify(mapper, times(1)).toEntity(TEACHER_REQUEST_FOR_UPDATE_1);
         verify(validator, times(1)).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_FOR_UPDATE_1);
         verify(validator, times(1)).validateEmail(TEACHER_REQUEST_FOR_UPDATE_1);
-        verify(teacherDao, times(1)).updateGeneralUserInfo(TEACHER_ENTITY_FOR_UPDATE_1);
+        verify(teacherRepository, times(1)).updateGeneralInfo(TEACHER_ENTITY_FOR_UPDATE_1.getId(),
+                TEACHER_ENTITY_FOR_UPDATE_1.getFirstName(), TEACHER_ENTITY_FOR_UPDATE_1.getLastName(),
+                TEACHER_ENTITY_FOR_UPDATE_1.getGender(), TEACHER_ENTITY_FOR_UPDATE_1.getEmail());
     }
 
     @Test
@@ -297,11 +316,11 @@ class TeacherServiceImplTest {
         TEACHER_REQUEST_FOR_UPDATE_1.setConfirmPassword("0000");
 
         when(passwordEncoder.encode("0000")).thenReturn("asdferergergefsv1234");
-        doNothing().when(teacherDao).updateUserPassword(1, "asdferergergefsv1234");
+        doNothing().when(teacherRepository).updateUserPassword(1, "asdferergergefsv1234");
 
         teacherService.editPassword(TEACHER_REQUEST_FOR_UPDATE_1);
 
-        verify(teacherDao, times(1)).updateUserPassword(1, "asdferergergefsv1234");
+        verify(teacherRepository, times(1)).updateUserPassword(1, "asdferergergefsv1234");
         verify(passwordEncoder, times(1)).encode("0000");
     }
 
@@ -359,13 +378,11 @@ class TeacherServiceImplTest {
         when(mapper.toEntity(TEACHER_REQUEST_FOR_UPDATE_1)).thenReturn(TEACHER_ENTITY_FOR_UPDATE_1);
         when(mapper.toEntity(TEACHER_REQUEST_FOR_UPDATE_2)).thenReturn(TEACHER_ENTITY_FOR_UPDATE_2);
 
-        doNothing().when(teacherDao).updateAll(listForUpdate);
-
         teacherService.editAll(inputList);
 
         verify(mapper, times(1)).toEntity(TEACHER_REQUEST_FOR_UPDATE_1);
         verify(mapper, times(1)).toEntity(TEACHER_REQUEST_FOR_UPDATE_2);
-        verify(teacherDao, times(1)).updateAll(listForUpdate);
+        verify(teacherRepository, times(1)).saveAll(listForUpdate);
         verify(validator, times(1)).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_FOR_UPDATE_1);
         verify(validator, times(1)).validateUserNameNotNullOrEmpty(TEACHER_REQUEST_FOR_UPDATE_2);
         verify(validator, times(1))
@@ -376,38 +393,38 @@ class TeacherServiceImplTest {
     void deleteById_inputTeacherId_expectedSuccessDelete() {
         int id = 1;
 
-        when(teacherDao.findById(id)).thenReturn(Optional.of(TEACHER_ENTITY_1));
-        doNothing().when(groupDao).unbindGroupsFromTeacher(id);
-        doNothing().when(lessonDao).unbindLessonsFromTeacher(id);
-        doNothing().when(courseDao).unbindCoursesFromTeacher(id);
-        doNothing().when(roleDao).unbindRoleFromUser(id);
-        when(teacherDao.deleteById(id)).thenReturn(true);
+        when(teacherRepository.findById(id)).thenReturn(Optional.of(TEACHER_ENTITY_1));
+        doNothing().when(groupRepository).unbindGroupsFromTeacher(id);
+        doNothing().when(lessonRepository).unbindLessonsFromTeacher(id);
+        doNothing().when(courseRepository).unbindCoursesFromTeacher(id);
+        doNothing().when(roleRepository).unbindRoleFromUser(id);
+        doNothing().when(teacherRepository).deleteById(id);
 
         boolean result = teacherService.deleteById(1);
 
         assertTrue(result);
-        verify(teacherDao, times(1)).findById(id);
-        verify(teacherDao, times(1)).deleteById(id);
-        verify(groupDao, times(1)).unbindGroupsFromTeacher(id);
-        verify(lessonDao, times(1)).unbindLessonsFromTeacher(id);
-        verify(courseDao, times(1)).unbindCoursesFromTeacher(id);
-        verify(roleDao, times(1)).unbindRoleFromUser(id);
+        verify(teacherRepository, times(1)).findById(id);
+        verify(teacherRepository, times(1)).deleteById(id);
+        verify(groupRepository, times(1)).unbindGroupsFromTeacher(id);
+        verify(lessonRepository, times(1)).unbindLessonsFromTeacher(id);
+        verify(courseRepository, times(1)).unbindCoursesFromTeacher(id);
+        verify(roleRepository, times(1)).unbindRoleFromUser(id);
     }
 
     @Test
     void deleteById_inputTeacherId_expectedFalseUnsuccessfulDelete() {
         int id = 1;
 
-        when(teacherDao.findById(id)).thenReturn(Optional.empty());
+        when(teacherRepository.findById(id)).thenReturn(Optional.empty());
 
         boolean result = teacherService.deleteById(1);
 
         assertFalse(result);
-        verify(teacherDao, times(1)).findById(id);
-        verifyNoInteractions(groupDao);
-        verifyNoInteractions(lessonDao);
-        verifyNoInteractions(courseDao);
-        verify(teacherDao, times(0)).deleteById(id);
+        verify(teacherRepository, times(1)).findById(id);
+        verifyNoInteractions(groupRepository);
+        verifyNoInteractions(lessonRepository);
+        verifyNoInteractions(courseRepository);
+        verify(teacherRepository, times(0)).deleteById(id);
     }
 
     @Test
@@ -416,98 +433,69 @@ class TeacherServiceImplTest {
         ids.add(1);
         ids.add(2);
 
-        doNothing().when(groupDao).unbindGroupsFromTeacher(1);
-        doNothing().when(lessonDao).unbindLessonsFromTeacher(1);
-        doNothing().when(courseDao).unbindCoursesFromTeacher(1);
-        doNothing().when(roleDao).unbindRoleFromUser(1);
-        doNothing().when(groupDao).unbindGroupsFromTeacher(2);
-        doNothing().when(lessonDao).unbindLessonsFromTeacher(2);
-        doNothing().when(courseDao).unbindCoursesFromTeacher(2);
-        doNothing().when(roleDao).unbindRoleFromUser(2);
-        when(teacherDao.deleteByIds(ids)).thenReturn(true);
+        doNothing().when(groupRepository).unbindGroupsFromTeacher(1);
+        doNothing().when(lessonRepository).unbindLessonsFromTeacher(1);
+        doNothing().when(courseRepository).unbindCoursesFromTeacher(1);
+        doNothing().when(roleRepository).unbindRoleFromUser(1);
+        doNothing().when(groupRepository).unbindGroupsFromTeacher(2);
+        doNothing().when(lessonRepository).unbindLessonsFromTeacher(2);
+        doNothing().when(courseRepository).unbindCoursesFromTeacher(2);
+        doNothing().when(roleRepository).unbindRoleFromUser(2);
+        doNothing().when(teacherRepository).deleteAllByIdInBatch(ids);
 
         boolean result = teacherService.deleteByIds(ids);
 
         assertTrue(result);
-        verify(teacherDao, times(1)).deleteByIds(ids);
-        verify(groupDao, times(1)).unbindGroupsFromTeacher(1);
-        verify(lessonDao, times(1)).unbindLessonsFromTeacher(1);
-        verify(courseDao, times(1)).unbindCoursesFromTeacher(1);
-        verify(roleDao, times(1)).unbindRoleFromUser(1);
-        verify(groupDao, times(1)).unbindGroupsFromTeacher(2);
-        verify(lessonDao, times(1)).unbindLessonsFromTeacher(2);
-        verify(courseDao, times(1)).unbindCoursesFromTeacher(2);
-        verify(roleDao, times(1)).unbindRoleFromUser(2);
-    }
-
-    @Test
-    void deleteByIds_inputTeachersIds_expectedUnsuccessfulDeletes() {
-        Set<Integer> ids = new HashSet<>();
-        ids.add(1);
-        ids.add(2);
-
-        doNothing().when(groupDao).unbindGroupsFromTeacher(1);
-        doNothing().when(lessonDao).unbindLessonsFromTeacher(1);
-        doNothing().when(courseDao).unbindCoursesFromTeacher(1);
-        doNothing().when(roleDao).unbindRoleFromUser(1);
-        doNothing().when(groupDao).unbindGroupsFromTeacher(2);
-        doNothing().when(lessonDao).unbindLessonsFromTeacher(2);
-        doNothing().when(courseDao).unbindCoursesFromTeacher(2);
-        doNothing().when(roleDao).unbindRoleFromUser(2);
-        when(teacherDao.deleteByIds(ids)).thenReturn(false);
-
-        boolean result = teacherService.deleteByIds(ids);
-
-        assertFalse(result);
-        verify(groupDao, times(1)).unbindGroupsFromTeacher(1);
-        verify(lessonDao, times(1)).unbindLessonsFromTeacher(1);
-        verify(courseDao, times(1)).unbindCoursesFromTeacher(1);
-        verify(roleDao, times(1)).unbindRoleFromUser(1);
-        verify(groupDao, times(1)).unbindGroupsFromTeacher(2);
-        verify(lessonDao, times(1)).unbindLessonsFromTeacher(2);
-        verify(courseDao, times(1)).unbindCoursesFromTeacher(2);
-        verify(roleDao, times(1)).unbindRoleFromUser(2);
+        verify(teacherRepository, times(1)).deleteAllByIdInBatch(ids);
+        verify(groupRepository, times(1)).unbindGroupsFromTeacher(1);
+        verify(lessonRepository, times(1)).unbindLessonsFromTeacher(1);
+        verify(courseRepository, times(1)).unbindCoursesFromTeacher(1);
+        verify(roleRepository, times(1)).unbindRoleFromUser(1);
+        verify(groupRepository, times(1)).unbindGroupsFromTeacher(2);
+        verify(lessonRepository, times(1)).unbindLessonsFromTeacher(2);
+        verify(courseRepository, times(1)).unbindCoursesFromTeacher(2);
+        verify(roleRepository, times(1)).unbindRoleFromUser(2);
     }
 
     @Test
     void subscribeUserToGroup_inputTeacherIdGroupId_expectedNothing() {
-        doNothing().when(teacherDao).addUserToGroup(1, 1);
+        doNothing().when(teacherRepository).addUserToGroup(1, 1);
 
         teacherService.subscribeUserToGroup(1, 1);
 
-        verify(teacherDao, times(1)).addUserToGroup(1, 1);
+        verify(teacherRepository, times(1)).addUserToGroup(1, 1);
     }
 
     @Test
     void subscribeTeacherToCourse_inputTeacherIdCourseId_expectedNothing() {
-        doNothing().when(teacherDao).addTeacherToCourse(1, 1);
+        doNothing().when(teacherRepository).addTeacherToCourse(1, 1);
 
         teacherService.subscribeTeacherToCourse(1, 1);
 
-        verify(teacherDao, times(1)).addTeacherToCourse(1, 1);
+        verify(teacherRepository, times(1)).addTeacherToCourse(1, 1);
     }
 
     @Test
     void unsubscribeTeacherFromCourse_inputTeacherIdCourseId_expectedNothing() {
-        doNothing().when(teacherDao).deleteTeacherFromCourse(1, 1);
+        doNothing().when(teacherRepository).deleteTeacherFromCourse(1, 1);
 
         teacherService.unsubscribeTeacherFromCourse(1, 1);
 
-        verify(teacherDao, times(1)).deleteTeacherFromCourse(1, 1);
+        verify(teacherRepository, times(1)).deleteTeacherFromCourse(1, 1);
     }
 
     @Test
     void findTeachersRelateToGroup_inputGroupId_expectedTeachersList() {
         int groupId = 1;
 
-        when(teacherDao.findTeachersRelateToGroup(groupId)).thenReturn(teacherEntitiesWithId);
+        when(teacherRepository.findTeachersByGroupsId(groupId)).thenReturn(teacherEntitiesWithId);
         when(mapper.toResponse(TEACHER_ENTITY_WITH_ID_1)).thenReturn(TEACHER_RESPONSE_WITH_ID_1);
         when(mapper.toResponse(TEACHER_ENTITY_WITH_ID_2)).thenReturn(TEACHER_RESPONSE_WITH_ID_2);
 
         List<TeacherResponse> foundTeachers = teacherService.findTeachersRelateToGroup(groupId);
 
         assertEquals(teacherResponses, foundTeachers);
-        verify(teacherDao, times(1)).findTeachersRelateToGroup(groupId);
+        verify(teacherRepository, times(1)).findTeachersByGroupsId(groupId);
         verify(mapper, times(1)).toResponse(TEACHER_ENTITY_WITH_ID_1);
         verify(mapper, times(1)).toResponse(TEACHER_ENTITY_WITH_ID_2);
     }
@@ -516,14 +504,14 @@ class TeacherServiceImplTest {
     void findTeachersRelateToCourse_inputCourseId_expectedTeachersList() {
         int courseId = 1;
 
-        when(teacherDao.findTeachersRelateToCourse(courseId)).thenReturn(teacherEntitiesWithId);
+        when(teacherRepository.findTeachersByCoursesId(courseId)).thenReturn(teacherEntitiesWithId);
         when(mapper.toResponse(TEACHER_ENTITY_WITH_ID_1)).thenReturn(TEACHER_RESPONSE_WITH_ID_1);
         when(mapper.toResponse(TEACHER_ENTITY_WITH_ID_2)).thenReturn(TEACHER_RESPONSE_WITH_ID_2);
 
         List<TeacherResponse> foundTeachers = teacherService.findTeachersRelateToCourse(courseId);
 
         assertEquals(teacherResponses, foundTeachers);
-        verify(teacherDao, times(1)).findTeachersRelateToCourse(courseId);
+        verify(teacherRepository, times(1)).findTeachersByCoursesId(courseId);
         verify(mapper, times(1)).toResponse(TEACHER_ENTITY_WITH_ID_1);
         verify(mapper, times(1)).toResponse(TEACHER_ENTITY_WITH_ID_2);
     }
@@ -532,27 +520,27 @@ class TeacherServiceImplTest {
     void findTeachersRelateToDepartment_inputDepartmentId_expectedTeachersList() {
         int departmentId = 1;
 
-        when(teacherDao.findTeachersRelateToDepartment(departmentId)).thenReturn(teacherEntitiesWithId);
+        when(teacherRepository.findTeachersByDepartmentId(departmentId)).thenReturn(teacherEntitiesWithId);
         when(mapper.toResponse(TEACHER_ENTITY_WITH_ID_1)).thenReturn(TEACHER_RESPONSE_WITH_ID_1);
         when(mapper.toResponse(TEACHER_ENTITY_WITH_ID_2)).thenReturn(TEACHER_RESPONSE_WITH_ID_2);
 
         List<TeacherResponse> foundTeachers = teacherService.findTeachersRelateToDepartment(departmentId);
 
         assertEquals(teacherResponses, foundTeachers);
-        verify(teacherDao, times(1)).findTeachersRelateToDepartment(departmentId);
+        verify(teacherRepository, times(1)).findTeachersByDepartmentId(departmentId);
         verify(mapper, times(1)).toResponse(TEACHER_ENTITY_WITH_ID_1);
         verify(mapper, times(1)).toResponse(TEACHER_ENTITY_WITH_ID_2);
     }
 
     @Test
     void lastPageNumber_inputNothing_expectedLastPageNumber() {
-        when(teacherDao.count()).thenReturn(5L);
+        when(teacherRepository.count()).thenReturn(5L);
 
         int expected = (int) Math.ceil(5.0 / AbstractPageableService.ITEMS_PER_PAGE);
 
         assertEquals(expected, teacherService.lastPageNumber());
 
-        verify(teacherDao, times(1)).count();
+        verify(teacherRepository, times(1)).count();
     }
 
     @Test
@@ -561,13 +549,13 @@ class TeacherServiceImplTest {
         final String correctPassword = "1111";
         final Teacher teacher = Teacher.builder().withEmail("email@mail.com").withPassword("1111").build();
 
-        when(teacherDao.findByName(email)).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findByEmail(email)).thenReturn(Optional.of(teacher));
         when(passwordEncoder.matches(correctPassword, teacher.getPassword())).thenReturn(true);
 
         assertTrue(teacherService.login(email, correctPassword));
 
         verify(passwordEncoder, times(1)).matches(correctPassword, teacher.getPassword());
-        verify(teacherDao, times(1)).findByName(email);
+        verify(teacherRepository, times(1)).findByEmail(email);
     }
 
     @Test
@@ -576,13 +564,13 @@ class TeacherServiceImplTest {
         final String nonCorrectPassword = "1111";
         final Teacher teacher = Teacher.builder().withEmail("email@mail.com").withPassword("1234").build();
 
-        when(teacherDao.findByName(email)).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findByEmail(email)).thenReturn(Optional.of(teacher));
         when(passwordEncoder.matches(nonCorrectPassword, teacher.getPassword())).thenReturn(false);
 
         assertFalse(teacherService.login(email, nonCorrectPassword));
 
         verify(passwordEncoder, times(1)).matches(nonCorrectPassword, teacher.getPassword());
-        verify(teacherDao, times(1)).findByName(email);
+        verify(teacherRepository, times(1)).findByEmail(email);
     }
 
     @Test
@@ -590,11 +578,11 @@ class TeacherServiceImplTest {
         final String email = "email@mail.com";
         final String correctPassword = "1111";
 
-        when(teacherDao.findByName(email)).thenReturn(Optional.empty());
+        when(teacherRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         assertFalse(teacherService.login(email, correctPassword));
 
-        verify(teacherDao, times(1)).findByName(email);
+        verify(teacherRepository, times(1)).findByEmail(email);
         verifyNoInteractions(passwordEncoder);
     }
 
@@ -603,13 +591,13 @@ class TeacherServiceImplTest {
         final int teacherId = 1;
         final int teacherTitleId = 1;
 
-        doNothing().when(teacherDao).changeTeacherTitle(teacherId, teacherTitleId);
+        doNothing().when(teacherRepository).changeTeacherTitle(teacherId, teacherTitleId);
 
         assertDoesNotThrow(() -> teacherService.changeTeacherTeacherTitle(teacherId, teacherTitleId));
 
-        verify(teacherDao, times(1)).changeTeacherTitle(teacherId, teacherTitleId);
-        verifyNoInteractions(lessonDao);
-        verifyNoInteractions(groupDao);
+        verify(teacherRepository, times(1)).changeTeacherTitle(teacherId, teacherTitleId);
+        verifyNoInteractions(lessonRepository);
+        verifyNoInteractions(groupRepository);
     }
 
     @Test
@@ -617,13 +605,13 @@ class TeacherServiceImplTest {
         final int teacherId = 1;
         final int departmentId = 1;
 
-        doNothing().when(teacherDao).changeDepartment(teacherId, departmentId);
+        doNothing().when(teacherRepository).changeDepartment(teacherId, departmentId);
 
         assertDoesNotThrow(() -> teacherService.changeTeacherDepartment(teacherId, departmentId));
 
-        verify(teacherDao, times(1)).changeDepartment(teacherId, departmentId);
-        verifyNoInteractions(lessonDao);
-        verifyNoInteractions(groupDao);
+        verify(teacherRepository, times(1)).changeDepartment(teacherId, departmentId);
+        verifyNoInteractions(lessonRepository);
+        verifyNoInteractions(groupRepository);
     }
 
     @Test
@@ -633,15 +621,15 @@ class TeacherServiceImplTest {
         groupIds.add(1);
         groupIds.add(2);
 
-        doNothing().when(teacherDao).addUserToGroup(teacherId, groupIds.get(0));
-        doNothing().when(teacherDao).addUserToGroup(teacherId, groupIds.get(1));
+        doNothing().when(teacherRepository).addUserToGroup(teacherId, groupIds.get(0));
+        doNothing().when(teacherRepository).addUserToGroup(teacherId, groupIds.get(1));
 
         assertDoesNotThrow(() -> teacherService.subscribeTeacherToGroups(teacherId, groupIds));
 
-        verify(teacherDao, times(1)).addUserToGroup(teacherId, groupIds.get(0));
-        verify(teacherDao, times(1)).addUserToGroup(teacherId, groupIds.get(1));
-        verifyNoInteractions(lessonDao);
-        verifyNoInteractions(groupDao);
+        verify(teacherRepository, times(1)).addUserToGroup(teacherId, groupIds.get(0));
+        verify(teacherRepository, times(1)).addUserToGroup(teacherId, groupIds.get(1));
+        verifyNoInteractions(lessonRepository);
+        verifyNoInteractions(groupRepository);
     }
 
     @Test
@@ -651,15 +639,15 @@ class TeacherServiceImplTest {
         groupIds.add(1);
         groupIds.add(2);
 
-        doNothing().when(teacherDao).deleteTeacherFromGroup(teacherId, groupIds.get(0));
-        doNothing().when(teacherDao).deleteTeacherFromGroup(teacherId, groupIds.get(1));
+        doNothing().when(teacherRepository).deleteTeacherFromGroup(teacherId, groupIds.get(0));
+        doNothing().when(teacherRepository).deleteTeacherFromGroup(teacherId, groupIds.get(1));
 
         assertDoesNotThrow(() -> teacherService.unsubscribeTeacherFromGroups(teacherId, groupIds));
 
-        verify(teacherDao, times(1)).deleteTeacherFromGroup(teacherId, groupIds.get(0));
-        verify(teacherDao, times(1)).deleteTeacherFromGroup(teacherId, groupIds.get(1));
-        verifyNoInteractions(lessonDao);
-        verifyNoInteractions(groupDao);
+        verify(teacherRepository, times(1)).deleteTeacherFromGroup(teacherId, groupIds.get(0));
+        verify(teacherRepository, times(1)).deleteTeacherFromGroup(teacherId, groupIds.get(1));
+        verifyNoInteractions(lessonRepository);
+        verifyNoInteractions(groupRepository);
     }
 
     @Test
@@ -669,15 +657,15 @@ class TeacherServiceImplTest {
         courseIds.add(1);
         courseIds.add(2);
 
-        doNothing().when(teacherDao).addTeacherToCourse(teacherId, courseIds.get(0));
-        doNothing().when(teacherDao).addTeacherToCourse(teacherId, courseIds.get(1));
+        doNothing().when(teacherRepository).addTeacherToCourse(teacherId, courseIds.get(0));
+        doNothing().when(teacherRepository).addTeacherToCourse(teacherId, courseIds.get(1));
 
         assertDoesNotThrow(() -> teacherService.subscribeTeacherToCourses(teacherId, courseIds));
 
-        verify(teacherDao, times(1)).addTeacherToCourse(teacherId, courseIds.get(0));
-        verify(teacherDao, times(1)).addTeacherToCourse(teacherId, courseIds.get(1));
-        verifyNoInteractions(lessonDao);
-        verifyNoInteractions(groupDao);
+        verify(teacherRepository, times(1)).addTeacherToCourse(teacherId, courseIds.get(0));
+        verify(teacherRepository, times(1)).addTeacherToCourse(teacherId, courseIds.get(1));
+        verifyNoInteractions(lessonRepository);
+        verifyNoInteractions(groupRepository);
     }
 
     @Test
@@ -687,15 +675,15 @@ class TeacherServiceImplTest {
         courseIds.add(1);
         courseIds.add(2);
 
-        doNothing().when(teacherDao).deleteTeacherFromCourse(teacherId, courseIds.get(0));
-        doNothing().when(teacherDao).deleteTeacherFromCourse(teacherId, courseIds.get(1));
+        doNothing().when(teacherRepository).deleteTeacherFromCourse(teacherId, courseIds.get(0));
+        doNothing().when(teacherRepository).deleteTeacherFromCourse(teacherId, courseIds.get(1));
 
         assertDoesNotThrow(() -> teacherService.unsubscribeTeacherFromCourses(teacherId, courseIds));
 
-        verify(teacherDao, times(1)).deleteTeacherFromCourse(teacherId, courseIds.get(0));
-        verify(teacherDao, times(1)).deleteTeacherFromCourse(teacherId, courseIds.get(1));
-        verifyNoInteractions(lessonDao);
-        verifyNoInteractions(groupDao);
+        verify(teacherRepository, times(1)).deleteTeacherFromCourse(teacherId, courseIds.get(0));
+        verify(teacherRepository, times(1)).deleteTeacherFromCourse(teacherId, courseIds.get(1));
+        verifyNoInteractions(lessonRepository);
+        verifyNoInteractions(groupRepository);
     }
 
     @Test
@@ -724,14 +712,14 @@ class TeacherServiceImplTest {
         final List<TeacherResponse> expected = new ArrayList<>();
         expected.add(TEACHER_RESPONSE_WITH_ID_1);
 
-        when(teacherDao.findAll()).thenReturn(teachers);
+        when(teacherRepository.findAll()).thenReturn(teachers);
         when(mapper.toResponse(TEACHER_ENTITY_WITH_ID_1)).thenReturn(TEACHER_RESPONSE_WITH_ID_1);
 
         List<TeacherResponse> found = teacherService.findTeachersRelateToTeacherTitle(1);
 
         assertEquals(expected, found);
         verify(mapper, times(1)).toResponse(TEACHER_ENTITY_WITH_ID_1);
-        verify(teacherDao, times(1)).findAll();
+        verify(teacherRepository, times(1)).findAll();
     }
 
 }

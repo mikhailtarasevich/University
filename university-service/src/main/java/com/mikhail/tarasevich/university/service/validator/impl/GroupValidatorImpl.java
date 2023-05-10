@@ -1,7 +1,7 @@
 package com.mikhail.tarasevich.university.service.validator.impl;
 
-import com.mikhail.tarasevich.university.dao.GroupDao;
 import com.mikhail.tarasevich.university.dto.GroupRequest;
+import com.mikhail.tarasevich.university.repository.GroupRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.validator.GroupValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class GroupValidatorImpl implements GroupValidator {
 
-    private final GroupDao dao;
+    private final GroupRepository dao;
 
     @Autowired
-    public GroupValidatorImpl(GroupDao dao) {
+    public GroupValidatorImpl(GroupRepository dao) {
         this.dao = dao;
     }
 

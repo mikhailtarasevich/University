@@ -1,7 +1,7 @@
 package com.mikhail.tarasevich.university.service.validator.impl;
 
-import com.mikhail.tarasevich.university.dao.LessonTypeDao;
 import com.mikhail.tarasevich.university.dto.LessonTypeRequest;
+import com.mikhail.tarasevich.university.repository.LessonTypeRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.validator.LessonTypeValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class LessonTypeValidatorImpl implements LessonTypeValidator {
 
-    private final LessonTypeDao dao;
+    private final LessonTypeRepository dao;
 
     @Autowired
-    public LessonTypeValidatorImpl(LessonTypeDao dao) {
+    public LessonTypeValidatorImpl(LessonTypeRepository dao) {
         this.dao = dao;
     }
 

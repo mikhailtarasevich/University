@@ -1,8 +1,8 @@
 package com.mikhail.tarasevich.university.validator.impl;
 
-import com.mikhail.tarasevich.university.dao.LessonTypeDao;
 import com.mikhail.tarasevich.university.dto.LessonTypeRequest;
 import com.mikhail.tarasevich.university.entity.LessonType;
+import com.mikhail.tarasevich.university.repository.LessonTypeRepository;
 import com.mikhail.tarasevich.university.service.exception.IncorrectRequestDataException;
 import com.mikhail.tarasevich.university.service.validator.impl.LessonTypeValidatorImpl;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class LessonTypeValidatorImplTest {
     @InjectMocks
     LessonTypeValidatorImpl lessonTypeValidator;
     @Mock
-    LessonTypeDao lessonTypeDao;
+    LessonTypeRepository lessonTypeRepository;
 
     private static final LessonTypeRequest LESSON_TYPE_REQUEST = new LessonTypeRequest();
 
@@ -34,21 +34,21 @@ class LessonTypeValidatorImplTest {
 
     @Test
     void validateUniqueNameInDB_inputWithUniqueName_expectedNothing() {
-        when(lessonTypeDao.findByName(LESSON_TYPE_REQUEST.getName())).thenReturn(Optional.empty());
+        when(lessonTypeRepository.findByName(LESSON_TYPE_REQUEST.getName())).thenReturn(Optional.empty());
 
         assertDoesNotThrow(() -> lessonTypeValidator.validateUniqueNameInDB(LESSON_TYPE_REQUEST));
 
-        verify(lessonTypeDao, times(1)).findByName(LESSON_TYPE_REQUEST.getName());
+        verify(lessonTypeRepository, times(1)).findByName(LESSON_TYPE_REQUEST.getName());
     }
 
     @Test
     void validateUniqueNameInDB_inputWithNotUniqueName_expectedException() {
-        when(lessonTypeDao.findByName(LESSON_TYPE_REQUEST.getName()))
+        when(lessonTypeRepository.findByName(LESSON_TYPE_REQUEST.getName()))
                 .thenReturn(Optional.of(LessonType.builder().build()));
 
         assertThrows(IncorrectRequestDataException.class, () -> lessonTypeValidator.validateUniqueNameInDB(LESSON_TYPE_REQUEST));
 
-        verify(lessonTypeDao, times(1)).findByName(LESSON_TYPE_REQUEST.getName());
+        verify(lessonTypeRepository, times(1)).findByName(LESSON_TYPE_REQUEST.getName());
     }
 
     @Test
