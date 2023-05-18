@@ -8,12 +8,221 @@
 </head>
 <body>
 <div layout:fragment="content">
-    <h1>University</h1>
-    <p>The university web site is designed to allow users to manage data related to various entities within an
-        educational institution. Users can create, read, update, and delete information about courses, departments,
-        education forms, faculties, groups, lesson types, lessons, students, teachers, and teacher titles.
-        The web site helps to keep information organized and up to date, making it easy for users to manage different
-        entities within the university.</p>
+
+    <h2>Libraries and Frameworks</h2>
+    <div style="text-align: left; width: 100%;">
+        <p>During the development of this project, several libraries, frameworks, and technologies were studied and
+            utilized. Here are some of the key ones:</p>
+
+        <ol>
+            <li>
+                <strong>Spring Framework:</strong> Spring is a widely used Java framework that provides extensive
+                support
+                for building enterprise applications. It offers various modules such as Spring Data JPA, Spring
+                Security,
+                and Spring MVC, which were likely utilized in different stages of the project.
+            </li>
+            <li>
+                <strong>Spring Data JPA:</strong> This module of the Spring Framework simplifies the implementation of
+                the
+                data access layer by providing an abstraction over the underlying database operations. It integrates
+                with
+                JPA (Java Persistence API) to streamline database interactions.
+            </li>
+            <li>
+                <strong>Hibernate:</strong> Hibernate is an object-relational mapping (ORM) framework that simplifies
+                database access by mapping Java objects to relational database tables. It offers features such as
+                caching,
+                lazy loading, and automatic SQL generation.
+            </li>
+            <li>
+                <strong>MapStruct:</strong> MapStruct is a Java-based code generation framework used for object mapping
+                between different data models. It helps eliminate boilerplate code by automatically generating the
+                mapping
+                code between DTOs (Data Transfer Objects) and entities.
+            </li>
+            <li>
+                <strong>Spring Security:</strong> Spring Security is a powerful framework for implementing
+                authentication
+                and authorization in Java applications. It provides features such as user authentication, role-based
+                access
+                control, and secure session management.
+            </li>
+            <li>
+                <strong>Mockito:</strong> Mockito is a widely used mocking framework for Java that simplifies the
+                creation
+                of mock objects for unit testing. It allows for the creation of mock dependencies to isolate components
+                for
+                testing purposes.
+            </li>
+            <li>
+                <strong>Lombok:</strong> Lombok is a library that helps reduce boilerplate code in Java classes. It
+                provides
+                annotations that generate getter, setter, and other commonly used methods at compile time, reducing
+                manual
+                coding efforts.
+            </li>
+            <li>
+                <strong>Thymeleaf:</strong> Thymeleaf is a popular Java-based templating engine used for server-side
+                rendering of dynamic web pages. It seamlessly integrates with Spring MVC and allows for easy
+                manipulation of
+                HTML templates.
+            </li>
+            <li>
+                <strong>Bootstrap:</strong> Bootstrap is a CSS framework that provides pre-designed responsive
+                components
+                and styles for web development. It helps in creating visually appealing and mobile-friendly user
+                interfaces.
+            </li>
+            <li>
+                <strong>Docker:</strong> Docker is a containerization platform that allows for the packaging and
+                deployment
+                of applications in isolated, lightweight containers. It simplifies the deployment process by providing a
+                consistent and reproducible environment.
+            </li>
+            <li>
+                <strong>JDBC Template:</strong> JDBC Template is a part of the Spring Framework that simplifies
+                database access in Java applications. It provides a higher-level abstraction for performing CRUD
+                (Create, Read, Update, Delete) operations and handling database connections.
+            </li>
+            <li>
+                <strong>PostgreSQL:</strong> PostgreSQL is an open-source relational database management system that is
+                commonly used in Java web applications. It offers robust features, scalability, and SQL support, making
+                it a suitable choice for data storage.
+            </li>
+            <li>
+                <strong>SQL Language:</strong> SQL (Structured Query Language) is a standard language for managing
+                relational databases. It is used to create, modify, and retrieve data from the database. Understanding
+                SQL is crucial for interacting with databases effectively.
+            </li>
+        </ol>
+    </div>
+
+    <h2>Project development history</h2>
+    <div style="text-align: left; width: 100%;">
+        <p>Before writing any code, I began by creating a UML diagram of the application to plan its
+            structure.
+            The entity classes were the first classes I implemented, and I incorporated them into the
+            initial
+            pull request along with the UML diagram.</p>
+
+        <p>
+            The following commit, titled "DAO layer added," introduced DAO classes to the application. I
+            also
+            created a small console-based FrontController class to observe the application's functionality.
+            At
+            this stage, the DAO classes interacted with the database using Spring JdbcTemplate and direct
+            SQL
+            queries. Additionally, I wrote tests for all DAO classes, utilizing an H2 database for testing
+            purposes. I ensured test coverage using the JaCoCo plugin.
+        </p>
+
+        <p>
+            In the subsequent pull request, I introduced the service layer to the application. Unlike the
+            DAO
+            layer, the service layer worked with mutable DTO classes instead of immutable entity classes. To
+            facilitate the interaction between the DTO and entity classes, I implemented mapper classes
+            responsible for converting between the two. To isolate the service layer for testing purposes, I
+            created mocks of the DAO classes using the Mockito framework.
+        </p>
+
+        <p>
+            In another significant improvement, I incorporated the Lombok library into the application. This
+            allowed me to remove over 2000 lines of manually written code, including getters, setters,
+            constructors, builders, and equals/hash code methods.
+        </p>
+
+        <p>
+            As the development progressed, I familiarized myself with Docker. In one of the commits, I
+            utilized
+            Docker to containerize the database.
+        </p>
+
+        <p>
+            Subsequent commits focused on adding the web user interface, typically one or two controllers
+            per
+            commit. Instead of employing Spring Boot, I utilized Spring MVC for this phase. Thymeleaf was
+            used
+            to transfer application data to the web interface, while Bootstrap templates were employed to
+            enhance the UI aesthetics.
+        </p>
+
+        <p>
+            After becoming acquainted with MapStruct, I took the opportunity to rewrite all the mappers in
+            my
+            application using this technology, which streamlined the mapping process.
+        </p>
+
+        <p>
+            Moving forward, I focused on enhancing the security of my application. I integrated Spring
+            Security
+            to handle this task. As part of this implementation, I created additional tables in the database
+            to
+            store information about user roles and their corresponding privileges. In my application, users
+            are
+            categorized into three types: students with read privileges, teachers with read and write
+            privileges, and admins with additional delete privileges.
+        </p>
+
+        <p>
+            To improve the project's organization, I divided it into four modules: data, client, service,
+            and
+            UI. The data module handles interactions with the database, the client module contains
+            interfaces
+            for service classes and DTO classes, serving as a contract that must be implemented to work with
+            the
+            data module. The service module implements the contracts defined in the client module, while the
+            UI
+            module contains controllers and views for user interaction.
+        </p>
+
+        <p>
+            During the subsequent phase, I performed several tasks. First, I added an additional module
+            called
+            "coverage" to assess the level of test coverage using JaCoCo. Secondly, I deployed the
+            application
+            into two Docker containers. One container housed the database, while the other contained the
+            application's WAR file. Lastly, I obtained the data source via JNDI, improving the application's
+            connectivity.
+        </p>
+
+        <p>
+            In an attempt to further optimize the codebase, I migrated from Spring JDBC to Hibernate.
+            However, I
+            encountered some challenges with debugging and bug identification compared to the simplicity of
+            Spring JDBC.
+        </p>
+
+        <p>
+            Continuing the effort to reduce code complexity, I decided to switch from Spring MVC to Spring
+            Boot.
+            This transition provided a more streamlined and enjoyable development experience.
+        </p>
+
+        <p>
+            As the final step in the application's evolution, I decided to migrate from Hibernate to Spring Data
+            JPA. This change further simplified the data access layer and improved the overall performance of
+            the application. In addition, I made use of layered JAR files in Docker to optimize container
+            startup time. With this improvement, the application started noticeably faster, enhancing the user
+            experience.
+        </p>
+
+        <p>
+            To simplify the deployment process, I created a docker-compose.yml file, which allowed for easy
+            setup and configuration of the application. Additionally, I published two Docker images to my Docker
+            Hub repository. The first image contained a preconfigured database, while the second image included
+            the application itself. This made it convenient to deploy and run the application on any machine
+            where Docker is installed, simplifying the setup process for users.
+        </p>
+
+        <p>
+            Overall, these final steps ensured that the application was more efficient, easier to deploy,
+            and
+            provided a smoother user experience. It's exciting to see the progress made in the project from
+            its
+            initial stages to its current state.
+        </p>
+    </div>
 </div>
 </body>
 </html>
