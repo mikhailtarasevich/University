@@ -10,7 +10,42 @@
 <body>
 <div layout:fragment="content">
     <h1>Welcome</h1>
-    <p>...some info</p>
+    <div style="text-align: left; width: 100%;">
+        <p>Hello, my name is Mikhail Tarasevich, and I would like to introduce you to my pet project—a CRUD application
+            aimed at digitalizing the university studying process.</p>
+        <p>The application is structured into three layers. The first layer is the DAO layer, responsible for retrieving
+            data from the database. Initially, the application utilized JdbcTemplate and direct SQL queries, but it has
+            now transitioned to using Spring Data JPA. You can find a comprehensive history of the application's
+            creation in the "about" tab.</p>
+        <p>The second layer is the Service layer, which handles the internal logic of the application. It manages
+            backend validation, transaction management, and interacts with the DAO layer to retrieve data.</p>
+        <p>The third layer is the UI layer, responsible for receiving HTTP requests from users and mapping them to the
+            relevant views, typically HTML pages. The UI layer adheres to the principles of the REST architecture.</p>
+        <p>In summary, my CRUD application facilitates the digitalization of the university studying process.
+            It incorporates a DAO layer for data retrieval, a Service layer for application logic, and a UI layer for
+            handling user requests and generating appropriate views. If you have any further inquiries, please let
+            me know!</p>
+    </div>
+    <h1>Explore application</h1>
+    <div style="text-align: left; width: 100%;">
+        <p>To explore the app on your own, you can log in as a student, teacher, or admin using the following
+            credentials:</p>
+        <ul>
+            <li><strong>Email:</strong> student / teacher / admin</li>
+            <li><strong>Password:</strong> 1111</li>
+        </ul>
+        <p>As a student, you have limited rights and can only view the pages without the ability to make any changes or
+            remove any information. However, you can access all pages and see the relevant content.</p>
+        <p>If you log in as a teacher, you will have additional rights to add new information to the app. You can
+            contribute and update the content as needed within your designated privileges.</p>
+        <p>On the other hand, if you log in as an admin, you will have full control over the application. In addition to
+            adding new information, you can also delete any unnecessary or outdated data.</p>
+        <p>Furthermore, users have the option to register their own student or teacher accounts. By clicking on the
+            registration link, you can create your own user account with the respective role. This allows you to
+            personalize your experience within the app and access additional features specific to your chosen role.</p>
+        <p>Feel free to explore the app using these credentials or register your own student or teacher account to
+            further customize your experience and take advantage of all available functionalities.</p>
+    </div>
 </div>
 </body>
 </html>
